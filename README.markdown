@@ -1,3 +1,5 @@
+#pupmod-simp-dummy [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/simp/pupmod-simp-dummy.svg)](https://travis-ci.org/simp/pupmod-simp-dummy) [![SIMP compatibility](https://img.shields.io/badge/SIMP%20compatibility-4.2.*%2F5.1.*-orange.svg)](https://img.shields.io/badge/SIMP%20compatibility-4.2.*%2F5.1.*-orange.svg)
+
 #### Table of Contents
 
 1. [Overview](#overview)
@@ -67,7 +69,9 @@ SIMP Puppet modules are generally intended to be used on a Redhat Enterprise Lin
 
 ## Development
 
-Please see the [https://simp-project.atlassian.net/wiki/display/SD/Contributing+to+SIMP](SIMP Contribution Guidelines).
+Please see the [SIMP Contribution Guidelines](https://simp-project.atlassian.net/wiki/display/SD/Contributing+to+SIMP).
+General developer documentation can be found on [Confluence](https://simp-project.atlassian.net/wiki/display/SD/SIMP+Development+Home).
+Visit the project homepage on [GitHub](https://github.com/NationalSecurityAgency/SIMP), chat with us on our [HipChat](https://simp-project.hipchat.com/), and look at our issues on  [JIRA](https://simp-project.atlassian.net/).
 
 ## Release Notes/Contributors/Etc **Optional**
 
