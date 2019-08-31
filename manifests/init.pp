@@ -46,7 +46,7 @@
 # @param enable_tcpwrappers
 #   If true, manage TCP wrappers configuration for dummy
 #
-# @author simp
+# @author SIMP Team
 #
 class dummy (
   String                        $service_name       = 'dummy',
@@ -61,7 +61,7 @@ class dummy (
   Boolean                       $enable_tcpwrappers = simplib::lookup('simp_options::tcpwrappers', { 'default_value' => false })
 ) {
 
-  assert_metadata($module_name)
+  simplib::assert_metadata($module_name)
 
   include '::dummy::install'
   include '::dummy::config'

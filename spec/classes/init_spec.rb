@@ -14,10 +14,10 @@ describe 'dummy' do
   end
 
   context 'supported operating systems' do
-    on_supported_os.each do |os, facts|
+    on_supported_os.each do |os, os_facts|
       context "on #{os}" do
         let(:facts) do
-          facts
+          os_facts
         end
 
         context "dummy class without any parameters" do
@@ -79,10 +79,14 @@ describe 'dummy' do
     describe 'dummy class without any parameters on Solaris/Nexenta' do
       let(:facts) {{
         :osfamily        => 'Solaris',
-        :operatingsystem => 'Nexenta'
+        :operatingsystem => 'Nexenta',
+        :os => {
+          :family => 'Solaris',
+          :name   => 'Nexenta',
+        }
       }}
 
-      it { expect { is_expected.to contain_package('dummy') }.to raise_error(Puppet::Error, /Nexenta not supported/) }
+      it { expect { is_expected.to contain_package('dummy') }.to raise_error(Puppet::Error, /'Nexenta' is not supported/) }
     end
   end
 end
