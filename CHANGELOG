@@ -1,3 +1,5 @@
+* Fri Aug 30 2019 Chris Tessmer <chris.tessmer@onyxpoint.com> - 0.2.1
+- Update diagnostic Travis API pipeline to 401 on empty PUPPETFORGE_API_TOKEN
+
 * Fri Aug 30 2019 Chris Tessmer <chris.tessmer@onyxpoint.com> - 0.2.0
 - Update asset conventions to SIMP 6.4.0-0 / skeleton 3.0.0
-- FIXME: something else you did
