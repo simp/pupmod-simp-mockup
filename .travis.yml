@@ -148,14 +148,13 @@ jobs:
             perl -pe ''s/\n/\\n/g'' )"'
         - 'printf ''{"tag_name": "%s", "target_commitish": "%s", "name": "%s", "body": "%s", "prerelease": false}''
             "$TRAVIS_TAG" "$committish" "$subject" "$body" | tee rel.json'
-        - 'wc -l rel.json'
-        - 'cat rel.json'
+        - 'jq . rel.json'
         - 'curl -X POST -d @rel.json -A "$FORGE_USER_AGENT"
             -H "Accept: application/vnd.github.v3+json"
             -H "Authorization: token $GITHUB_OAUTH_TOKEN"
             -w "\n%{http_code}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/releases" | {
-             read $body;
-             read $code;
+             read body;
+             read code;
              echo "===== HTTP response code: ''$code''";
              jq . <<< "$body";
              [[ "$code" == 200 ]] || false;
@@ -170,18 +169,14 @@ jobs:
       script:
         - 'rm -rf pkg'
         - 'git clean -f -x -d'
-        - 'gem install -v "$PUPPET_VERSION" puppet'
+        - 'gem install --no-document -v "$PUPPET_VERSION" puppet'
         - 'puppet module build'
+        - 'find $PWD/pkg -name ''*.tar.gz'''
         - 'curl -A "$FORGE_USER_AGENT"
            -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}"
-           -X POST --data-binary "file@$(find $PWD/pkg -name ''*.tar.gz'' -mmin -1)"
-           -w "\n%{http_code}" https://forgeapi.puppet.com/v3/releases | {
-             read $body;
-             read $code;
-             echo "===== HTTP response code: ''$code''";
-             jq . <<< "$body";
-             [[ "$code" == 200 ]] || false;
-           }'
+           -X POST -F "file=@$(find $PWD/pkg -name ''*.tar.gz'')"
+           -w "\nRESPONSE=%{http_code}\n" https://forgeapi.puppet.com/v3/releases
+           -v'
 
     - stage: 'validate tokens'
       name:  'validate CI GitHub OAuth token has sufficient scope to release'

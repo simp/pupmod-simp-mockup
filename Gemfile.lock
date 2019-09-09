@@ -305,7 +305,7 @@ DEPENDENCIES
   pry
   pry-byebug
   pry-doc
-  puppet (~> 5.5)
+  puppet (~> 5.5.0)
   puppet-lint-empty_string-check
   puppet-lint-trailing_comma-check
   puppet-strings
