@@ -151,7 +151,8 @@ jobs:
             "target_commitish": "%s",
             "name": "%s",
             "body": "%s",
-            "prerelease": false
+            "prerelease": false,
+            "draft": false
           }'' "$TRAVIS_TAG" "$committish" "$subject" "$body" | tee rel.json'
         - 'jq . rel.json'
         - 'curl -A "$FORGE_USER_AGENT"

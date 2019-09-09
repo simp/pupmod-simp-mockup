@@ -107,19 +107,3 @@ class dummy (
     -> Class[ '::dummy::service' ]
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
