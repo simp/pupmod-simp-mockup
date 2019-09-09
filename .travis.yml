@@ -139,7 +139,8 @@ jobs:
       <<: *_minimal_step
       <<: *_pre_release_checks
       script:
-        - 'committish="$(git log --tags $TRAVIS_TAG -1 --pretty=%H)"'
+        - 'subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
+          --format="%(*objectname)" | perl -pe "chomp;" '
         - 'subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
             --format="%(contents:subject)" |
             perl -pe ''chomp; s/"/\\"/g; s/\n/\\n/g'' )"'
