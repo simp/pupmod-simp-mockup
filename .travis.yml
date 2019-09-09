@@ -141,10 +141,10 @@ jobs:
       script:
         - 'committish="$(git log --tags $TRAVIS_TAG -1 --pretty=%H)"'
         - 'subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
-            --format="%(contents:subject)" |  sed -e ''s/"/\\"/g'' |
+            --format="%(contents:subject)" |
             perl -pe ''chomp; s/"/\\"/g; s/\n/\\n/g'' )"'
         - 'body="$(git for-each-ref refs/tags/$TRAVIS_TAG
-            --format="%(contents:body)" |  sed -e ''s/"/\\"/g'' |
+            --format="%(contents:body)" |
             perl -pe ''chomp; s/"/\\"/g; s/\n/\\n/g'' )"'
         - 'printf ''{
             "tag_name": "%s",
