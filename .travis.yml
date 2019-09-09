@@ -139,12 +139,12 @@ jobs:
       <<: *_minimal_step
       <<: *_pre_release_checks
       script:
-        - 'subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
+        - 'export committish="$(git for-each-ref refs/tags/$TRAVIS_TAG
           --format="%(*objectname)")" | perl -pe "chomp;"'
-        - 'subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
+        - 'export subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
             --format="%(contents:subject)" |
             perl -pe ''chomp; s/"/\\"/g; s/\n/\\n/g'' )"'
-        - 'body="$(git for-each-ref refs/tags/$TRAVIS_TAG
+        - 'export body="$(git for-each-ref refs/tags/$TRAVIS_TAG
             --format="%(contents:body)" |
             perl -pe ''chomp; s/"/\\"/g; s/\n/\\n/g'' )"'
         - 'printf ''{
