@@ -139,20 +139,26 @@ jobs:
       <<: *_minimal_step
       <<: *_pre_release_checks
       script:
-        - 'export committish="$(git log --tags $TRAVIS_TAG -1 --pretty=%H)"'
-        - 'export subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
+        - 'committish="$(git log --tags $TRAVIS_TAG -1 --pretty=%H)"'
+        - 'subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
              --format="%(contents:subject)" |  sed -e ''s/"/\\"/g'' |
              perl -pe ''s/\n/\\n/g'' )"'
-        - 'export body="$(git for-each-ref refs/tags/$TRAVIS_TAG
+        - 'body="$(git for-each-ref refs/tags/$TRAVIS_TAG
             --format="%(contents:body)" |  sed -e ''s/"/\\"/g'' |
             perl -pe ''s/\n/\\n/g'' )"'
-        - 'printf ''{"tag_name": "%s", "target_commitish": "%s", "name": "%s", "body": "%s", "prerelease": false}''
-            "$TRAVIS_TAG" "$committish" "$subject" "$body" | tee rel.json'
+        - 'printf ''{
+            "tag_name": "%s",
+            "target_commitish": "%s",
+            "name": "%s",
+            "body": "%s",
+            "prerelease": false
+          }'' "$TRAVIS_TAG" "$committish" "$subject" "$body" | tee rel.json'
         - 'jq . rel.json'
         - 'curl -X POST -d @rel.json -A "$FORGE_USER_AGENT"
             -H "Accept: application/vnd.github.v3+json"
             -H "Authorization: token $GITHUB_OAUTH_TOKEN"
-            -w "\n\nRESPONSE=%{http_code}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/releases"
+            -w "\n\nRESPONSE=%{http_code}"
+            "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/releases"
            | tee result.out'
         - 'grep ''^RESPONSE=201$'' result.out'
 
@@ -163,15 +169,14 @@ jobs:
       env: PUPPET_VERSION="~> 5.5.0"
       <<: *_pre_release_checks
       script:
-        - 'rm -rf pkg'
         - 'git clean -f -x -d'
         - 'gem install --no-document -v "$PUPPET_VERSION" puppet'
         - 'puppet module build'
-        - 'find $PWD/pkg -name ''*.tar.gz'''
         - 'curl -A "$FORGE_USER_AGENT"
            -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}"
            -X POST -F "file=@$(find $PWD/pkg -name ''*.tar.gz'')"
-           -w "\n\nRESPONSE=%{http_code}\n" https://forgeapi.puppet.com/v3/releases
+           -w "\n\nRESPONSE=%{http_code}\n"
+           https://forgeapi.puppet.com/v3/releases
            | tee result.out'
         - 'grep ''^RESPONSE=201$'' result.out'
 
