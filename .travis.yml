@@ -155,7 +155,6 @@ jobs:
             -w "\n\nRESPONSE=%{http_code}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/releases"
            | tee result.out'
         - 'grep ''^RESPONSE=201$'' result.out'
-            '
 
     - stage: release
       name: 'Release to PuppetForge'
