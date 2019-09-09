@@ -61,7 +61,6 @@ class dummy (
   Boolean                       $enable_tcpwrappers = simplib::lookup('simp_options::tcpwrappers', { 'default_value' => false })
 ) {
 
-
   simplib::assert_metadata($module_name)
 
   include '::dummy::install'

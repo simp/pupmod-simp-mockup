@@ -148,7 +148,7 @@ jobs:
             perl -pe ''s/\n/\\n/g'' )"'
         - 'printf ''{"tag_name": "%s", "target_commitish": "%s", "name": "%s", "body": "%s", "prerelease": false}''
             "$TRAVIS_TAG" "$committish" "$subject" "$body" | tee rel.json'
-        - 'curl -sS --fail -X POST -d @rel.json -A "$FORGE_USER_AGENT"
+        - 'curl -iS --fail -X POST -d @rel.json -A "$FORGE_USER_AGENT"
             -H "Accept: application/vnd.github.v3+json"
             -H "Authorization: token $GITHUB_OAUTH_TOKEN"
               "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/releases"'
@@ -165,7 +165,7 @@ jobs:
         - 'gem install -v "$PUPPET_VERSION" puppet'
         - 'puppet module build'
         - 'find pkg -name ''*.tar.gz'' &&
-           curl -i --fail -A "$FORGE_USER_AGENT"
+           curl -sS --fail -A "$FORGE_USER_AGENT"
            -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}"
            -X POST -F "file=@$(find $PWD/pkg -name ''*.tar.gz'')"
            https://forgeapi.puppet.com/v3/releases'
