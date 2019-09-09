@@ -112,26 +112,26 @@ jobs:
         - bundle exec rake lint
         - bundle exec puppet module build
 
-    - stage: spec
-      rvm: 2.4.5
-      name: 'Puppet 5.5 (SIMP 6.3, PE 2018.1)'
-      env: PUPPET_VERSION="~> 5.5.0"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      name: 'Puppet 5.x (Latest)'
-      rvm: 2.4.5
-      env: PUPPET_VERSION="~> 5.0"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      name: 'Puppet 6.4 (PE 2019.1)'
-      rvm: 2.5.3
-      env: PUPPET_VERSION="~> 6.4.0"
-      script:
-        - bundle exec rake spec
+###    - stage: spec
+###      rvm: 2.4.5
+###      name: 'Puppet 5.5 (SIMP 6.3, PE 2018.1)'
+###      env: PUPPET_VERSION="~> 5.5.0"
+###      script:
+###        - bundle exec rake spec
+###
+###    - stage: spec
+###      name: 'Puppet 5.x (Latest)'
+###      rvm: 2.4.5
+###      env: PUPPET_VERSION="~> 5.0"
+###      script:
+###        - bundle exec rake spec
+###
+###    - stage: spec
+###      name: 'Puppet 6.4 (PE 2019.1)'
+###      rvm: 2.5.3
+###      env: PUPPET_VERSION="~> 6.4.0"
+###      script:
+###        - bundle exec rake spec
 
     - stage: release
       name: 'Release to GitHub'
