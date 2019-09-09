@@ -153,7 +153,12 @@ jobs:
         - 'curl -i --fail -X POST -d @rel.json -A "$FORGE_USER_AGENT"
             -H "Accept: application/vnd.github.v3+json"
             -H "Authorization: token $GITHUB_OAUTH_TOKEN"
-              "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/releases"'
+            -w "\n%{http_code}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/releases" | {
+             read $body;
+             read $code;
+             echo "===== HTTP response code: ''$code''";
+             jq . <<< "$body";
+           }'
 
     - stage: release
       name: 'Release to PuppetForge'
@@ -168,9 +173,13 @@ jobs:
         - 'puppet module build'
         - 'curl -i --fail -A "$FORGE_USER_AGENT"
            -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}"
-             -X POST --data-binary "file@$(find $PWD/pkg -name ''*.tar.gz'' -mmin -1)"
-           https://forgeapi.puppet.com/v3/releases'
-        - 'wget --version'
+           -X POST --data-binary "file@$(find $PWD/pkg -name ''*.tar.gz'' -mmin -1)"
+           -w "\n%{http_code}" https://forgeapi.puppet.com/v3/releases | {
+             read $body;
+             read $code;
+             echo "===== HTTP response code: ''$code''";
+             jq . <<< "$body";
+           }'
 
     - stage: 'validate tokens'
       name:  'validate CI GitHub OAuth token has sufficient scope to release'
