@@ -1,6 +1,6 @@
 {
   "name": "simp-dummy",
-  "version": "0.2.41",
+  "version": "0.2.42",
   "author": "SIMP Team",
   "summary": "A dummy module used to test SIMP CI, RELENG, and the puppet module skeleton",
   "license": "Apache-2.0",
