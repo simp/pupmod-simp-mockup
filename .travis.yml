@@ -140,7 +140,7 @@ jobs:
       <<: *_pre_release_checks
       script:
         - 'export committish="$(git for-each-ref refs/tags/$TRAVIS_TAG
-          --format="%(*objectname)")" | perl -pe "chomp;"'
+          --format="%(*objectname)" | perl -pe "chomp;")"'
         - 'export subject="$(git for-each-ref refs/tags/$TRAVIS_TAG
             --format="%(contents:subject)" |
             perl -pe ''chomp; s/"/\\"/g; s/\n/\\n/g'' )"'
