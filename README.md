@@ -2,11 +2,12 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/73/badge)](https://bestpractices.coreinfrastructure.org/projects/73)
 [![Puppet Forge](https://img.shields.io/puppetforge/v/simp/dummy.svg)](https://forge.puppetlabs.com/simp/dummy)
 [![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/simp/dummy.svg)](https://forge.puppetlabs.com/simp/dummy)
-[![Build Status](https://travis-ci.org/simp/pupmod-simp-dummy.svg)](https://travis-ci.org/simp/pupmod-simp-dummy)
+[![Build Status](https://travis-ci.com/simp/pupmod-simp-dummy.svg)](https://travis-ci.org/simp/pupmod-simp-dummy)
 
 #### Table of Contents
 
 <!-- vim-markdown-toc GFM -->
+
 * [Description](#description)
   * [This is a (dummy) SIMP module](#this-is-a-dummy-simp-module)
 * [Setup](#setup)
