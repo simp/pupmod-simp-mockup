@@ -98,40 +98,40 @@ _pre_release_checks: &_pre_release_checks
 
 jobs:
   include:
-###    - stage: check
-###      name: 'Syntax, style, and validation checks'
-###      rvm: 2.4.5
-###      env: PUPPET_VERSION="~> 5"
-###      script:
-###        - bundle exec rake check:dot_underscore
-###        - bundle exec rake check:test_file
-###        - bundle exec rake pkg:check_version
-###        - bundle exec rake metadata_lint
-###        - bundle exec rake pkg:compare_latest_tag
-###        - bundle exec rake pkg:create_tag_changelog
-###        - bundle exec rake lint
-###        - bundle exec puppet module build
-###
-###    - stage: spec
-###      rvm: 2.4.5
-###      name: 'Puppet 5.5 (SIMP 6.3, PE 2018.1)'
-###      env: PUPPET_VERSION="~> 5.5.0"
-###      script:
-###        - bundle exec rake spec
-###
-###    - stage: spec
-###      name: 'Puppet 5.x (Latest)'
-###      rvm: 2.4.5
-###      env: PUPPET_VERSION="~> 5.0"
-###      script:
-###        - bundle exec rake spec
-###
-###    - stage: spec
-###      name: 'Puppet 6.4 (PE 2019.1)'
-###      rvm: 2.5.3
-###      env: PUPPET_VERSION="~> 6.4.0"
-###      script:
-###        - bundle exec rake spec
+    - stage: check
+      name: 'Syntax, style, and validation checks'
+      rvm: 2.4.5
+      env: PUPPET_VERSION="~> 5"
+      script:
+        - bundle exec rake check:dot_underscore
+        - bundle exec rake check:test_file
+        - bundle exec rake pkg:check_version
+        - bundle exec rake metadata_lint
+        - bundle exec rake pkg:compare_latest_tag
+        - bundle exec rake pkg:create_tag_changelog
+        - bundle exec rake lint
+        - bundle exec puppet module build
+
+    - stage: spec
+      rvm: 2.4.5
+      name: 'Puppet 5.5 (SIMP 6.3, PE 2018.1)'
+      env: PUPPET_VERSION="~> 5.5.0"
+      script:
+        - bundle exec rake spec
+
+    - stage: spec
+      name: 'Puppet 5.x (Latest)'
+      rvm: 2.4.5
+      env: PUPPET_VERSION="~> 5.0"
+      script:
+        - bundle exec rake spec
+
+    - stage: spec
+      name: 'Puppet 6.4 (PE 2019.1)'
+      rvm: 2.5.3
+      env: PUPPET_VERSION="~> 6.4.0"
+      script:
+        - bundle exec rake spec
 
     - stage: release
       name: 'Release to GitHub'
