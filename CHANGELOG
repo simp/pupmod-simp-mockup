@@ -1,10 +1,8 @@
+* Mon Sep 09 2019 Chris Tessmer <chris.tessmer@onyxpoint.com> - 0.2.46
+- Update README badge to point to travis.com
+- Re-enable CI pipeline tests
+
 * Mon Sep 09 2019 Chris Tessmer <chris.tessmer@onyxpoint.com> - 0.2.45
-- Bump version to validate pipeline steps
-
-* Mon Sep 09 2019 Chris Tessmer <chris.tessmer@onyxpoint.com> - 0.2.6
-- Bump version to validate pipeline steps
-
-* Mon Sep 09 2019 Chris Tessmer <chris.tessmer@onyxpoint.com> - 0.2.4
 - Bump version to validate pipeline steps
 
 * Mon Sep 09 2019 Chris Tessmer <chris.tessmer@onyxpoint.com> - 0.2.3
