@@ -1,11 +1,11 @@
 require 'spec_helper_acceptance'
 
-test_name '<%= metadata.name %> class'
+test_name 'dummy class'
 
-describe '<%= metadata.name %> class' do
+describe 'dummy class' do
   let(:manifest) {
     <<-EOS
-      class { '<%= metadata.name %>': }
+      class { 'dummy': }
     EOS
   }
 
@@ -20,11 +20,11 @@ describe '<%= metadata.name %> class' do
     end
 
 
-    describe package('<%= metadata.name %>') do
+    describe package('dummy') do
       it { is_expected.to be_installed }
     end
 
-    describe service('<%= metadata.name %>') do
+    describe service('dummy') do
       it { is_expected.to be_enabled }
       it { is_expected.to be_running }
     end

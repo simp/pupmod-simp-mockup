@@ -1,8 +1,5 @@
-# == Class dummy::config::selinux
-#
-# This class is meant to be called from dummy.
-# It ensures that selinux rules are defined.
-#
+# @summary  Ensures that selinux rules are defined
+# @api private
 class dummy::config::selinux {
   assert_private()
 

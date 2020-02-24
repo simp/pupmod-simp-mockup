@@ -1,8 +1,5 @@
-# == Class dummy::config::config::pki
-#
-# This class is meant to be called from dummy.
-# It ensures that pki rules are defined.
-#
+# @summary Ensures that pki rules are defined
+# @api private
 class dummy::config::pki {
   assert_private()
 

@@ -1,8 +1,5 @@
-# == Class dummy::config::logging
-#
-# This class is meant to be called from dummy.
-# It ensures that logging rules are defined.
-#
+# @summary Ensures that logging rules are defined
+# @api private
 class dummy::config::logging {
   assert_private()
 

@@ -10,7 +10,7 @@ describe 'dummy' do
     it { is_expected.to contain_class('dummy::service').that_subscribes_to('Class[dummy::config]') }
 
     it { is_expected.to contain_service('dummy') }
-    it { is_expected.to contain_package('dummy').with_ensure('present') }
+    it { is_expected.to contain_package('dummy').with_ensure('installed') }
   end
 
   context 'supported operating systems' do
@@ -28,7 +28,7 @@ describe 'dummy' do
 
         context "dummy class with firewall enabled" do
           let(:params) {{
-            :enable_firewall => true
+            :firewall => true
           }}
 
           ###it_behaves_like "a structured module"
@@ -41,7 +41,7 @@ describe 'dummy' do
 
         context "dummy class with selinux enabled" do
           let(:params) {{
-            :enable_selinux => true
+            :selinux => true
           }}
 
           ###it_behaves_like "a structured module"
@@ -52,7 +52,7 @@ describe 'dummy' do
 
         context "dummy class with auditing enabled" do
           let(:params) {{
-            :enable_auditing => true
+            :auditing => true
           }}
 
           ###it_behaves_like "a structured module"
@@ -63,7 +63,7 @@ describe 'dummy' do
 
         context "dummy class with logging enabled" do
           let(:params) {{
-            :enable_logging => true
+            :logging => true
           }}
 
           ###it_behaves_like "a structured module"

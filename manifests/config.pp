@@ -1,7 +1,5 @@
-# == Class dummy::config
-#
-# This class is called from dummy for service config.
-#
+# @summary Configures services
+# @api private
 class dummy::config {
   assert_private()
 }

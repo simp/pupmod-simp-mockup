@@ -1,8 +1,5 @@
-# == Class dummy::config::tcpwrappers
-#
-# This class is meant to be called from dummy.
-# It ensures that tcpwrappers rules are defined.
-#
+# @summary ensures that tcpwrappers rules are defined
+# @api private
 class dummy::config::tcpwrappers {
   assert_private()
 

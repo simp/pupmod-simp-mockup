@@ -1,8 +1,5 @@
-# == Class dummy::config::auditing
-#
-# This class is meant to be called from dummy.
-# It ensures that auditing rules are defined.
-#
+# @summary Ensures that auditing rules are defined
+# @api private
 class dummy::config::auditing {
   assert_private()
 

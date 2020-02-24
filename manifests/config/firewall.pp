@@ -1,8 +1,5 @@
-# == Class dummy::config::firewall
-#
-# This class is meant to be called from dummy.
-# It ensures that firewall rules are defined.
-#
+# @summary Ensures that firewall rules are defined
+# @api private
 class dummy::config::firewall {
   assert_private()
 

@@ -1,14 +1,15 @@
 {
   "name": "simp-dummy",
-  "version": "0.2.46",
-  "author": "SIMP Team",
+  "version": "0.3.0",
+  "author": "SIMP",
   "summary": "A dummy module used to test SIMP CI, RELENG, and the puppet module skeleton",
   "license": "Apache-2.0",
   "source": "https://github.com/simp/pupmod-simp-dummy",
-  "project_page": "https://github.com/simp/pupmod-simp-dummy",
-  "issues_url": "https://simp-project.atlassian.net",
+  "project_page": "https://www.simp-project.com/",
+  "issues_url": "https://simp-project.atlassian.net/",
   "tags": [
-    "simp"
+    "simp",
+    "dummy"
   ],
   "dependencies": [
     {
@@ -17,7 +18,7 @@
     },
     {
       "name": "simp/simplib",
-      "version_requirement": ">= 3.15.0 < 4.0.0"
+      "version_requirement": ">= 3.15.0 < 5.0.0"
     },
     {
       "name": "puppetlabs/stdlib",
@@ -29,29 +30,31 @@
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.6.0 < 7.0.0"
+      "version_requirement": ">= 5.0.0 < 7.0.0"
     }
-  ],
-  "data_provider": "hiera"
+  ]
 }
