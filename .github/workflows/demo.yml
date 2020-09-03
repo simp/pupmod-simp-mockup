@@ -32,6 +32,11 @@ jobs:
             ruby_version: "2.5"
     env:
       PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"
+      GEM_HOME:          .vendor/gem_install
+      BUNDLE_CACHE_PATH: .vendor/bundle
+      BUNDLE_PATH:       .vendor/bundle
+      BUNDLE_BIN:        .vendor/gem_install/bin
+      BUNDLE_NO_PRUNE:   'true'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -42,6 +47,13 @@ jobs:
         uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
         with:
           ruby-version: ${{matrix.puppet.ruby_version}}
+
+      - uses: actions/cache@v2
+        with:
+          path: .vendor
+          key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
 
 # TODO: caching?
       - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
@@ -63,3 +75,5 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+          
+          
