@@ -117,7 +117,7 @@ jobs:
           bundle config path .vendor/bundle
           bundle install --jobs 4 --retry 3
           
-      - name: "Run Acceptance tests for ${{matrix.puppet.label}"
+      - name: "Run Acceptance tests for ${{matrix.puppet.label}}"
         run: "echo Hello, world!  ${{matrix.puppet.label}}"
         run: | 
           echo bundle exec rake syntax
