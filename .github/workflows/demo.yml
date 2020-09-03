@@ -46,7 +46,7 @@ jobs:
       - name: "Bundle dependencies v:${{matrix.puppet.puppet_version}} e:${PUPPET_VERSION}"
         run: |
           echo "PUPPET_VERSION: ${PUPPET_VERSION}"
-          echo "bundle"
+          bundle
 
       # Runs a single command using the runners shell
       - name: "Validation"
