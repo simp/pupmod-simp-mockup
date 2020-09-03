@@ -118,8 +118,6 @@ jobs:
           bundle install --jobs 4 --retry 3
           
       - name: "Run Acceptance tests for ${{matrix.puppet.label}}"
-        run: "echo Hello, world!  ${{matrix.puppet.label}}"
         run: | 
-          echo bundle exec rake syntax
-          echo bundle exec rake lint
-          echo bundle exec rake metadata_lint
+          echo bundle exec rake beaker:suite[TODO:matrix_thing_here]
+
