@@ -44,7 +44,7 @@ jobs:
           ruby-version: ${{matrix.puppet.ruby_version}}
 
 # TODO: caching?
-      - name: "Bundle dependencies for Puppet {{matrix.puppet.puppet_version}}"
+      - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
         run: bundle
 
       # Runs a single command using the runners shell
