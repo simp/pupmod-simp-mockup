@@ -1,0 +1,176 @@
+# The testing matrix considers ruby/puppet versions supported by SIMP and PE:
+# ------------------------------------------------------------------------------
+# Release       Puppet   Ruby    EOL
+# SIMP 6.4      5.5      2.40    TBD
+# PE 2018.1     5.5      2.40    2021-01 (LTS overlap)
+# PE 2019.8     6.18     2.5     2022-12 (LTS)
+#
+# https://puppet.com/docs/pe/2018.1/component_versions_in_recent_pe_releases.html
+# https://puppet.com/misc/puppet-enterprise-lifecycle
+# https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
+# ==============================================================================
+
+name: Validation and Tests
+# Controls when the action will run.
+on:
+  push: {}
+  pull_request: {}
+
+jobs:
+  validate:
+    name: "Validations"
+    runs-on: ubuntu-18.04
+    env:
+      PUPPET_VERSION: "~> 6"
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: "bundle exec rake syntax"
+
+  style:
+    name: "Coding Style"
+    runs-on: ubuntu-18.04
+    env:
+      PUPPET_VERSION: "~> 6"
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: "bundle exec rake lint"
+      - run: "bundle exec rake metadata_lint"
+
+
+  files:
+    name: "File checks"
+    runs-on: ubuntu-18.04
+    env:
+      PUPPET_VERSION: "~> 6"
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: bundle exec rake check:dot_underscore
+      - run: bundle exec rake check:test_file
+
+
+  releng-checks:
+    name: "RELENG checks"
+    runs-on: ubuntu-18.04
+    env:
+      PUPPET_VERSION: "~> 6"
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+
+      - name: "Tags and changelogs"
+        run: |
+          bundle exec rake pkg:check_version
+          bundle exec rake pkg:compare_latest_tag
+          bundle exec rake pkg:create_tag_changelog
+
+      - name: "Build Puppet module"
+        run: "bundle exec pdk build --force"
+
+
+  test:
+    name: "Spec/Unit Tests"
+    needs: [validate]
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        puppet:
+          - label: "SIMP 6.5/PE 2019.8"
+            puppet_version: "~> 6.18.0"
+            ruby_version: "2.5"
+          - label: "SIMP 6.4/PE 2018.1"
+            puppet_version: "~> 5.5.22"
+            ruby_version: "2.4"
+          - label: "Puppet 7.x"
+            puppet_version: "~> 7.0"
+            ruby_version: "2.7"
+
+    env:
+      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.puppet.ruby_version}}
+          bundler-cache: true
+      - run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
+      - run: "bundle exec rake spec"
+
+
+  trigger-if-user-has-repo-permissions:
+    name: "Trigger if user has Repo Permissions"
+    needs: [validate, releng-checks, files, style, test]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/github-script@v3
+        id: user-repo-permissions
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          # See:
+          #   - https://octokit.github.io/rest.js/
+          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
+          script: |
+            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+              headers: {
+                accept: 'application/vnd.github.v3+json'
+              },
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.sender.login,
+            })
+            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+            return(has_write_access(project_permission.data.permission))
+      - name: Trigger if user has Repo Permissions
+        if: steps.user-repo-permissions.outputs.result == 'true'
+        run: |
+           echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
+
+  trigger-if-user-has-project-permissions:
+    name: "Trigger if user has Project Permissions"
+    needs: [validate, releng-checks, files, style, test]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/github-script@v3
+        id: user-project-permissions
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          # See:
+          #   - https://octokit.github.io/rest.js/
+          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
+          script: |
+            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.sender.login,
+              mediaType: { previews: [ 'inertia' ] }
+            })
+            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+            return(has_write_access(project_permission.data.permission))
+
+      - name: Trigger if user has Project Permissions
+        if: steps.user-project-permissions.outputs.result == 'true'
+        run: |
+           echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"

@@ -1,0 +1,90 @@
+# From https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#job-context
+---
+name: Diagnotics (for pipeline development)
+on: push
+
+jobs:
+  member_check1:
+    name: Member check (github-script)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v3
+        id: user-membership
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            // See: https://octokit.github.io/rest.js/
+            ////console.log("========== REPO:", context.repo)
+            ////console.log("========== REPO OWNER: ", context.repo.owner)
+            ////console.log("========== PAYLOAD: ", context.payload)
+             // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
+            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.sender.login,
+              mediaType: {
+                previews: [
+                  'inertia'
+                ]
+              }
+            })
+            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+            ////console.log("========== PROJ PERMISSION (SHORT): ", project_permission.data.permission)
+            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+            return(has_write_access(project_permission.data.permission))
+
+            // ERROR: Resource not accessible by integration
+            // NOTE: We'd need to pass in a github-token: apart from the main job
+            // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/teams#get-team-membership-for-a-user
+            //
+            // const team_membership = await github.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+            //  org: context.repo.owner,
+            //  team_slug: 'reviewers',
+            //  username: context.payload.sender.login,
+            //})
+            //console.log("========== TEAM MEMBERSHIP: ", team_membership)
+      - name: Create Comment (PASS)
+        if: steps.user-membership.outputs.result == 'true'
+        run: |
+           echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}"
+      - name: Create Comment (DENIED)
+        if: steps.user-membership.outputs.result == 'false'
+        run: |
+           echo "::warning::DENIED User does not belog to org ${GITHUB_REPOSITORY_OWNER}"
+
+
+  contexts:
+    name: 'Examine Context contents'
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Dump contexts
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+      - name: Dump env context
+        env:
+          ENV_CONTEXT: ${{ toJson(env) }}
+        run: echo "$ENV_CONTEXT"
+      - name: Dump env vars
+        run: env | sort
