@@ -12,10 +12,10 @@
 
 name: CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# Controls when the action will run.
 on:
   push: {}
+  
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -42,12 +42,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
-        with:
-          ruby-version: ${{matrix.puppet.ruby_version}}
-
+        
       - uses: actions/cache@v2
         with:
           path: .vendor
@@ -55,22 +50,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
 
-# TODO: caching?
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+        with:
+          ruby-version: ${{matrix.puppet.ruby_version}}
+
       - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
         run: bundle
 
       # Runs a single command using the runners shell
       - name: "Validation"
         run: | 
-          bundle exec rake syntax
-          bundle exec rake lint
-          bundle exec rake metadata_lint
+          echo bundle exec rake syntax
+          echo bundle exec rake lint
+          echo bundle exec rake metadata_lint
 
       # Runs a single command using the runners shell
       - name: "Spec/Unit tests"
         run: "echo Hello, world!  ${{matrix.puppet.label}}"
 
       # Runs a set of commands using the runners shell
+# TODO: only run when org member initiates action?
       - name: "Acceptance tests"
         run: |
           echo Add other actions to build,
