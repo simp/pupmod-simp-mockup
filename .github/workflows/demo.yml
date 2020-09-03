@@ -17,20 +17,19 @@ on:
   push: {}
   pull_request: {}
   
-
-
-defaults:
-  env:
-    GEM_HOME:          .vendor/gem_install
-    BUNDLE_CACHE_PATH: .vendor/bundle
-    BUNDLE_PATH:       .vendor/bundle
-    BUNDLE_BIN:        .vendor/gem_install/bin
-    BUNDLE_NO_PRUNE:   'true'
+env:
+  GEM_HOME:          .vendor/gem_install
+  BUNDLE_CACHE_PATH: .vendor/bundle
+  BUNDLE_PATH:       .vendor/bundle
+  BUNDLE_BIN:        .vendor/gem_install/bin
+  BUNDLE_NO_PRUNE:   'true'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:     
   test:  # <-- can be anything    
     runs-on: ubuntu-latest
+    env:
+      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"    
     strategy:
       matrix:
         puppet:
@@ -40,8 +39,7 @@ jobs:
           - label: "PE 2019.2"
             puppet_version: "~> 6.10.0"
             ruby_version: "2.5"
-    env:
-      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"
+
 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
