@@ -28,9 +28,7 @@ defaults:
     BUNDLE_NO_PRUNE:   'true'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  prepare:
-     
+jobs:     
   test:  # <-- can be anything    
     runs-on: ubuntu-latest
     strategy:
