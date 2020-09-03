@@ -43,8 +43,10 @@ jobs:
         with:
           ruby-version: ${{matrix.puppet.ruby_version}}
 
-      - name: "Bundle dependencies"
-        run: "bundle"
+      - name: "Bundle dependencies v:${{matrix.puppet.puppet_version}} e:${PUPPET_VERSION}"
+        run: |
+          echo "PUPPET_VERSION: ${PUPPET_VERSION}"
+          echo "bundle"
 
       # Runs a single command using the runners shell
       - name: "Validation"
