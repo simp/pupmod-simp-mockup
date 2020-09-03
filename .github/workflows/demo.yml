@@ -43,14 +43,16 @@ jobs:
         with:
           ruby-version: ${{matrix.puppet.ruby_version}}
 
-      - name: "Bundle dependencies v:${{matrix.puppet.puppet_version}} e:${PUPPET_VERSION}"
-        run: |
-          echo "PUPPET_VERSION: ${PUPPET_VERSION}"
-          bundle
+# TODO: caching?
+      - name: "Bundle dependencies for Puppet {{matrix.puppet.puppet_version}}"
+        run: bundle
 
       # Runs a single command using the runners shell
       - name: "Validation"
-        run: "echo Hello, world!  ${{matrix.puppet.label}}"
+        run: | 
+          bundle exec rake syntax
+          bundle exec rake lint
+          bundle exec rake metadata_lint
 
       # Runs a single command using the runners shell
       - name: "Spec/Unit tests"
