@@ -42,7 +42,6 @@ jobs:
           bundle config path .vendor/bundle
           bundle install --jobs 4 --retry 3
 
-      # Runs a single command using the runners shell
       - name: "Validation"
         run: | 
           echo bundle exec rake syntax
@@ -51,10 +50,8 @@ jobs:
 
     
   test:  # <-- can be anything
-    name: "Lint & Spec Tests"
+    name: "Spec/Unit Tests"
     runs-on: ubuntu-latest
-    env:
-      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"    
     strategy:
       matrix:
         puppet:
@@ -63,7 +60,10 @@ jobs:
             ruby_version: "2.4"
           - label: "PE 2019.2"
             puppet_version: "~> 6.17.0"
-            ruby_version: "2.5"
+            ruby_version: "2.5"    
+    env:
+      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"    
+
     steps:
       - uses: actions/checkout@v2
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
@@ -76,19 +76,50 @@ jobs:
           key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
-
       - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
         run: |
           bundle config path .vendor/bundle
           bundle install --jobs 4 --retry 3
 
-      - name: "Spec/Unit tests"
+      - name: "Run Spec/Unit tests for ${{matrix.puppet.label}"
         run: "echo Hello, world!  ${{matrix.puppet.label}}"
 
-# TODO: only run when org member initiates action?
-      - name: "Acceptance tests"
+  # TODO: only run when org member initiates action?      
+  acceptance:  # <-- can be anything
+    name: "Acceptance tests"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        puppet:
+          - label: "SIMP 6.4/PE 2018.1"
+            puppet_version: "~> 5.5.21"
+            ruby_version: "2.4"
+          - label: "PE 2019.2"
+            puppet_version: "~> 6.17.0"
+            ruby_version: "2.5"    
+    env:
+      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"    
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.puppet.ruby_version}}
+      - uses: actions/cache@v2
+        with:
+          path: .vendor
+          key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
+      - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          bundle config path .vendor/bundle
+          bundle install --jobs 4 --retry 3
           
-          
+      - name: "Run Acceptance tests for ${{matrix.puppet.label}"
+        run: "echo Hello, world!  ${{matrix.puppet.label}}"
+        run: | 
+          echo bundle exec rake syntax
+          echo bundle exec rake lint
+          echo bundle exec rake metadata_lint
