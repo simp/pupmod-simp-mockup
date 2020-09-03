@@ -81,7 +81,7 @@ jobs:
           bundle config path .vendor/bundle
           bundle install --jobs 4 --retry 3
 
-      - name: "Run Spec/Unit tests for ${{matrix.puppet.label}"
+      - name: "Run Spec/Unit tests for ${{matrix.puppet.label}}"
         run: "echo Hello, world!  ${{matrix.puppet.label}}"
 
   # TODO: only run when org member initiates action?      
