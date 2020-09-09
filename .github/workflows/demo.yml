@@ -75,6 +75,7 @@ jobs:
           path: .vendor
           key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
+            ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
             ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
       - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
         run: |
