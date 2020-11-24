@@ -74,11 +74,17 @@ jobs:
             });
             console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
 
+
             if( owner_resp.data.type == 'Organization' ){
-              var membership = await github.request("GET /orgs/:org/memberships/:username", {
-                org: context.repo.owner,
-                username: creator,
+              const team_members = github.teams.listMembersInOrg({
+                context.repo.owner,
+                'Reviewers',
               });
-              console.log("========== CREATOR MEMBERSHIP: ", membership)
+              console.log("========== Team members: ", team_members)
+              // var membership = await github.request("GET /orgs/:org/memberships/:username", {
+              //   org: context.repo.owner,
+              //   username: creator,
+              // });
+              // console.log("========== CREATOR MEMBERSHIP: ", membership)
             }
 
