@@ -24,7 +24,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  test:  # <-- can be anything
+  membership:  # <-- can be anything
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -72,12 +72,11 @@ jobs:
             const owner_resp = await github.request("GET /users/:user", {
               user: context.repo.owner,
             });
-            const owner_type = owner_resp.data.type
-            console.log("========== REPO OWNER TYPE: ", owner_type)
+            console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
 
-            if( owner_type == 'Organization' ){
+            if( owner_resp.data.type == 'Organization' ){
               var membership = await github.request("GET /orgs/:org/memberships/:username", {
-                org: owner,
+                org: context.repo.owner,
                 username: creator,
               });
               console.log("========== CREATOR MEMBERSHIP: ", membership)
