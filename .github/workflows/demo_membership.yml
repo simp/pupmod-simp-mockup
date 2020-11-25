@@ -76,9 +76,7 @@ jobs:
 
             if ( owner_resp.data.type == "Organization" ) {
               console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
-              const team_members = github.teams.listMembersInOrg({
-                context.repo.owner,
-                "Reviewers",
-              });
+              const ulist = octokit.teams.listForAuthenticatedUser();
+              console.log("==========  ulist: ", ulist )
             }
 
