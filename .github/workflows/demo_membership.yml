@@ -74,11 +74,11 @@ jobs:
             });
             console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
 
-            if( owner_resp.data.type == "Organization" ){
-              const team_members = github.teams.listMembersInOrg({
-                context.repo.owner,
-                'Reviewers',
-              });
-              console.log("========== Team members: ", team_members)
-            }
+#            if( owner_resp.data.type == "Organization" ){
+#              const team_members = github.teams.listMembersInOrg({
+#                context.repo.owner,
+#                'Reviewers',
+#              });
+#              console.log("========== Team members: ", team_members)
+#            }
 
