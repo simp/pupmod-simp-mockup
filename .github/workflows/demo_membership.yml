@@ -76,7 +76,7 @@ jobs:
 
             if ( owner_resp.data.type == "Organization" ) {
               console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
-              const ulist = githubt.teams.listForAuthenticatedUser();
+              const ulist = github.teams.listForAuthenticatedUser();
               console.log("==========  ulist: ", ulist )
             }
 
