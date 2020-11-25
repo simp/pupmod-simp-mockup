@@ -69,14 +69,17 @@ jobs:
             const creator = context.payload.sender.login
             console.log("========== REPO:", context.repo)
             console.log("========== REPO OWNER: ", context.repo.owner)
-            const owner_resp = await github.request("GET /users/:user", {
+            const owner_resp = await github.request("get /users/:user", {
               user: context.repo.owner,
             });
+            console.log("========== REPO OWNER RESP: ", owner_resp)
             console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
 
             if ( owner_resp.data.type == "Organization" ) {
               console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
-              const ulist = github.teams.list();
+              const ulist = await github.request("get /teams/:org", {
+                user: context.repo.owner,
+              });
               console.log("==========  ulist: ", ulist )
             }
 
