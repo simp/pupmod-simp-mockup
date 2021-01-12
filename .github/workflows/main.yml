@@ -30,7 +30,32 @@ jobs:
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
         run: echo "$MATRIX_CONTEXT"
-  member_check:
+  member_check1:
+    name: Member check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v3
+        id: user-membership
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            // See: https://octokit.github.io/rest.js/
+            console.log("========== REPO:", context.repo)
+            console.log("========== REPO OWNER: ", context.repo.owner)
+            
+             // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
+            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: 'username',
+              mediaType: {
+                previews: [
+                  'inertia'
+                ]
+              }
+            })
+            console.log("========== PROJ PERMISSION: ", project_permission)
+  member_check2:
     name: Member check
     runs-on: ubuntu-latest
     steps:
