@@ -30,16 +30,6 @@ jobs:
         env:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
         run: echo "$MATRIX_CONTEXT"
-
-
-
-name: Is Organization Member Example
-
-on:
-  issues:
-    types: [push]
-
-jobs:
   member_check:
     name: Member check
     runs-on: ubuntu-latest
