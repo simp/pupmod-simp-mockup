@@ -43,9 +43,11 @@ jobs:
           organization: simp
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Comment
-        if: steps.is_organization_member.outputs.result == true
-        run: echo "GOOD User Belongs to simp"
-      - name: Create Comment
-        if: steps.is_organization_member.outputs.result == false
-        run: echo "DENIED User Does Not Belong to simp"
+      - name: Create Comment (PASS)
+        if: steps.is_organization_member.outputs.result == 'true'
+        run: |
+           echo "GOOD User Belongs to simp"
+      - name: Create Comment (DENIED)
+        if: steps.is_organization_member.outputs.result == 'false'
+        run: |
+           echo "DENIED User Does Not Belong to simp"
