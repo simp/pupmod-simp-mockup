@@ -29,7 +29,8 @@ jobs:
             })
             console.log("========== PROJ PERMISSION (SHORT): ", project_permission.data.permission)
             
-            const team_membership = await github.request('GET /repos/{owner}/teams/{team_slug}/memberships/{username}', {
+            // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/teams#get-team-membership-for-a-user
+            const team_membership = await github.request('GET /orgs/{owner}/teams/{team_slug}/memberships/{username}', {
               owner: context.repo.owner,
               team_slug: 'reviewers'
               username: context.payload.sender.login,
