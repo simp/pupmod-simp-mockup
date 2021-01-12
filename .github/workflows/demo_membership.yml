@@ -66,12 +66,26 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             // See: https://octokit.github.io/rest.js/
-            const creator = context.payload.sender.login
             console.log("========== REPO:", context.repo)
             console.log("========== REPO OWNER: ", context.repo.owner)
+            
+            
+             // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
+            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+              owner: context.repo.owner,
+              repo: context.repo,
+              username: 'username',
+              mediaType: {
+                previews: [
+                  'inertia'
+                ]
+              }
+            })            
+            const creator = context.payload.sender.login
             const owner_resp = await github.request("get /users/:user", {
               user: context.repo.owner,
             });
+
             console.log("========== REPO OWNER RESP: ", owner_resp)
             console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
 
