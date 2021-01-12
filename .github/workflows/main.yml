@@ -47,7 +47,7 @@ jobs:
             const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              username: 'username',
+              username: github.actor,
               mediaType: {
                 previews: [
                   'inertia'
