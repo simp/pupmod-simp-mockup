@@ -32,13 +32,8 @@ jobs:
             // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/teams#get-team-membership-for-a-user
             const team_membership = await github.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
               org: context.repo.owner,
-              team_slug: 'reviewers'
+              team_slug: 'reviewers',
               username: context.payload.sender.login,
-              mediaType: {
-                previews: [
-                  'inertia'
-                ]
-              }
             })
             console.log("========== TEAM MEMBERSHIP: ", team_membership)
             
