@@ -80,20 +80,8 @@ jobs:
                   'inertia'
                 ]
               }
-            })            
-            const creator = context.payload.sender.login
-            const owner_resp = await github.request("get /users/:user", {
-              user: context.repo.owner,
-            });
+            })
+            console.log("========== PROJ PERMISSION: ", project_permission)
 
-            console.log("========== REPO OWNER RESP: ", owner_resp)
-            console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
 
-            if ( owner_resp.data.type == "Organization" ) {
-              console.log("========== REPO OWNER TYPE: ", owner_resp.data.type)
-              const ulist = await github.request("get /teams/:org", {
-                user: context.repo.owner,
-              });
-              console.log("==========  ulist: ", ulist )
-            }
 
