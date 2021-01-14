@@ -27,39 +27,53 @@ jobs:
                 ]
               }
             })
+            has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
             console.log("========== PROJ PERMISSION (SHORT): ", project_permission.data.permission)
+            return(has_write_access(project_permission.data.permission))
             
+            
+            // ERROR: Resource not accessible by integration   
+            // NOTE: We'd need to pass in a github-token: apart from the main job
             // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/teams#get-team-membership-for-a-user
-            const team_membership = await github.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
-              org: context.repo.owner,
-              team_slug: 'reviewers',
-              username: context.payload.sender.login,
-            })
-            console.log("========== TEAM MEMBERSHIP: ", team_membership)
-            
-
-
-  member_check2:
-    name: Member check (is-organization-member)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check if organization member
-        id: is_organization_member
-        if: github.event.action == 'push'
-        #uses: jamessingleton/is-organization-member@v1
-        uses: jamessingleton/is-organization-member@3c9963089f1fade125df64983be54219d99fa9bd
-        with:
-          organization: simp
-          username: ${{ github.actor }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+            //
+            // const team_membership = await github.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
+            //  org: context.repo.owner,
+            //  team_slug: 'reviewers',
+            //  username: context.payload.sender.login,
+            //})
+            //console.log("========== TEAM MEMBERSHIP: ", team_membership)
       - name: Create Comment (PASS)
-        if: steps.is_organization_member.outputs.result == 'true'
+        if: steps.user-membership.outputs.result == 'true'
         run: |
            echo "GOOD User Belongs to simp"
       - name: Create Comment (DENIED)
-        if: steps.is_organization_member.outputs.result == 'false'
+        if: steps.user-membership.outputs.result == 'false'
         run: |
            echo "DENIED User Does Not Belong to simp"
+     
+
+  # Action doesn't return expected value
+#   member_check2:
+#     name: Member check (is-organization-member)
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check if organization member
+#         id: is_organization_member
+#         if: github.event.action == 'push'
+#         #uses: jamessingleton/is-organization-member@v1
+#         uses: jamessingleton/is-organization-member@3c9963089f1fade125df64983be54219d99fa9bd
+#         with:
+#           organization: simp
+#           username: ${{ github.actor }}
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Create Comment (PASS)
+#         if: steps.is_organization_member.outputs.result == 'true'
+#         run: |
+#            echo "GOOD User Belongs to simp"
+#       - name: Create Comment (DENIED)
+#         if: steps.is_organization_member.outputs.result == 'false'
+#         run: |
+#            echo "DENIED User Does Not Belong to simp"
   one:
     runs-on: ubuntu-16.04
     steps:
