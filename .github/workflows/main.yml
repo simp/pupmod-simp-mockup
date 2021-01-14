@@ -15,7 +15,7 @@ jobs:
             // See: https://octokit.github.io/rest.js/
             ////console.log("========== REPO:", context.repo)
             ////console.log("========== REPO OWNER: ", context.repo.owner)
-            console.log("========== PAYLOAD: ", context.payload)
+            ////console.log("========== PAYLOAD: ", context.payload)
              // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
             const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
               owner: context.repo.owner,
@@ -28,7 +28,7 @@ jobs:
               }
             })
             has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
-            console.log("========== PROJ PERMISSION (SHORT): ", project_permission.data.permission)
+            ////console.log("========== PROJ PERMISSION (SHORT): ", project_permission.data.permission)
             return(has_write_access(project_permission.data.permission))
             
             
