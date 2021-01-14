@@ -27,10 +27,11 @@ jobs:
                 ]
               }
             })
-            has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
             ////console.log("========== PROJ PERMISSION (SHORT): ", project_permission.data.permission)
+            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
-            
             
             // ERROR: Resource not accessible by integration   
             // NOTE: We'd need to pass in a github-token: apart from the main job
