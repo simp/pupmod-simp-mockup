@@ -43,7 +43,7 @@ jobs:
           bundle install --jobs 4 --retry 3
 
       - name: "Validation"
-        run: | 
+        run: |
           bundle exec rake syntax
           bundle exec rake lint
           bundle exec rake metadata_lint
@@ -60,7 +60,8 @@ jobs:
           bundle exec rake pkg:create_tag_changelog
           
       - name: "RELENG checks (build)"
-        run: |          
+        shell: bash
+        run: |     
           if [[ $(puppet --version | cut -d. -f1) < '6' ]]; then
             command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:
             bundle exec puppet module build
