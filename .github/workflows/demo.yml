@@ -61,7 +61,13 @@ jobs:
           
       - name: "RELENG checks (build)"
         shell: bash
-        run: "bundle exec pdk build --force"
+        run: |
+          lsb_release -a
+          wget https://apt.puppet.com/puppet-tools-release-bionic.deb
+          sudo dpkg -i puppet-tools-release-bionic.deb
+          sudo apt-get update 
+          sudo apt-get install pdk
+          bundle exec pdk build --force
 
 
   test:  # <-- can be anything
