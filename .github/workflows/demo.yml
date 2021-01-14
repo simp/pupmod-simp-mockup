@@ -44,19 +44,25 @@ jobs:
 
       - name: "Validation"
         run: | 
-          echo bundle exec rake syntax
-          echo bundle exec rake lint
-          echo bundle exec rake metadata_lint
+          bundle exec rake syntax
+          bundle exec rake lint
+          bundle exec rake metadata_lint
 
-      - name: "RELENG checks"
-        run: | 
-          command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:
+      - name: "RELENG checks (files)"
+        run: |
           bundle exec rake check:dot_underscore
           bundle exec rake check:test_file
+
+      - name: "RELENG checks (tags)"
+        run: |
           bundle exec rake pkg:check_version
           bundle exec rake pkg:compare_latest_tag
           bundle exec rake pkg:create_tag_changelog
+          
+      - name: "RELENG checks (build)"
+        run: |          
           if [[ $(puppet --version | cut -d. -f1) < '6' ]]; then
+            command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:
             bundle exec puppet module build
           fi
 
