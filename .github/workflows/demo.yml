@@ -61,11 +61,8 @@ jobs:
           
       - name: "RELENG checks (build)"
         shell: bash
-        run: |     
-          if [[ $(puppet --version | cut -d. -f1) < '6' ]]; then
-            command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:
-            bundle exec puppet module build
-          fi
+        run: "bundle exec pdk build --force"
+
 
   test:  # <-- can be anything
     name: "Spec/Unit Tests"
@@ -100,6 +97,9 @@ jobs:
         run: |
           bundle config path .vendor/bundle
           bundle install --jobs 4 --retry 3
+
+      - name: "Ensure `rpm` command is available"
+        run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
 
       - name: "Run Spec/Unit tests for ${{matrix.puppet.label}}"
         run: |
