@@ -45,11 +45,13 @@ jobs:
       - name: Create Comment (PASS)
         if: steps.user-membership.outputs.result == 'true'
         run: |
-           echo `GOOD User Belongs to org ${context.repo.owner}`
+           env
+           echo "GOOD User Belongs to org ${context.repo.owner}`
       - name: Create Comment (DENIED)
         if: steps.user-membership.outputs.result == 'false'
         run: |
-           echo `DENIED User does not belog to org ${context.repo.owner}`
+           env
+           echo "::warning::DENIED User does not belog to org ${context.repo.owner}`
      
 
   # Action doesn't return expected value
