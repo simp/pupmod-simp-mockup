@@ -16,11 +16,13 @@ on:
   push: {}
   pull_request: {}
   
+defaults:
+  runs-on: ubuntu-18.04
+  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:   
   validate:
     name: "Validation"
-    runs-on: ubuntu-latest
     env:
       PUPPET_VERSION: "~> 6"
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -55,7 +57,7 @@ jobs:
   test:
     name: "Spec/Unit Tests"
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         puppet:
@@ -93,7 +95,7 @@ jobs:
   trigger-acceptance:
     name: "Trigger GLCI Acceptance tests"
     needs: [validate, test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
         id: user-membership
