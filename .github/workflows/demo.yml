@@ -18,7 +18,7 @@ on:
     
 jobs:   
   validate:
-    name: "Validation"
+    name: "Validations"
     runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
@@ -32,26 +32,6 @@ jobs:
       - run: "bundle exec rake syntax"
       - run: "bundle exec rake lint"        
       - run: "bundle exec rake metadata_lint"
-        
-#       - name: "Validation"
-#         run: |
-#           bundle exec rake syntax
-#           bundle exec rake lint
-#           bundle exec rake metadata_lint
-#
-#       - name: "RELENG check (files)"
-#         run: |
-#           bundle exec rake check:dot_underscore
-#           bundle exec rake check:test_file
-
-#       - name: "RELENG check (tags and changelogs)"
-#         run: |
-#           bundle exec rake pkg:check_version
-#           bundle exec rake pkg:compare_latest_tag
-#           bundle exec rake pkg:create_tag_changelog
-
-#       - name: "RELENG check (build Puppet module)"
-#         run: "bundle exec pdk build --force"
 
 
   releng-checks:
@@ -62,31 +42,24 @@ jobs:
     steps:           
       - uses: actions/checkout@v2
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.5
           bundler-cache: true
 
-#       - name: "Validation"
-#         run: |
-#           bundle exec rake syntax
-#           bundle exec rake lint
-#           bundle exec rake metadata_lint
-
-      - name: "RELENG check (files)"
+      - name: "Check files"
         run: |
           bundle exec rake check:dot_underscore
           bundle exec rake check:test_file
 
-      - name: "RELENG check (tags and changelogs)"
+      - name: "Tags and changelogs"
         run: |
           bundle exec rake pkg:check_version
           bundle exec rake pkg:compare_latest_tag
           bundle exec rake pkg:create_tag_changelog
 
-      - name: "RELENG check (build Puppet module)"
+      - name: "Build Puppet module"
         run: "bundle exec pdk build --force"
-
 
 
   test:
@@ -111,19 +84,15 @@ jobs:
         with:
           ruby-version: ${{matrix.puppet.ruby_version}}
           bundler-cache: true
+      - run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
+      - run: "bundle exec rake spec"
 
-      - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
-        run: |
-          bundle config path .vendor/bundle
-          bundle install --jobs 4 --retry 3
+#       - name: "Ensure `rpm` command is available"
+#         run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
 
-      - name: "Ensure `rpm` command is available"
-        run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
-
-      - name: "Run Spec/Unit tests for ${{matrix.puppet.label}}"
-        run: |
-          bundle exec rake spec
-          echo Hello, world!  ${{matrix.puppet.label}}
+#       - name: "Run Spec/Unit tests for ${{matrix.puppet.label}}"
+#         run: "bundle exec rake spec"
+          
 
   trigger-acceptance:
     name: "Trigger GLCI Acceptance tests"
