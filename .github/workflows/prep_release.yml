@@ -1,0 +1,52 @@
+---
+name: Prepare release
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to release'
+        required: true
+        default: $default-branch
+      generate_docs:
+        description: 'Generate documentation'
+        required: true
+        default: true
+      build_artifacts:
+        description: 'Build artifact'
+        required: true
+        default: true
+
+jobs:
+  generate-docs:
+    name: "Generate Documentation"
+    if: ${{ github.event.inputs.generate_docs }}
+    runs-on: ubuntu-18.04
+    env:
+      PUPPET_VERSION: "~> 6"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref}}
+          clean: true
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: 'bundle exec rake strings:generate:reference'
+      - name: 'Set up git user & remote'
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.name "${GITHUB_ACTOR}@users.noreply.github.com"
+          git remote add github "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
+      - name: 'Commit REFERENCE.md'
+        run: |
+          git add REFERENCE.md
+          git commit -m "Generate REFERENCE.md"
+      - name: 'Commit REFERENCE.md'
+        run: |
+          git add REFERENCE.md
+          git commit -m "Generate REFERENCE.md"
+
+
+

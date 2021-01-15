@@ -144,6 +144,7 @@ jobs:
       - name: Trigger if user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         run: |
+           echo '::set-output name=SELECTED_COLOR::green'
            echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
 
   trigger-if-user-has-project-permissions:

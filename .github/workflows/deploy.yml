@@ -10,6 +10,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+    # Technical implemntation notes:
+    #
+    # - The latest ref is stored in $GITHUB_REF as 'refs/tags/<tag_name>'
+    # - ${GITHUB_REF:10} is an obscure shell expansion syntax to lop off the
+    #   'refs/tags/' prefix
+    #
     - name: Get latest tag
       id: vars
       run: echo ::set-output name=tag::${GITHUB_REF:10}
