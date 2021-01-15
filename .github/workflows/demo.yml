@@ -59,12 +59,13 @@ jobs:
     strategy:
       matrix:
         puppet:
-          - label: "SIMP 6.4/PE 2018.1"
-            puppet_version: "~> 5.5.21"
-            ruby_version: "2.4"
           - label: "SIMP 6.5/PE 2019.8"
             puppet_version: "~> 6.18.0"
             ruby_version: "2.5"
+          - label: "SIMP 6.4/PE 2018.1"
+            puppet_version: "~> 5.5.22"
+            ruby_version: "2.4"
+
     env:
       PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"    
 
@@ -90,7 +91,7 @@ jobs:
           echo Hello, world!  ${{matrix.puppet.label}}
 
   trigger-acceptance:
-    name: "Trigger Acceptance tests"
+    name: "Trigger GLCI Acceptance tests"
     needs: [validate, test]
     runs-on: ubuntu-latest
     steps:
