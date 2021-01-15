@@ -47,7 +47,7 @@ jobs:
       - run: "bundle exec rake metadata_lint"
 
 
-  file-checks:
+  files:
     name: "File checks"
     runs-on: ubuntu-18.04
     env:
@@ -93,7 +93,7 @@ jobs:
 
   test:
     name: "Spec/Unit Tests"
-    needs: [validate, releng-checks, file-checks]
+    needs: [validate, files]
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -129,7 +129,7 @@ jobs:
 
   trigger-acceptance:
     name: "Trigger GLCI Acceptance tests"
-    needs: [validate, releng-checks, file-checks, test]
+    needs: [validate, releng-checks, files, style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
