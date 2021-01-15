@@ -67,6 +67,7 @@ jobs:
           sudo dpkg -i puppet-tools-release-bionic.deb
           sudo apt-get update 
           sudo apt-get install pdk
+          rm -f Gemfile.lock
           pdk build --force
 
 
