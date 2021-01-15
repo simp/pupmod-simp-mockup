@@ -1,59 +1,17 @@
 # From https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#job-context
 ---
-name: Diagnotics (for pipeline development)
-on: push
+name: Diagnostics (for pipeline development)
+on:
+  push: {}
+  pull_request: {}
+
+env:
+  GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
+  GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+  GITLAB_ORG: 'simp'
+  PUPPET_VERSION: '~> 6'
 
 jobs:
-  member_check1:
-    name: Member check (github-script)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v3
-        id: user-membership
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            // See: https://octokit.github.io/rest.js/
-            ////console.log("========== REPO:", context.repo)
-            ////console.log("========== REPO OWNER: ", context.repo.owner)
-            ////console.log("========== PAYLOAD: ", context.payload)
-             // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
-            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              username: context.payload.sender.login,
-              mediaType: {
-                previews: [
-                  'inertia'
-                ]
-              }
-            })
-            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
-            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
-            ////console.log("========== PROJ PERMISSION (SHORT): ", project_permission.data.permission)
-            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
-            return(has_write_access(project_permission.data.permission))
-
-            // ERROR: Resource not accessible by integration
-            // NOTE: We'd need to pass in a github-token: apart from the main job
-            // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/teams#get-team-membership-for-a-user
-            //
-            // const team_membership = await github.request('GET /orgs/{org}/teams/{team_slug}/memberships/{username}', {
-            //  org: context.repo.owner,
-            //  team_slug: 'reviewers',
-            //  username: context.payload.sender.login,
-            //})
-            //console.log("========== TEAM MEMBERSHIP: ", team_membership)
-      - name: Create Comment (PASS)
-        if: steps.user-membership.outputs.result == 'true'
-        run: |
-           echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}"
-      - name: Create Comment (DENIED)
-        if: steps.user-membership.outputs.result == 'false'
-        run: |
-           echo "::warning::DENIED User does not belog to org ${GITHUB_REPOSITORY_OWNER}"
-
-
   contexts:
     name: 'Examine Context contents'
     runs-on: ubuntu-16.04

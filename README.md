@@ -9,22 +9,22 @@
 #### Table of Contents
 
 <!-- vim-markdown-toc GFM -->
-1. [Description](#description)
-2. [Setup - The basics of getting started with dummy](#setup)
-    * [What dummy affects](#what-dummy-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with dummy](#beginning-with-dummy)
-3. [Usage - Configuration options and additional functionality](#usage)
-4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-5. [Limitations - OS compatibility, etc.](#limitations)
-6. [Development - Guide for contributing to the module](#development)
-    * [Acceptance Tests - Beaker env variables](#acceptance-tests)
+
+* [Description](#description)
+  * [This is a SIMP module](#this-is-a-simp-module)
+* [Setup](#setup)
+  * [What dummy affects](#what-dummy-affects)
+  * [Setup Requirements **OPTIONAL**](#setup-requirements-optional)
+  * [Beginning with dummy](#beginning-with-dummy)
+* [Usage](#usage)
+* [Reference](#reference)
+* [Limitations](#limitations)
+* [Development](#development)
+  * [Acceptance tests](#acceptance-tests)
 
 <!-- vim-markdown-toc -->
 
 ## Description
-
-**FIXME:** Ensure the *Description* section is correct and complete, then remove this line!
 
 Start with a one- or two-sentence summary of what the module does and/or what
 problem it solves. This is your 30-second elevator pitch for your module.
