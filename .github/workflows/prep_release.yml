@@ -6,7 +6,7 @@ on:
       ref:
         description: 'Git ref to release'
         required: true
-        default: master
+        default: ${{ github.repository.default_branch }}
       generate_docs:
         description: 'Generate documentation'
         required: true
