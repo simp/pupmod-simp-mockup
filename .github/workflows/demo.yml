@@ -31,16 +31,6 @@ jobs:
         with:
           ruby-version: 2.5
           bundler-cache: true
-#       - uses: actions/cache@v2
-#         with:
-#           path: .vendor
-#           key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
-#           restore-keys: |
-#             ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
-#       - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
-#         run: |
-#           bundle config path .vendor/bundle
-#           bundle install --jobs 4 --retry 3
 
       - name: "Validation"
         run: |
@@ -48,30 +38,21 @@ jobs:
           bundle exec rake lint
           bundle exec rake metadata_lint
 
-      - name: "RELENG checks (files)"
+      - name: "RELENG check (files)"
         run: |
           bundle exec rake check:dot_underscore
           bundle exec rake check:test_file
 
-      - name: "RELENG checks (tags)"
+      - name: "RELENG check (tags and changelogs)"
         run: |
           bundle exec rake pkg:check_version
           bundle exec rake pkg:compare_latest_tag
           bundle exec rake pkg:create_tag_changelog
           
-      - name: "RELENG checks (build)"
-        run: |
-          bundle exec pdk build --force
-          #$(bundle exec gem contents pdk | grep exe/pdk) build --force
-          #
-          #wget https://apt.puppet.com/puppet-tools-release-bionic.deb
-          #sudo dpkg -i puppet-tools-release-bionic.deb
-          #sudo apt-get update 
-          #sudo apt-get install pdk
-          #rm -f Gemfile.lock
+      - name: "RELENG check (build Puppet module)"
+        run: "bundle exec pdk build --force"
 
-
-  test:  # <-- can be anything
+  test:
     name: "Spec/Unit Tests"
     needs: validate
     runs-on: ubuntu-latest
@@ -93,13 +74,8 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.puppet.ruby_version}}
-      - uses: actions/cache@v2
-        with:
-          path: .vendor
-          key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
-            ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
+          bundler-cache: true
+
       - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
         run: |
           bundle config path .vendor/bundle
@@ -113,41 +89,34 @@ jobs:
           bundle exec rake spec
           echo Hello, world!  ${{matrix.puppet.label}}
 
-  # TODO: only run when org member initiates action?      
-  acceptance:  # <-- can be anything
-    name: "Acceptance tests"
+  trigger-acceptance:
+    name: "Trigger Acceptance tests"
     needs: [validate, test]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        puppet:
-          - label: "SIMP 6.4/PE 2018.1"
-            puppet_version: "~> 5.5.21"
-            ruby_version: "2.4"
-          - label: "PE 2019.2"
-            puppet_version: "~> 6.17.0"
-            ruby_version: "2.5"    
-    env:
-      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"    
-
     steps:
-      - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
+      - uses: actions/github-script@v3
+        id: user-membership
         with:
-          ruby-version: ${{matrix.puppet.ruby_version}}
-      - uses: actions/cache@v2
-        with:
-          path: .vendor
-          key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
-      - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            // See: https://octokit.github.io/rest.js/
+            // See: https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
+            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.sender.login,
+              mediaType: {
+                previews: [
+                  'inertia'
+                ]
+              }
+            })
+            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+            return(has_write_access(project_permission.data.permission))
+            
+      - name: Trigger Gitlab CI
+        if: steps.user-membership.outputs.result == 'true'
         run: |
-          bundle config path .vendor/bundle
-          bundle install --jobs 4 --retry 3
-          
-      - name: "Run Acceptance tests for ${{matrix.puppet.label}}"
-        run: | 
-          echo bundle exec rake beaker:suite[TODO:matrix_thing_here]
-
+           echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
