@@ -60,7 +60,9 @@ jobs:
           
       - name: "RELENG checks (build)"
         run: |
-          bundle exec pdk build --force
+          
+          $(bundle exec gem contents pdk | grep exe/pdk) build --force
+          #bundle exec pdk build --force
           #wget https://apt.puppet.com/puppet-tools-release-bionic.deb
           #sudo dpkg -i puppet-tools-release-bionic.deb
           #sudo apt-get update 
