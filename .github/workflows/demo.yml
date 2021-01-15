@@ -15,14 +15,12 @@ name: Validation and Tests
 on:
   push: {}
   pull_request: {}
-  
-defaults:
-  runs-on: ubuntu-18.04
-  
+    
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:   
   validate:
     name: "Validation"
+    runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
     # Steps represent a sequence of tasks that will be executed as part of the job
