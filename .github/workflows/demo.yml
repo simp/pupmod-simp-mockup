@@ -29,7 +29,7 @@ jobs:
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
         uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
         with:
-          ruby-version: ${{matrix.puppet.ruby_version}}        
+          ruby-version: 2.5        
       - uses: actions/cache@v2
         with:
           path: .vendor
@@ -59,15 +59,12 @@ jobs:
           bundle exec rake pkg:create_tag_changelog
           
       - name: "RELENG checks (build)"
-        shell: bash
         run: |
-          cat /etc/os-release
-          hostnamectl status
-          wget https://apt.puppet.com/puppet-tools-release-bionic.deb
-          sudo dpkg -i puppet-tools-release-bionic.deb
-          sudo apt-get update 
-          sudo apt-get install pdk
-          rm -f Gemfile.lock
+          #wget https://apt.puppet.com/puppet-tools-release-bionic.deb
+          #sudo dpkg -i puppet-tools-release-bionic.deb
+          #sudo apt-get update 
+          #sudo apt-get install pdk
+          #rm -f Gemfile.lock
           pdk build --force
 
 
