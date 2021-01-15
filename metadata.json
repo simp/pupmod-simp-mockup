@@ -2,7 +2,7 @@
   "name": "simp-dummy",
   "version": "0.3.2",
   "author": "SIMP",
-  "summary": "A dummy module used to test SIMP CI, RELENG, and the puppet module skeleton",
+  "summary": "A mock module used to test SIMP CI, RELENG, and the SIMP puppet module skeleton",
   "license": "Apache-2.0",
   "source": "https://github.com/simp/pupmod-simp-dummy",
   "project_page": "https://www.simp-project.com/",
