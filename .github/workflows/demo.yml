@@ -29,17 +29,18 @@ jobs:
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
         uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
         with:
-          ruby-version: 2.5        
-      - uses: actions/cache@v2
-        with:
-          path: .vendor
-          key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
-      - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
-        run: |
-          bundle config path .vendor/bundle
-          bundle install --jobs 4 --retry 3
+          ruby-version: 2.5
+          bundler-cache: true
+#       - uses: actions/cache@v2
+#         with:
+#           path: .vendor
+#           key: ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-${{ hashFiles('**/Gemfile.lock') }}
+#           restore-keys: |
+#             ${{ runner.os }}-gems-ruby${{matrix.puppet.ruby_version}}-
+#       - name: "Bundle dependencies for Puppet ${{matrix.puppet.puppet_version}}"
+#         run: |
+#           bundle config path .vendor/bundle
+#           bundle install --jobs 4 --retry 3
 
       - name: "Validation"
         run: |
