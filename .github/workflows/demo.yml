@@ -34,6 +34,22 @@ jobs:
       - run: "bundle exec rake metadata_lint"
 
 
+  file-checks:
+    name: "File checks"
+    runs-on: ubuntu-18.04
+    env:
+      PUPPET_VERSION: "~> 6"
+    steps:           
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: bundle exec rake check:dot_underscore
+      - run: bundle exec rake check:test_file
+
+
   releng-checks:
     name: "RELENG checks"
     runs-on: ubuntu-18.04
@@ -47,10 +63,10 @@ jobs:
           ruby-version: 2.5
           bundler-cache: true
 
-      - name: "Check files"
-        run: |
-          bundle exec rake check:dot_underscore
-          bundle exec rake check:test_file
+#       - name: "Check files"
+#         run: |
+#           bundle exec rake check:dot_underscore
+#           bundle exec rake check:test_file
 
       - name: "Tags and changelogs"
         run: |
@@ -64,7 +80,7 @@ jobs:
 
   test:
     name: "Spec/Unit Tests"
-    needs: [validate, releng-checks]
+    needs: [validate, releng-checks, file-checks]
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -75,6 +91,10 @@ jobs:
           - label: "SIMP 6.4/PE 2018.1"
             puppet_version: "~> 5.5.22"
             ruby_version: "2.4"
+          - label: "Puppet 7.x"
+            puppet_version: "~> 7.0"
+            ruby_version: "2.7"
+
     env:
       PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"    
     steps:
@@ -96,7 +116,7 @@ jobs:
 
   trigger-acceptance:
     name: "Trigger GLCI Acceptance tests"
-    needs: [validate, releng-checks, test]
+    needs: [validate, releng-checks, file-checks, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
