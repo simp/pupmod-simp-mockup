@@ -76,11 +76,6 @@ jobs:
           ruby-version: 2.5
           bundler-cache: true
 
-#       - name: "Check files"
-#         run: |
-#           bundle exec rake check:dot_underscore
-#           bundle exec rake check:test_file
-
       - name: "Tags and changelogs"
         run: |
           bundle exec rake pkg:check_version
@@ -93,7 +88,7 @@ jobs:
 
   test:
     name: "Spec/Unit Tests"
-    needs: [validate, files]
+    needs: [validate]
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -119,12 +114,6 @@ jobs:
           bundler-cache: true
       - run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
       - run: "bundle exec rake spec"
-
-#       - name: "Ensure `rpm` command is available"
-#         run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
-
-#       - name: "Run Spec/Unit tests for ${{matrix.puppet.label}}"
-#         run: "bundle exec rake spec"
           
 
   trigger-acceptance:
