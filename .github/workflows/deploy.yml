@@ -1,3 +1,13 @@
+# ------------------------------------------------------------------------------
+# NOTES
+#
+# To help decipher the syntax of `echo ::set-output name=tag::${GITHUB_REF:10}`:
+#
+# - On tag pushes, the value of $GITHUB_REF will be 'refs/tags/<tag_name>'
+# - ${GITHUB_REF:10} is an obscure shell expansion syntax to lop off the
+#   (10-character-long) 'refs/tags/' prefix
+#
+# ------------------------------------------------------------------------------
 ---
 name: Build and publish to Puppet Forge
 
@@ -11,12 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    # Technical implemntation notes:
-    #
-    # - The latest ref is stored in $GITHUB_REF as 'refs/tags/<tag_name>'
-    # - ${GITHUB_REF:10} is an obscure shell expansion syntax to lop off the
-    #   'refs/tags/' prefix
-    #
     - name: Get latest tag
       id: vars
       run: echo ::set-output name=tag::${GITHUB_REF:10}
@@ -25,6 +29,7 @@ jobs:
       with:
         ref: ${{ steps.vars.outputs.tag }}
     - run: 'echo "== LATEST TAG:  ${{ steps.vars.outputs.tag }}"'
+    - run: 'jq . metadata.json'
 #    - name: Build and publish module
 #      uses: barnumbirr/action-forge-publish@v2.3.0
 #      env:

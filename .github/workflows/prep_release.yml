@@ -1,5 +1,6 @@
-# NOTES
 # ------------------------------------------------------------------------------
+# NOTES
+#
 # It would be nice if we could use an expression to set the default value of
 # `github.event.inputs.branch` to the the repository's current default branch,
 #  so the defaults always work, regardless of the whether it's `master`,
@@ -9,13 +10,13 @@
 # doesn't evaluate within `workflow_dispatch.inputs.*.default`, and the
 # [`$default-branch` macro][1] only works in workflow **templates**.
 #
-# FIXME: When we implement [default branch renaming][2], this default MUST
-#        be updated.
+# FIXME: When we implement [default branch renaming][2], this MUST be changed.
 #
 # [1]: https://github.blog/changelog/2020-07-22-github-actions-better-support-for-alternative-default-branch-names/
 # [2]: https://github.com/github/renaming/
+# ------------------------------------------------------------------------------
 ---
-name: Prepare release
+name: Prepare assets for release
 on:
   workflow_dispatch:
     inputs:
