@@ -83,7 +83,7 @@ jobs:
   auto-tag:
     name: "Auto-Tag release"
     if: github.event.inputs.auto_tag == 'true' || github.event.inputs.auto_tag == 'noop'
-    needs: [ generate-docs ]
+    ### needs: [ generate-docs ] FIXME: uncomment before using in production
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -115,9 +115,13 @@ jobs:
           else
              echo "=== No need for tag (wait, WHY)!"
           fi
-      - name: 'Push tag to ${{ github.event.inputs.branch }}'
+      - name: 'Push tag ${{steps.tag-release.tag-name}} to ${{ github.event.inputs.branch }}'
         if: contains(steps.tag-release.tag-name,'.')  && github.event.inputs.auto_tag != 'noop'
         run: "git push -u github ${{ github.event.inputs.branch }}"
+      - name: 'echo things'
+        run: |
+          echo "== steps.tag-release.tag-name: '${{steps.tag-release.tag-name}}'"
+          echo "== github.event.inputs.auto_tag: '${{github.event.inputs.auto_tag}}'"
 
   files:
     name: "File checks"
