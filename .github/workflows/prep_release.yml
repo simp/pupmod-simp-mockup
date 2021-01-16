@@ -76,6 +76,7 @@ jobs:
   auto-tag:
     name: "Auto-Tag release"
     if: github.event.inputs.auto_tag == 'true'
+    needs: [ generate-docs ]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -92,7 +93,8 @@ jobs:
         with:
           ruby-version: 2.5
           bundler-cache: true
-      - run: |
+      - name: 'Tag release (if needed)'
+        run: |
           git fetch --tags
           if bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required'; then
              tag="$(bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required' | sed -e 's/^.*\([[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\).*$/\1/')"
@@ -105,19 +107,8 @@ jobs:
           else
              echo "=== No need for tag (wait, WHY)!"
           fi
-
-#      - name: 'Set up git user & remote'
-#        run: |
-#          git config --global user.name "${GITHUB_ACTOR}"
-#          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-#          git remote add github "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
-#      - name: 'Commit REFERENCE.md'
-#        run: |
-#          git add REFERENCE.md
-#          git commit -m "(RELENG) Generate REFERENCE.md"
-#      - name: 'Push commit back to ${{ github.event.inputs.branch }}'
+#      - name: 'Push tag to ${{ github.event.inputs.branch }}'
 #        run: "git push -u github ${{ github.event.inputs.branch }}"
-#
 
   files:
     name: "File checks"
