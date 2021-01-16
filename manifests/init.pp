@@ -31,7 +31,7 @@
 #   If true, manage TCP wrappers configuration for dummy
 #
 # @param foo
-#   A new API thing
+#   A new API thingamie
 #
 # @author SIMP
 #
