@@ -43,7 +43,8 @@ class dummy (
   Variant[Boolean,Enum['firewalld']] $firewall    = simplib::lookup('simp_options::firewall', { 'default_value'    => false }),
   Boolean                            $logging     = simplib::lookup('simp_options::syslog', { 'default_value'      => false }),
   Boolean                            $selinux     = simplib::lookup('simp_options::selinux', { 'default_value'     => false }),
-  Boolean                            $tcpwrappers = simplib::lookup('simp_options::tcpwrappers', { 'default_value' => false })
+  Boolean                            $tcpwrappers = simplib::lookup('simp_options::tcpwrappers', { 'default_value' => false }),
+  Boolean                            $foo         = true,
 ) {
 
   simplib::assert_metadata($module_name)
