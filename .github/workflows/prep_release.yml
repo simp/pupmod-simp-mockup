@@ -78,7 +78,9 @@ jobs:
       - name: 'Push commit back to ${{ github.event.inputs.branch }}'
         if: steps.git-diff.outputs.exit-code != '0'
         run: "git push -u github ${{ github.event.inputs.branch }}"
-
+      - name: 'echo things'
+        run: |
+          echo "== steps.git-diff.exit-code: '${{steps.git-diff.exit-code}}'"
 
   auto-tag:
     name: "Auto-Tag release"
@@ -123,7 +125,7 @@ jobs:
         run: |
           echo "== steps.tag-release.tag-name: '${{steps.tag-release.tag-name}}'"
           echo "== github.event.inputs.auto_tag: '${{github.event.inputs.auto_tag}}'"
-          echo "== github.event.inputs.branch: '${{github.event.inputs.branch}}'"
+          echo "== github.event.inputs.auto_tag: '${{github.event.inputs.auto_tag}}'"
 
   files:
     name: "File checks"
