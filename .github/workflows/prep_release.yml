@@ -31,7 +31,7 @@ on:
       auto_tag:
         description: 'Automatically tag release'
         required: true
-        default: 'noop' # FIXME: in productino , change to true
+        default: 'noop' # FIXME: in production , change to 'true'
 ###      build_artifacts:
 ###        description: 'Build artifact'
 ###        required: true
