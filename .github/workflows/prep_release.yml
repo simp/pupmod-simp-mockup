@@ -114,8 +114,8 @@ jobs:
           else
              echo "=== No need for tag (wait, WHY)!"
           fi
-#      - name: 'Push tag to ${{ github.event.inputs.branch }}'
-#        run: "git push -u github ${{ github.event.inputs.branch }}"
+      - name: 'Push tag to ${{ github.event.inputs.branch }}'
+        run: "git push -u github ${{ github.event.inputs.branch }}"
 
   files:
     name: "File checks"
