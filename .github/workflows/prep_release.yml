@@ -16,7 +16,7 @@
 # [2]: https://github.com/github/renaming/
 # ------------------------------------------------------------------------------
 ---
-name: Prepare assets for release
+name: 'Prepare assets for release'
 on:
   workflow_dispatch:
     inputs:
@@ -28,6 +28,10 @@ on:
         description: 'Generate documentation'
         required: true
         default: true
+      auto_tag:
+        description: 'Automatically tag release'
+        required: true
+        default: true
 ###      build_artifacts:
 ###        description: 'Build artifact'
 ###        required: true
@@ -36,10 +40,6 @@ on:
 ###        description: 'Automatically bump unresolved assets to the latest version'
 ###        required: true
 ###        default: true
-      auto_tag:
-        description: 'Automatically tag release, if needed'
-        required: true
-        default: true
 
 env:
   PUPPET_VERSION: "~> 6"
@@ -70,6 +70,8 @@ jobs:
           git add REFERENCE.md
           git commit -m "(RELENG) Generate REFERENCE.md"
       - name: 'Push commit back to ${{ github.event.inputs.branch }}'
+        run: "git push -u github ${{ github.event.inputs.branch }}"
+
 
   auto-tag:
     name: "Tag release"
@@ -81,11 +83,12 @@ jobs:
           ref: ${{ github.event.inputs.branch}}
           clean: true
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.5
           bundler-cache: true
       - run: "bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required'  | sed -e 's/^.*\\([[:digit:]]\\+\\.[[:digit:]]\\+\\.[[:digit:]]\\+\\).*$/\\1/'"
+
 #      - name: 'Set up git user & remote'
 #        run: |
 #          git config --global user.name "${GITHUB_ACTOR}"
@@ -98,7 +101,6 @@ jobs:
 #      - name: 'Push commit back to ${{ github.event.inputs.branch }}'
 #        run: "git push -u github ${{ github.event.inputs.branch }}"
 #
-#        run: "git push -u github ${{ github.event.inputs.branch }}"
 
   files:
     name: "File checks"
