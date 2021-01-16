@@ -60,27 +60,27 @@ jobs:
           ruby-version: 2.5
           bundler-cache: true
       - run: 'bundle exec rake strings:generate:reference'
-      - id: git-diff
+      - id: git_diff
         run: |
           git diff --exit-code -- REFERENCE.md
           echo "::set-output name=exit-code::${?}"
       - name: 'Set up git user & remote'
-        if: steps.git-diff.outputs.exit-code != '0'
+        if: steps.git_diff.outputs.exit-code != '0'
         run: |
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git remote add github "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
       - name: 'Commit REFERENCE.md'
-        if: steps.git-diff.outputs.exit-code != '0'
+        if: steps.git_diff.outputs.exit-code != '0'
         run: |
           git add REFERENCE.md
           git commit -m "(RELENG) Generate REFERENCE.md"
       - name: 'Push commit back to ${{ github.event.inputs.branch }}'
-        if: steps.git-diff.outputs.exit-code != '0'
+        if: steps.git_diff.outputs.exit-code != '0'
         run: "git push -u github ${{ github.event.inputs.branch }}"
       - name: 'echo things'
         run: |
-          echo "== steps.git-diff.exit-code: '${{steps.git-diff.exit-code}}'"
+          echo "== steps.git_diff.outputs.exit-code: '${{steps.git_diff.outputs.exit-code}}'"
 
   auto-tag:
     name: "Auto-Tag release"
@@ -118,12 +118,12 @@ jobs:
              echo "=== No need for tag (wait, WHY)!"
              echo "::set-output name=tag-name::"
           fi
-      - name: 'Push tag ${{steps.tag-release.tag-name}} to ${{ github.event.inputs.branch }}'
-        if: contains(steps.tag-release.tag-name,'.')  && github.event.inputs.auto_tag != 'noop'
-        run: "git push -u github ${{ steps.tag-release.tag-name }}"
+      - name: 'Push tag ${{steps.tag-release.outputs.tag-name}} to ${{ github.event.inputs.branch }}'
+        if: contains(steps.tag-release.outputs.tag-name,'.')  && github.event.inputs.auto_tag != 'noop'
+        run: "git push -u github ${{ steps.tag-release.outputs.tag-name }}"
       - name: 'echo things'
         run: |
-          echo "== steps.tag-release.tag-name: '${{steps.tag-release.tag-name}}'"
+          echo "== steps.tag-release.outputs.tag-name: '${{steps.tag-release.outputs.tag-name}}'"
           echo "== github.event.inputs.auto_tag: '${{github.event.inputs.auto_tag}}'"
           echo "== github.event.inputs.auto_tag: '${{github.event.inputs.auto_tag}}'"
 
