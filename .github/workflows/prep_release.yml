@@ -43,7 +43,7 @@ env:
 jobs:
   generate-docs:
     name: "Generate REFERENCE.md"
-    if: ${{ github.event.inputs.generate_docs }}
+    if: ${{ github.event.inputs.generate_docs }} == 'true'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
