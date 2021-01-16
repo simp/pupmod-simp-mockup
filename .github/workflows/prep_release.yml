@@ -64,6 +64,7 @@ jobs:
         run: |
           git diff --exit-code -- REFERENCE.md
           echo "::set-output name=exit-code::${?}"
+          echo "::group::Commit and push REFERENCE.md (if changed)"
       - name: 'Set up git user & remote'
         if: steps.git_diff.outputs.exit-code != '0'
         run: |
@@ -80,6 +81,7 @@ jobs:
         run: "git push -u github ${{ github.event.inputs.branch }}"
       - name: 'echo things'
         run: |
+          echo "::endgroup::"
           echo "== steps.git_diff.outputs.exit-code: '${{steps.git_diff.outputs.exit-code}}'"
 
   auto-tag:
