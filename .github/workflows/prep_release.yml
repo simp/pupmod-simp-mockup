@@ -89,7 +89,7 @@ jobs:
           bundler-cache: true
       - run: |
           if bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required'; then
-             tag="$(bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required')  | sed -e 's/^.*\([[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\).*$/\1/')"
+             tag="$(bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required' | sed -e 's/^.*\([[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\).*$/\1/')"
              changelog_file="$(mktemp)"
              echo '::set-output name=SELECTED_COLOR::green'
              echo "=== TAGGING '$tag'"
