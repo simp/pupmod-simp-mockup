@@ -31,7 +31,7 @@ on:
       auto_tag:
         description: 'Automatically tag release'
         required: true
-        default: 'true'
+        default: 'noop' # FIXME: in productino , change to true
 ###      build_artifacts:
 ###        description: 'Build artifact'
 ###        required: true
@@ -82,7 +82,7 @@ jobs:
 
   auto-tag:
     name: "Auto-Tag release"
-    if: github.event.inputs.auto_tag == 'true'
+    if: github.event.inputs.auto_tag == 'true' || github.event.inputs.auto_tag == 'noop'
     needs: [ generate-docs ]
     runs-on: ubuntu-18.04
     steps:
@@ -117,7 +117,7 @@ jobs:
              echo "=== No need for tag (wait, WHY)!"
           fi
       - name: 'Push tag to ${{ github.event.inputs.branch }}'
-        if: steps.tag-release.tag-name
+        if: steps.tag-release.tag-name && github.event.inputs.auto_tag != 'noop'
         run: "git push -u github ${{ github.event.inputs.branch }}"
 
   files:
