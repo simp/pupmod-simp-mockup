@@ -107,17 +107,17 @@ jobs:
           if bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required'; then
              tag="$(bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required' | sed -e 's/^.*\([[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\).*$/\1/')"
              changelog_file="$(mktemp)"
+             echo "::set-output name=tag-name::${tag}"
              echo "=== TAGGING '$tag'"
              bundle exec rake pkg:create_tag_changelog > "$changelog_file"
              git tag "$tag" -a -F "$changelog_file"
              git tag -l -n6
-             echo '::set-output name=tag-name::$?'
           else
              echo "=== No need for tag (wait, WHY)!"
           fi
       - name: 'Push tag ${{steps.tag-release.tag-name}} to ${{ github.event.inputs.branch }}'
         if: contains(steps.tag-release.tag-name,'.')  && github.event.inputs.auto_tag != 'noop'
-        run: "git push -u github ${{ github.event.inputs.branch }}"
+        run: "git push -u github ${{ steps.tag-release.tag-name }}"
       - name: 'echo things'
         run: |
           echo "== steps.tag-release.tag-name: '${{steps.tag-release.tag-name}}'"
