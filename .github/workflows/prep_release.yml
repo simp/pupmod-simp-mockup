@@ -28,16 +28,25 @@ on:
         description: 'Generate documentation'
         required: true
         default: 'true'
+### TODO
+###   bundle exec puppet strings generate --format JSON > x.json
+###   jq . x.json
+###   TODO if new tag needed:
+###       gen json for old tag
+###       gen json for current code
+###       compare json to determine auto bump size
+
+
+###      auto_bump_version:
+###        description: 'Automatically bump unresolved assets to the latest version'
+###        required: true
+###        default: true
       auto_tag:
         description: 'Automatically tag release'
         required: true
         default: 'noop' # FIXME: in production , change to 'true'
 ###      build_artifacts:
 ###        description: 'Build artifact'
-###        required: true
-###        default: true
-###      auto_bump_version:
-###        description: 'Automatically bump unresolved assets to the latest version'
 ###        required: true
 ###        default: true
 

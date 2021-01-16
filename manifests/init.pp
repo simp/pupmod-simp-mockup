@@ -48,6 +48,7 @@ class dummy (
   Boolean                            $selinux     = simplib::lookup('simp_options::selinux', { 'default_value'     => false }),
   Boolean                            $tcpwrappers = simplib::lookup('simp_options::tcpwrappers', { 'default_value' => false }),
   Boolean                            $foo         = true,
+  Boolean                            $bar         = true,
 ) {
 
   simplib::assert_metadata($module_name)
