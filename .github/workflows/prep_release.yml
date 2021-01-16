@@ -114,6 +114,7 @@ jobs:
              git tag -l -n6
           else
              echo "=== No need for tag (wait, WHY)!"
+             echo "::set-output name=tag-name::"
           fi
       - name: 'Push tag ${{steps.tag-release.tag-name}} to ${{ github.event.inputs.branch }}'
         if: contains(steps.tag-release.tag-name,'.')  && github.event.inputs.auto_tag != 'noop'
