@@ -65,18 +65,18 @@ jobs:
           git diff --exit-code -- REFERENCE.md
           echo '::set-output name=exit-code::$?'
       - name: 'Set up git user & remote'
-        if: steps.git-diff.outputs.exit-code == '0'
+        if: steps.git-diff.outputs.exit-code != '0'
         run: |
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git remote add github "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
       - name: 'Commit REFERENCE.md'
-        if: steps.git-diff.outputs.exit-code == '0'
+        if: steps.git-diff.outputs.exit-code != '0'
         run: |
           git add REFERENCE.md
           git commit -m "(RELENG) Generate REFERENCE.md"
       - name: 'Push commit back to ${{ github.event.inputs.branch }}'
-        if: steps.git-diff.outputs.exit-code == '0'
+        if: steps.git-diff.outputs.exit-code != '0'
         run: "git push -u github ${{ github.event.inputs.branch }}"
 
 
