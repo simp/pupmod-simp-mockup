@@ -101,6 +101,7 @@ jobs:
           ruby-version: 2.5
           bundler-cache: true
       - name: 'Tag release (if needed)'
+        id: tag-release
         run: |
           git fetch --tags
           if bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required'; then
@@ -111,10 +112,12 @@ jobs:
              bundle exec rake pkg:create_tag_changelog > "$changelog_file"
              git tag "$tag" -a -F "$changelog_file"
              git tag -l -n6
+              echo '::set-output name=tag-name::$?'
           else
              echo "=== No need for tag (wait, WHY)!"
           fi
       - name: 'Push tag to ${{ github.event.inputs.branch }}'
+        if: steps.tag-release.tag-name
         run: "git push -u github ${{ github.event.inputs.branch }}"
 
   files:
