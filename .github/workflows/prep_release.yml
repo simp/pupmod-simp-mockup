@@ -90,6 +90,12 @@ jobs:
       - run: |
           if bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required'; then
              tag="$(bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required')  | sed -e 's/^.*\\([[:digit:]]\\+\\.[[:digit:]]\\+\\.[[:digit:]]\\+\\).*$/\\1/')"
+             changelog_file="$(mktemp)"
+             echo '::set-output name=SELECTED_COLOR::green'
+             echo "=== TAGGING '$tag'"
+             bundle exec rake pkg:create_tag_changelog > "$changelog_file"
+             git tag "$tag" -a -F "$changelog_file"
+             git tag -l -n6
           else
              echo "=== No need for tag (wait, WHY)!"
           fi
