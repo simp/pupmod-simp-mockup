@@ -36,6 +36,10 @@ on:
 ###        description: 'Automatically bump unresolved assets to the latest version'
 ###        required: true
 ###        default: true
+      auto_tag:
+        description: 'Automatically tag release, if needed'
+        required: true
+        default: true
 
 env:
   PUPPET_VERSION: "~> 6"
@@ -43,7 +47,7 @@ env:
 jobs:
   generate-docs:
     name: "Generate REFERENCE.md"
-    if: ${{ github.event.inputs.generate_docs }} == 'true'
+    if: github.event.inputs.generate_docs == 'true'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
