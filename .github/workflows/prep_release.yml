@@ -70,12 +70,40 @@ jobs:
           git add REFERENCE.md
           git commit -m "(RELENG) Generate REFERENCE.md"
       - name: 'Push commit back to ${{ github.event.inputs.branch }}'
-        run: "git push -u github ${{ github.event.inputs.branch }}"
+
+  auto-tag:
+    name: "Tag release"
+    if: github.event.inputs.auto_tag == true
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch}}
+          clean: true
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: "bundle exec rake pkg:compare_latest_tag | grep 'New tag.* is required'  | sed -e 's/^.*\\([[:digit:]]\\+\\.[[:digit:]]\\+\\.[[:digit:]]\\+\\).*$/\\1/'"
+#      - name: 'Set up git user & remote'
+#        run: |
+#          git config --global user.name "${GITHUB_ACTOR}"
+#          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+#          git remote add github "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
+#      - name: 'Commit REFERENCE.md'
+#        run: |
+#          git add REFERENCE.md
+#          git commit -m "(RELENG) Generate REFERENCE.md"
+#      - name: 'Push commit back to ${{ github.event.inputs.branch }}'
+#        run: "git push -u github ${{ github.event.inputs.branch }}"
+#
+#        run: "git push -u github ${{ github.event.inputs.branch }}"
 
   files:
     name: "File checks"
     if: always()
-    needs: [ generate-docs ]
+    needs: [ generate-docs, auto-tag ]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -94,7 +122,7 @@ jobs:
   releng-checks:
     name: "RELENG checks"
     if: always()
-    needs: [ generate-docs ]
+    needs: [ generate-docs, auto-tag  ]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
