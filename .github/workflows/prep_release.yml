@@ -123,6 +123,7 @@ jobs:
         run: |
           echo "== steps.tag-release.tag-name: '${{steps.tag-release.tag-name}}'"
           echo "== github.event.inputs.auto_tag: '${{github.event.inputs.auto_tag}}'"
+          echo "== github.event.inputs.branch: '${{github.event.inputs.branch}}'"
 
   files:
     name: "File checks"
