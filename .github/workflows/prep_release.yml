@@ -47,7 +47,7 @@ env:
 jobs:
   generate-docs:
     name: "Generate REFERENCE.md"
-    if: github.event.inputs.generate_docs == 'true'
+    if: github.event.inputs.generate_docs == true
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -74,6 +74,7 @@ jobs:
 
   files:
     name: "File checks"
+    if: always()
     needs: [ generate-docs ]
     runs-on: ubuntu-18.04
     steps:
@@ -92,6 +93,7 @@ jobs:
 
   releng-checks:
     name: "RELENG checks"
+    if: always()
     needs: [ generate-docs ]
     runs-on: ubuntu-18.04
     steps:
