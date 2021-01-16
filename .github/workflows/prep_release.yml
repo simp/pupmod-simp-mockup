@@ -47,7 +47,7 @@ env:
 jobs:
   generate-docs:
     name: "Generate REFERENCE.md"
-    if: github.event.inputs.generate_docs == true
+    if: github.event.inputs.generate_docs == 'true'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -75,7 +75,7 @@ jobs:
 
   auto-tag:
     name: "Tag release"
-    if: github.event.inputs.auto_tag == true
+    if: github.event.inputs.auto_tag == 'true'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
