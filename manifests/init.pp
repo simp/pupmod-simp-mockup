@@ -30,6 +30,9 @@
 # @param tcpwrappers
 #   If true, manage TCP wrappers configuration for dummy
 #
+# @param foo
+#   A new API thing
+#
 # @author SIMP
 #
 class dummy (
