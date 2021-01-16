@@ -63,7 +63,7 @@ jobs:
       - id: git-diff
         run: |
           git diff --exit-code -- REFERENCE.md
-          echo '::set-output name=exit-code::$?'
+          echo "::set-output name=exit-code::${?}"
       - name: 'Set up git user & remote'
         if: steps.git-diff.outputs.exit-code != '0'
         run: |
