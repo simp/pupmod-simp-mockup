@@ -27,10 +27,15 @@ on:
         description: 'Generate documentation'
         required: true
         default: true
-      build_artifacts:
-        description: 'Build artifact'
-        required: true
-        default: true
+###      build_artifacts:
+###        description: 'Build artifact'
+###        required: true
+###        default: true
+###      auto_bump_version:
+###        description: 'Automatically bump unresolved assets to the latest version'
+###        required: true
+###        default: true
+
 env:
   PUPPET_VERSION: "~> 6"
 
