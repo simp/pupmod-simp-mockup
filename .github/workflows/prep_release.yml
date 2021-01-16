@@ -87,7 +87,7 @@ jobs:
   auto-tag:
     name: "Auto-Tag release"
     if: github.event.inputs.auto_tag == 'true' || github.event.inputs.auto_tag == 'noop'
-    ### needs: [ generate-docs ] FIXME: uncomment before using in production
+    needs: [ generate-docs ]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
