@@ -94,7 +94,7 @@ jobs:
 
 
   lint-glci:
-    name: 'Lintcheck:dot_underscore .gitlab-ci.yml'
+    name: 'Lint .gitlab-ci.yml'
     continue-on-error: true
     runs-on: ubuntu-16.04
     steps:
@@ -139,7 +139,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: "Trigger if user has Repo Permissions"
-    needs: [syntax, validate-glci, releng-checks, files, style, test]
+    needs: [syntax, validate-glci, lint-glci, releng-checks, files, style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
