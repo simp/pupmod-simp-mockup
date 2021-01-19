@@ -118,8 +118,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: 'Validate GLCI file'
         run: |
-         jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @- | jq .
-         status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --silent --header 'Content-Type: application/json' --data @- | jq .status )
+         status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
          [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
 
