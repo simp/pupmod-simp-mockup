@@ -149,6 +149,7 @@ jobs:
 
   validate-glci:
     name: 'Validate .gitlab-ci.yml'
+    runs-on: ubuntu-16.04
     if: steps.user-project-permissions.outputs.result == 'true'
     steps:
      - run: |
