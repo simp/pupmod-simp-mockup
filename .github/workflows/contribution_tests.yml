@@ -17,8 +17,8 @@ on:
   pull_request: {}
 
 jobs:
-  validate:
-    name: "Validations"
+  syntax:
+    name: "Syntax"
     runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
@@ -64,7 +64,7 @@ jobs:
 
 
   releng-checks:
-    name: "RELENG checks"
+    name: "RELENG policy"
     runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
@@ -85,8 +85,8 @@ jobs:
       - name: "Build Puppet module"
         run: "bundle exec pdk build --force"
 
-  validate-glci:
-    name: 'Validate GLCI'
+  syntax-glci:
+    name: 'Validate .gitlab-ci.yml'
     runs-on: ubuntu-16.04
     steps:
       - name: 'Validata GLCI file'
@@ -95,7 +95,7 @@ jobs:
 
   test:
     name: "Spec/Unit Tests"
-    needs: [validate]
+    needs: [syntax]
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -125,7 +125,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: "Trigger if user has Repo Permissions"
-    needs: [validate, validate-glci, releng-checks, files, style, test]
+    needs: [syntax, validate-glci, releng-checks, files, style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
@@ -156,12 +156,13 @@ jobs:
         run: |
            echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permittedd to trigger remote PR check"
            echo "TODO - Trigger GLCI pipeline from here"
+           echo "TODO - Trigger GLCI pipeline from here"
 
 
 
 #  trigger-if-user-has-project-permissions:
 #    name: "Trigger if user has Project Permissions"
-#    needs: [validate, validate-glci, releng-checks, files, style, test]
+#    needs: [syntax, validate-glci, releng-checks, files, style, test]
 #    runs-on: ubuntu-18.04
 #    steps:
 #      - uses: actions/github-script@v3
