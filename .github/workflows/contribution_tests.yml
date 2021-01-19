@@ -17,7 +17,7 @@ on:
 
 jobs:
   puppet-syntax:
-    name: "Syntax"
+    name: "Puppet Syntax"
     runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
@@ -60,7 +60,7 @@ jobs:
           bundler-cache: true
       - run: "bundle exec rake rubocop"
 
-  glci-lint:
+  glci-style:
     name: '.gitlab-ci.yml Style (experimental)'
     continue-on-error: true
     runs-on: ubuntu-16.04
@@ -152,7 +152,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: "Trigger if user has Repo Permissions"
-    needs: [puppet-syntax, glci-syntax, glci-lint, releng-checks, files, puppet-style, test]
+    needs: [puppet-syntax, glci-syntax, releng-checks, files, puppet-style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
