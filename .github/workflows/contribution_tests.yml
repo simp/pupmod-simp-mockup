@@ -10,7 +10,7 @@
 # https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
 # ==============================================================================
 
-name: Validation and Tests
+name: Tests
 # Controls when the action will run.
 on:
   push: {}
@@ -147,9 +147,16 @@ jobs:
            echo '::set-output name=SELECTED_COLOR::green'
            echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
 
+  validate-glci:
+      - name: 'Validate .gitlab-ci.yml'
+        if: steps.user-project-permissions.outputs.result == 'true'
+        run: |
+          jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @-
+
+
   trigger-if-user-has-project-permissions:
     name: "Trigger if user has Project Permissions"
-    needs: [validate, releng-checks, files, style, test]
+    needs: [validate, validate-glci, releng-checks, files, style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
@@ -171,7 +178,11 @@ jobs:
             console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
 
+
       - name: Trigger if user has Project Permissions
         if: steps.user-project-permissions.outputs.result == 'true'
+        env:
+          GITLAB_API_URL: ${{ secrets.GitLabApiUrl }}
+          GITLAB_API_TOKEN: ${{ secrets.GitLabApiToken }}
         run: |
            echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
