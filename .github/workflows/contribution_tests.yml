@@ -86,11 +86,12 @@ jobs:
         run: "bundle exec pdk build --force"
 
   validate-glci:
-    name: 'Validate .gitlab-ci.yml'
+    name: 'Validate GLCI'
     runs-on: ubuntu-16.04
     if: steps.user-project-permissions.outputs.result == 'true'
     steps:
-      - run: |
+      - name: 'Validata GLCI file'
+        run: |
          jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @-
 
   test:
