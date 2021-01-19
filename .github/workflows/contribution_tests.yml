@@ -16,7 +16,7 @@ on:
   pull_request: {}
 
 jobs:
-  syntax:
+  puppet-syntax:
     name: "Syntax"
     runs-on: ubuntu-18.04
     env:
@@ -60,6 +60,19 @@ jobs:
           bundler-cache: true
       - run: "bundle exec rake rubocop"
 
+  glci-lint:
+    name: '.gitlab-ci.yml Style (experimental)'
+    continue-on-error: true
+    runs-on: ubuntu-16.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: bundle exec rake simp:ci_lint
+
   files:
     name: "File checks"
     runs-on: ubuntu-18.04
@@ -98,7 +111,7 @@ jobs:
       - name: "Build Puppet module"
         run: "bundle exec pdk build --force"
 
-  validate-glci:
+  glci-syntax:
     name: 'Syntax .gitlab-ci.yml'
     runs-on: ubuntu-16.04
     steps:
@@ -107,23 +120,9 @@ jobs:
          jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @-
 
 
-  lint-glci:
-    name: 'Lint .gitlab-ci.yml'
-    continue-on-error: true
-    runs-on: ubuntu-16.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake simp:ci_lint
-
-
   test:
     name: "Spec/Unit Tests"
-    needs: [syntax]
+    needs: [puppet-syntax]
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -153,7 +152,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: "Trigger if user has Repo Permissions"
-    needs: [syntax, validate-glci, lint-glci, releng-checks, files, puppet-style, test]
+    needs: [puppet-syntax, glci-syntax, glci-lint, releng-checks, files, puppet-style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
@@ -190,7 +189,7 @@ jobs:
 
 #  trigger-if-user-has-project-permissions:
 #    name: "Trigger if user has Project Permissions"
-#    needs: [syntax, validate-glci, releng-checks, files, puppet-style, test]
+#    needs: [syntax, glci-syntax, releng-checks, files, puppet-style, test]
 #    runs-on: ubuntu-18.04
 #    steps:
 #      - uses: actions/github-script@v3
