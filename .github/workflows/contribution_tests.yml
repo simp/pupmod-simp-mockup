@@ -126,6 +126,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
+        # fail-fast: false
         puppet:
           - label: "Puppet 6.18 [SIMP 6.5/PE 2019.8]"
             puppet_version: "~> 6.18.0"
@@ -174,18 +175,22 @@ jobs:
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
             console.log(`=== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
-      - name: Trigger if user has Repo Permissions
+      - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
-          GITLAB_SERVER_URL: ${{ secrets.GITLAB_API_URL }}
-          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
-          GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
+          GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} || 'https://gitlab.com'
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }} || 'https://gitlab.com/api/v4'
+          GITLAB_SERVICE_ACCOUNT:  ${{ secrets.GITLAB_SERVICE_ACCOUNT }}
+          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
         run: |
-          git remote add gitlab "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
+          pipeline_id=$(curl --header "PRIVATE-TOKEN: $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
+          #pipeline_id=$(curl --header "PRIVATE-TOKEN: $GITLAB_PASSWORD" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
+
+          git remote add gitlab "https://${GITLAB_SERVICE_ACCOUNT}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permittedd to trigger remote PR check"
-          echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_TOKEN: $GITLAB_API_TOKEN]"
+          echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
-      - name: Trigger if user has Repo Permissions
+      - name: When user does NOT has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
         continue-on-error: true
         run: false
@@ -221,6 +226,6 @@ jobs:
 #        if: steps.user-project-permissions.outputs.result == 'true'
 #        env:
 #          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
-#          GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
+#          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
 #        run: |
 #           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permittedd to trigger remote PR check"
