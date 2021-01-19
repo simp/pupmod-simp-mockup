@@ -120,8 +120,8 @@ jobs:
          jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @-
 
 
-  test:
-    name: "Spec/Unit Tests"
+  spec-tests:
+    name: "Spec Tests"
     needs: [puppet-syntax]
     runs-on: ubuntu-18.04
     strategy:
@@ -151,7 +151,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: "Trigger if user has Repo Permissions"
-    needs: [puppet-syntax, glci-syntax, releng-checks, files, puppet-style, test]
+    needs: [puppet-syntax, glci-syntax, releng-checks, files, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
@@ -188,7 +188,7 @@ jobs:
 
 #  trigger-if-user-has-project-permissions:
 #    name: "Trigger if user has Project Permissions"
-#    needs: [syntax, glci-syntax, releng-checks, files, puppet-style, test]
+#    needs: [syntax, glci-syntax, releng-checks, files, puppet-style, spec-tests]
 #    runs-on: ubuntu-18.04
 #    steps:
 #      - uses: actions/github-script@v3
