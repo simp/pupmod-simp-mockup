@@ -30,8 +30,8 @@ jobs:
           bundler-cache: true
       - run: "bundle exec rake syntax"
 
-  style:
-    name: "Lint Puppet"
+  puppet-style:
+    name: "Puppet Lint"
     runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
@@ -45,8 +45,8 @@ jobs:
       - run: "bundle exec rake lint"
       - run: "bundle exec rake metadata_lint"
 
-  lint-ruby:
-    name: "Lint Ruby (experimental)"
+  ruby-style:
+    name: "Rubocop (experimental)"
     runs-on: ubuntu-18.04
     continue-on-error: true
     env:
@@ -153,7 +153,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: "Trigger if user has Repo Permissions"
-    needs: [syntax, validate-glci, lint-glci, releng-checks, files, style, test]
+    needs: [syntax, validate-glci, lint-glci, releng-checks, files, puppet-style, ruby-style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
@@ -190,7 +190,7 @@ jobs:
 
 #  trigger-if-user-has-project-permissions:
 #    name: "Trigger if user has Project Permissions"
-#    needs: [syntax, validate-glci, releng-checks, files, style, test]
+#    needs: [syntax, validate-glci, releng-checks, files, puppet-style, test]
 #    runs-on: ubuntu-18.04
 #    steps:
 #      - uses: actions/github-script@v3
