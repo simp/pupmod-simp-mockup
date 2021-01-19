@@ -46,7 +46,7 @@ jobs:
       - run: "bundle exec rake metadata_lint"
 
   ruby-style:
-    name: "Rubocop (experimental)"
+    name: "Ruby Style (experimental)"
     runs-on: ubuntu-18.04
     continue-on-error: true
     env:
@@ -61,7 +61,7 @@ jobs:
       - run: "bundle exec rake rubocop"
 
   glci-style:
-    name: '.gitlab-ci.yml Style (experimental)'
+    name: '.gitlab-ci.yml Style (:test_tube:)'
     continue-on-error: true
     runs-on: ubuntu-16.04
     steps:
