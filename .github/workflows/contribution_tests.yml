@@ -31,7 +31,7 @@ jobs:
       - run: "bundle exec rake syntax"
 
   puppet-style:
-    name: "Puppet Lint"
+    name: "Puppet Style"
     runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
@@ -112,7 +112,7 @@ jobs:
         run: "bundle exec pdk build --force"
 
   glci-syntax:
-    name: 'Syntax .gitlab-ci.yml'
+    name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
     steps:
       - name: 'Validata GLCI file'
