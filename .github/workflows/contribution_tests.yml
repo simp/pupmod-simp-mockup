@@ -11,7 +11,6 @@
 # ==============================================================================
 
 name: Tests
-# Controls when the action will run.
 on:
   push: {}
   pull_request: {}
@@ -86,12 +85,27 @@ jobs:
         run: "bundle exec pdk build --force"
 
   validate-glci:
-    name: 'Validate .gitlab-ci.yml'
+    name: 'Syntax .gitlab-ci.yml'
     runs-on: ubuntu-16.04
     steps:
       - name: 'Validata GLCI file'
         run: |
          jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @-
+
+
+  lint-glci:
+    name: 'Lintcheck:dot_underscore .gitlab-ci.yml'
+    continue-on-error: true
+    runs-on: ubuntu-16.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: bundle exec rake simp:ci_lint
+
 
   test:
     name: "Spec/Unit Tests"
@@ -146,7 +160,7 @@ jobs:
             })
             const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
-            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+            console.log(`=== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
       - name: Trigger if user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
