@@ -16,7 +16,7 @@
 # [2]: https://github.com/github/renaming/
 # ------------------------------------------------------------------------------
 ---
-name: 'Prepare assets for release'
+name: 'Release (Alpha workflow)'
 on:
   workflow_dispatch:
     inputs:
@@ -93,10 +93,15 @@ jobs:
           echo "::endgroup::"
           echo "== steps.git_diff.outputs.exit-code: '${{steps.git_diff.outputs.exit-code}}'"
 
-  auto-tag:
+  auto-bump:
     name: "Auto-Tag release"
     if: github.event.inputs.auto_tag == 'true' || github.event.inputs.auto_tag == 'noop'
     needs: [ generate-docs ]
+
+  auto-tag:
+    name: "Auto-Tag release"
+    if: (github.event.inputs.auto_tag == 'true' || github.event.inputs.auto_tag == 'noop') && always()
+    needs: [ generate-docs, auto-bump ]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2

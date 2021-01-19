@@ -148,43 +148,46 @@ jobs:
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
             console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
-      - name: Trigger if user has Repo Permissions
-        if: steps.user-repo-permissions.outputs.result == 'true'
-        run: |
-           echo '::set-output name=SELECTED_COLOR::green'
-           echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
-
-
-
-  trigger-if-user-has-project-permissions:
-    name: "Trigger if user has Project Permissions"
-    needs: [validate, validate-glci, releng-checks, files, style, test]
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/github-script@v3
-        id: user-project-permissions
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          # See:
-          #   - https://octokit.github.io/rest.js/
-          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
-          script: |
-            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              username: context.payload.sender.login,
-              mediaType: { previews: [ 'inertia' ] }
-            })
-            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
-            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
-            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
-            return(has_write_access(project_permission.data.permission))
-
-
       - name: Trigger if user has Project Permissions
         if: steps.user-project-permissions.outputs.result == 'true'
         env:
-          GITLAB_API_URL: ${{ secrets.GitLabApiUrl }}
-          GITLAB_API_TOKEN: ${{ secrets.GitLabApiToken }}
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
+          GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
         run: |
-           echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
+           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permittedd to trigger remote PR check"
+           echo "TODO - Trigger GLCI pipeline from here"
+
+
+
+#  trigger-if-user-has-project-permissions:
+#    name: "Trigger if user has Project Permissions"
+#    needs: [validate, validate-glci, releng-checks, files, style, test]
+#    runs-on: ubuntu-18.04
+#    steps:
+#      - uses: actions/github-script@v3
+#        id: user-project-permissions
+#        with:
+#          github-token: ${{secrets.GITHUB_TOKEN}}
+#          # See:
+#          #   - https://octokit.github.io/rest.js/
+#          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/projects#get-project-permission-for-a-user
+#          script: |
+#            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              username: context.payload.sender.login,
+#              mediaType: { previews: [ 'inertia' ] }
+#            })
+#            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+#            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+#            console.log(`=== payload user '${context.payload.sender.login}' for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+#            return(has_write_access(project_permission.data.permission))
+#
+#
+#      - name: Trigger if user has Project Permissions
+#        if: steps.user-project-permissions.outputs.result == 'true'
+#        env:
+#          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
+#          GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
+#        run: |
+#           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permittedd to trigger remote PR check"
