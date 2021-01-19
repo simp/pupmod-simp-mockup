@@ -125,7 +125,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: "Trigger if user has Repo Permissions"
-    needs: [validate, releng-checks, files, style, test]
+    needs: [validate, validate-glci, releng-checks, files, style, test]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
