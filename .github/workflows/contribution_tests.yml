@@ -61,7 +61,7 @@ jobs:
       - run: "bundle exec rake rubocop"
 
   glci-style:
-    name: '.gitlab-ci.yml Style (:test_tube:)'
+    name: '.gitlab-ci.yml Style (experimental)'
     continue-on-error: true
     runs-on: ubuntu-16.04
     steps:
