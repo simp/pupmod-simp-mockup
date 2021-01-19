@@ -148,10 +148,11 @@ jobs:
            echo "GOOD User Belongs to org ${GITHUB_REPOSITORY_OWNER}; I'd have triggered a remote PR check here"
 
   validate-glci:
-      - name: 'Validate GLCI'
-        if: steps.user-project-permissions.outputs.result == 'true'
+      name: 'Validate .gitlab-ci.yml'
+      if: steps.user-project-permissions.outputs.result == 'true'
+      steps:
         run: |
-          jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @-
+            jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --header 'Content-Type: application/json' --data @-
 
 
   trigger-if-user-has-project-permissions:
