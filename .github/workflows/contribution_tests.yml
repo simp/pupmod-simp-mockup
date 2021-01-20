@@ -241,7 +241,10 @@ jobs:
           else
             echo No active pipelines found
           fi
-          echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
+
+          "== Pushing $GIT_BRANCH to gitlab"
+          git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
+          git push gitlab "$GIT_BRANCH" -f
 
       - name: When user does NOT have Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
