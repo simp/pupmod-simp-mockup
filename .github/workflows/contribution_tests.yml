@@ -115,7 +115,7 @@ jobs:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
     env:
-      GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }} || 'https://gitlab.com/api/v4'
+      GITLAB_API_URL: "${{ secrets.GITLAB_API_URL }} || 'https://gitlab.com/api/v4'"
     steps:
       - uses: actions/checkout@v2
       - name: 'Validate GLCI file'
