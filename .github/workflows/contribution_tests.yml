@@ -195,7 +195,7 @@ jobs:
           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
-          curl --include --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
+          curl --include --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status" 2>&1
       - name: When user does NOT have Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
         continue-on-error: true
