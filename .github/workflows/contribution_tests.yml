@@ -115,11 +115,12 @@ jobs:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
     env:
-      GITLAB_API_URL: "${{ secrets.GITLAB_API_URL }} || 'https://gitlab.com/api/v4'"
+      GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
     steps:
       - uses: actions/checkout@v2
       - name: 'Validate GLCI file'
         run: |
+         GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
          status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
          [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
