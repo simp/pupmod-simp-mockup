@@ -242,7 +242,7 @@ jobs:
             echo No active pipelines found
           fi
 
-          "== Pushing $GIT_BRANCH to gitlab"
+          echo "== Pushing $GIT_BRANCH to gitlab"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git branch -av
           git push gitlab "$GIT_BRANCH" -f
