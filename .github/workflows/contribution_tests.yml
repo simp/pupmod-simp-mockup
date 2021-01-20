@@ -30,11 +30,12 @@ on:
 env:
   GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
   GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
-  PUPPET_VERSION: "~> 6"
+  GITLAB_ORG: 'simp'
+  PUPPET_VERSION: '~> 6'
 
 jobs:
   puppet-syntax:
-    name: "Puppet Syntax"
+    name: 'Puppet Syntax'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -46,7 +47,7 @@ jobs:
       - run: "bundle exec rake syntax"
 
   puppet-style:
-    name: "Puppet Style"
+    name: 'Puppet Style'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -59,11 +60,9 @@ jobs:
       - run: "bundle exec rake metadata_lint"
 
   ruby-style:
-    name: "Ruby Style (experimental)"
+    name: 'Ruby Style (experimental)'
     runs-on: ubuntu-18.04
     continue-on-error: true
-    env:
-      PUPPET_VERSION: "~> 6"
     steps:
       - uses: actions/checkout@v2
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
@@ -87,13 +86,11 @@ jobs:
       - run: bundle exec rake simp:ci_lint
 
   files:
-    name: "File checks"
+    name: 'File checks'
     runs-on: ubuntu-18.04
-    env:
-      PUPPET_VERSION: "~> 6"
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.5
@@ -103,26 +100,24 @@ jobs:
 
 
   releng-checks:
-    name: "RELENG checks"
+    name: 'RELENG checks'
     runs-on: ubuntu-18.04
-    env:
-      PUPPET_VERSION: "~> 6"
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.5
           bundler-cache: true
 
-      - name: "Tags and changelogs"
+      - name: 'Tags and changelogs'
         run: |
           bundle exec rake pkg:check_version
           bundle exec rake pkg:compare_latest_tag
           bundle exec rake pkg:create_tag_changelog
 
-      - name: "Test-build the Puppet module"
-        run: "bundle exec pdk build --force"
+      - name: 'Test-build the Puppet module'
+        run: 'bundle exec pdk build --force'
 
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
@@ -137,33 +132,33 @@ jobs:
 
 
   spec-tests:
-    name: "Puppet Spec Tests"
+    name: 'Puppet Spec Tests'
     needs: [puppet-syntax]
     runs-on: ubuntu-18.04
     strategy:
       matrix:
         # fail-fast: false
         puppet:
-          - label: "Puppet 6.18 [SIMP 6.5/PE 2019.8]"
-            puppet_version: "~> 6.18.0"
-            ruby_version: "2.5"
-          - label: "Puppet 5.5 [SIMP 6.4/PE 2018.1]"
-            puppet_version: "~> 5.5.22"
-            ruby_version: "2.4"
-          - label: "Puppet 7.x"
-            puppet_version: "~> 7.0"
-            ruby_version: "2.7"
+          - label: 'Puppet 6.18 [SIMP 6.5/PE 2019.8]'
+            puppet_version: '~> 6.18.0'
+            ruby_version: '2.5'
+          - label: 'Puppet 5.5 [SIMP 6.4/PE 2018.1]'
+            puppet_version: '~> 5.5.22'
+            ruby_version: '2.4'
+          - label: 'Puppet 7.x'
+            puppet_version: '~> 7.0'
+            ruby_version: '2.7'
     env:
-      PUPPET_VERSION: "${{matrix.puppet.puppet_version}}"
+      PUPPET_VERSION: '${{matrix.puppet.puppet_version}}'
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.puppet.ruby_version}}
           bundler-cache: true
-      - run: "command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:"
-      - run: "bundle exec rake spec"
+      - run: 'command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:'
+      - run: 'bundle exec rake spec'
 
 
   trigger-if-user-has-repo-permissions:
@@ -194,15 +189,15 @@ jobs:
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
-          GITLAB_SERVICE_ACCOUNT:  ${{ secrets.GITLAB_SERVICE_ACCOUNT }}
+          ### GITLAB_SERVICE_ACCOUNT:  ${{ secrets.GITLAB_SERVICE_ACCOUNT }}
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
-          CURL=(curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
+          CURL_CMD=(curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
           #pipeline_id=$(curl --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
-          project_id="$("${CURL[@]}" "${GITLAB_API_URL}/projects/${GITHUB_REPOSITORY/\//%2F}" | jq .id )"
+          project_id="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITHUB_REPOSITORY/\//%2F}" | jq .id )"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
           curl --version
