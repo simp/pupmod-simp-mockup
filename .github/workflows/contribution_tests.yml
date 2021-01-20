@@ -9,6 +9,18 @@
 # https://puppet.com/misc/puppet-enterprise-lifecycle
 # https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
 # ==============================================================================
+#
+# GitHub Action Secrets variables available for this pipeline:
+#
+#   Travis CI Env Var         Type      Notes
+#   ------------------------  --------  ----------------------------------------
+#   GITLAB_API_PRIVATE_TOKEN  Secure
+#   GITLAB_API_URL            Optional
+#
+#   The secure vars will be filtered in GitHub Actions log output, and aren't
+#   provided to untrusted builds (i.e, triggered by PR from another repository)
+#
+# ------------------------------------------------------------------------------
 
 name: Tests
 on:
@@ -196,7 +208,7 @@ jobs:
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
           curl --version
-          curl --include --http1 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
+          curl --include --http1.1 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
       - name: When user does NOT have Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
         continue-on-error: true
