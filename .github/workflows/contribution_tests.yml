@@ -12,9 +12,9 @@
 #
 # GitHub Action Secrets variables available for this pipeline:
 #
-#   Travis CI Env Var         Type      Notes
+#   GitHub Secret variable    Type      Notes
 #   ------------------------  --------  ----------------------------------------
-#   GITLAB_API_PRIVATE_TOKEN  Secure
+#   GITLAB_API_PRIVATE_TOKEN  Secure    Only provided to jobs that need it
 #   GITLAB_API_URL            Optional
 #
 #   The secure vars will be filtered in GitHub Actions log output, and aren't
@@ -163,8 +163,10 @@ jobs:
 
 
   trigger-if-user-has-repo-permissions:
-    name: 'Trigger if user has Repo Permissions'
+    name: 'Trigger CI (if permitted)'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
+    ### if: github.event.pull_request.merged == 'false' # <-- the gitlab mirror will pick up the change
+
     needs: [puppet-syntax, glci-syntax, files, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
     steps:
