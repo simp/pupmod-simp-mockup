@@ -222,10 +222,12 @@ jobs:
 
           # Cancel any active/pending GitLab CI pipelines for the same project+branch
           active_pipeline_ids=()
-          for pipe_scope in pending running; do
-            echo "  ---- checking for CI pipelines with scope '$pipe_scope' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
-            active_pipelines="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&scope=${pipe_scope}" | jq -r '.[] | .id , .web_url')"
+          for pipe_status in created waiting_for_resource preparing pending running; do
+            echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
+            active_pipelines="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}" | jq -r '.[] | .id , .web_url')"
             active_pipeline_ids+=($(echo "$active_pipelines" |  grep -E '^[0-9]*$'))
+            echo "$active_pipelines"
+            echo
           done
           if [ "${#active_pipeline_ids[@]}" -gt 0 ]; then
             printf "\nFound %s active pipeline ids:\n" "${#active_pipeline_ids[@]}"
