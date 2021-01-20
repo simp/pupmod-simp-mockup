@@ -162,7 +162,7 @@ jobs:
 
 
   trigger-if-user-has-repo-permissions:
-    name: "Trigger if user has Repo Permissions"
+    name: 'Trigger if user has Repo Permissions'
     needs: [puppet-syntax, glci-syntax, releng-checks, files, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
     steps:
@@ -194,10 +194,12 @@ jobs:
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
+          repo_name="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
           CURL_CMD=(curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
           #pipeline_id=$(curl --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
-          project_id="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITHUB_REPOSITORY/\//%2F}" | jq .id )"
+          project_id="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_ORG}%2F${repo_name}" | jq .id )"
+          "Gitlab project ID"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
           curl --version
