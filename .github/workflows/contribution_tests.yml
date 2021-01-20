@@ -28,8 +28,8 @@ on:
   pull_request: {}
 
 env:
-  GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }}
-  GITLAB_API_URL: secrets.GITLAB_API_URL || 'xxxx'
+  GITLAB_SERVER_URL: secrets.GITLAB_SERVER_URL # https://gitlab.com
+  GITLAB_API_URL: secrets.GITLAB_API_URL       # https://gitlab.com/api/v4
 
 jobs:
   puppet-syntax:
