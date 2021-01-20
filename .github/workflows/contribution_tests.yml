@@ -183,11 +183,13 @@ jobs:
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
-          GITLAB_SERVER_URL: "${{ secrets.GITLAB_SERVER_URL }} || 'https://gitlab.com'"
-          GITLAB_API_URL: "${{ secrets.GITLAB_API_URL }} || 'https://gitlab.com/api/v4'"
+          GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }}
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
           GITLAB_SERVICE_ACCOUNT:  ${{ secrets.GITLAB_SERVICE_ACCOUNT }}
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
         run: |
+          GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
+          GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com"
           pipeline_id=$(curl --header "PRIVATE-TOKEN: $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
           #pipeline_id=$(curl --header "PRIVATE-TOKEN: $GITLAB_PASSWORD" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
 
