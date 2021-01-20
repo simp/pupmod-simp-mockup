@@ -166,6 +166,7 @@ jobs:
     name: 'Trigger CI (if permitted)'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     ### if: github.event.pull_request.merged == 'false' # <-- the gitlab mirror will pick up the change
+    continue-on-error: true
 
     needs: [puppet-syntax, glci-syntax, files, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
@@ -208,6 +209,7 @@ jobs:
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
           GIT_BRANCH=${GITHUB_REF:11}
+          [ $GITHUB_EVENT_NAME == 'pull_request' ] && GIT_BRANCH="$GITHUB_HEAD_REF"
           GITXXB_REPO_NAME="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
           # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
           CURL_CMD=(curl --http1.0 --fail --silent --show-error \
