@@ -165,7 +165,7 @@ jobs:
   trigger-if-user-has-repo-permissions:
     name: 'Trigger if user has Repo Permissions'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
-    needs: [puppet-syntax, glci-syntax, releng-checks, files, puppet-style, spec-tests]
+    needs: [puppet-syntax, glci-syntax, files, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
