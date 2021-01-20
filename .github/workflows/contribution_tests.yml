@@ -27,6 +27,10 @@ on:
   push: {}
   pull_request: {}
 
+env:
+  GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }}
+  GITLAB_API_URL: secrets.GITLAB_API_URL || 'xxxx'
+
 jobs:
   puppet-syntax:
     name: "Puppet Syntax"
@@ -126,8 +130,6 @@ jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
-    env:
-      GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
     steps:
       - uses: actions/checkout@v2
       - name: 'Validate GLCI file'
@@ -195,20 +197,20 @@ jobs:
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
-          GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }}
-          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
           GITLAB_SERVICE_ACCOUNT:  ${{ secrets.GITLAB_SERVICE_ACCOUNT }}
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
+          CURL=(curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
           #pipeline_id=$(curl --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
-          #git remote add gitlab "https://${GITLAB_SERVICE_ACCOUNT}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
+          project_id="$("${CURL[@]}" "${GITLAB_API_URL}/projects/${GITHUB_REPOSITORY/\//%2F}" | jq .id )"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
           curl --version
-          curl --include --http1.1 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
+          # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
+          curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
       - name: When user does NOT have Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
         continue-on-error: true
