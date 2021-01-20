@@ -25,7 +25,8 @@
 name: Tests
 on:
   push: {}
-  pull_request: {}
+  pull_request:
+    types: [opened, reopened, edited]
 
 env:
   GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
@@ -192,10 +193,10 @@ jobs:
       # - [ ] if there's no GitLab mirror, make one
       # - [ ] if there's no GitLab <-> GitHub integration, make one
       # - [ ] if there's no PR check, make one (?)
-      # - [ ] if there are already pipelines pending/running for this branch, CANCEL THEM
+      # - [X] if there are already pipelines pending/running for this branch, CANCEL THEM
       #       - "created|waiting_for_resource|preparing|pending|running"
       # - [ ] if PR: force-push branch to GitLab
-      #       - if 
+      #       - if
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
@@ -204,21 +205,37 @@ jobs:
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
-          repo_name="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
-          CURL_CMD=(curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
-          #pipeline_id=$(curl --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
-          echo "== GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
-          echo "== Finding project ID for ${GITLAB_ORG}/${repo_name}:"
-          project_id="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_ORG}%2F${repo_name}" | jq .id )"
-          echo "Gitlab project ID: '$project_id'"
-          echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
-          echo "TODO - Trigger GLCI pipeline from here"
-          "${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${project_id}/pipelines?ref=glci-testing&order_by=status"   | jq '.[] | select( .status | test("created|waiting_for_resource|preparing|pending|running") )'
-          # .[] | select( .status | test("created|waiting_for_resource|preparing|pending|running") ) | .id
-          # https://jqplay.org/s/oEjNJReM6k
-          curl --version
+          GIT_BRANCH=${GITHUB_REF:11}
+          GITXXB_REPO_NAME="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
           # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
-          curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
+          CURL_CMD=(curl --http1.0 --fail --silent --show-error \
+            --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" \
+            --header "Content-Type: application/json" \
+            --header "Accept: application/json" \
+          )
+
+          ###GITLAB_PROJECT_ID="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_ORG}%2F${GITXXB_REPO_NAME}" | jq .id )"
+          GITLAB_PROJECT_ID="${GITLAB_ORG}%2F${GITXXB_REPO_NAME}"
+          echo "Gitlab project ID: '$GITLAB_PROJECT_ID'"
+
+          # Cancel any active/pending GitLab CI pipelines for the same project+branch
+          active_pipeline_ids=()
+          for pipe_scope in pending running; do
+            echo "  ---- checking for CI pipelines with scope '$pipe_scope' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
+            active_pipelines="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&scope=${pipe_scope}" | jq -r '.[] | .id , .web_url')"
+            active_pipeline_ids+=($(echo "$active_pipelines" |  grep -E '^[0-9]*$'))
+          done
+          if [ "${#active_pipeline_ids[@]}" -gt 0 ]; then
+            printf "\nFound %s active pipeline ids: %s\n" "${#active_pipeline_ids[@]}" "${active_pipeline_ids[@]}"
+            for pipe_id in "${active_pipeline_ids[@]}"; do
+              printf "\n  ------ Cancelling pipeline ID %s...\n" "$pipe_id"
+              "${CURL_CMD[@]}" --request POST "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines/${pipe_id}/cancel"
+            done
+          else
+            echo No active pipelines found
+          fi
+          echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
+
       - name: When user does NOT have Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
         continue-on-error: true
