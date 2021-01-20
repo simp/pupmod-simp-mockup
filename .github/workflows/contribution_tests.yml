@@ -190,12 +190,12 @@ jobs:
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
-          #pipeline_id=$(curl --header "PRIVATE-TOKEN: $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
+          #pipeline_id=$(curl --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
           #git remote add gitlab "https://${GITLAB_SERVICE_ACCOUNT}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
           echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
-          curl --header "PRIVATE-TOKEN: $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
+          curl --include --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
       - name: When user does NOT have Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
         continue-on-error: true
