@@ -184,7 +184,7 @@ jobs:
             })
             const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
-            console.log(`=== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
@@ -200,7 +200,7 @@ jobs:
           echo "== GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
           echo "== Finding project ID for ${GITLAB_ORG}/${repo_name}:"
           project_id="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_ORG}%2F${repo_name}" | jq .id )"
-          "Gitlab project ID"
+          echo "Gitlab project ID: '$project_id'"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
           curl --version
