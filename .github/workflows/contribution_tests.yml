@@ -165,7 +165,7 @@ jobs:
   trigger-if-user-has-repo-permissions:
     name: 'Trigger CI (if permitted)'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
-    ### if: github.event.pull_request.merged == 'false' # <-- the gitlab mirror will pick up the change
+    if:  github.event_name == 'pull_request' &&  github.event.pull_request.merged == 'false' # <-- the gitlab mirror will pick up the change
     continue-on-error: true
 
     needs: [puppet-syntax, glci-syntax, files, puppet-style, spec-tests]
