@@ -188,6 +188,14 @@ jobs:
             console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
 
+      # Secon
+      # - [ ] if there's no GitLab mirror, make one
+      # - [ ] if there's no GitLab <-> GitHub integration, make one
+      # - [ ] if there's no PR check, make one (?)
+      # - [ ] if there are already pipelines pending/running for this branch, CANCEL THEM
+      #       - "created|waiting_for_resource|preparing|pending|running"
+      # - [ ] if PR: force-push branch to GitLab
+      #       - if 
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
