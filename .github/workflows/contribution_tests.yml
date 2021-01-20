@@ -197,7 +197,8 @@ jobs:
           repo_name="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
           CURL_CMD=(curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
           #pipeline_id=$(curl --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" --silent "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/repository/commits/${branch}" | jq '.last_pipeline.id')
-          echo "GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
+          echo "== GOOD User has write access to ${GITHUB_REPOSITORY}; permitted to trigger remote PR check"
+          echo "== Finding project ID for ${GITLAB_ORG}/${repo_name}:"
           project_id="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_ORG}%2F${repo_name}" | jq .id )"
           "Gitlab project ID"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
