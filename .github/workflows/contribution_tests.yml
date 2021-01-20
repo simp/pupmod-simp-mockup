@@ -90,7 +90,7 @@ jobs:
 
 
   releng-checks:
-    name: "RELENG policy"
+    name: "RELENG checks"
     runs-on: ubuntu-18.04
     env:
       PUPPET_VERSION: "~> 6"
@@ -114,11 +114,13 @@ jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
+    env:
+      GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }} || 'https://gitlab.com/api/v4'
     steps:
       - uses: actions/checkout@v2
       - name: 'Validate GLCI file'
         run: |
-         status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
+         status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
          [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
 
@@ -193,7 +195,7 @@ jobs:
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
           curl --header "PRIVATE-TOKEN: $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status" | jq  .
-      - name: When user does NOT has Repo Permissions
+      - name: When user does NOT have Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'false'
         continue-on-error: true
         run: false
