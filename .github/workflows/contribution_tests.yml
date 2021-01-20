@@ -163,6 +163,7 @@ jobs:
 
   trigger-if-user-has-repo-permissions:
     name: 'Trigger if user has Repo Permissions'
+    ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     needs: [puppet-syntax, glci-syntax, releng-checks, files, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
     steps:
@@ -186,6 +187,7 @@ jobs:
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
             console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
             return(has_write_access(project_permission.data.permission))
+
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
@@ -203,6 +205,9 @@ jobs:
           echo "Gitlab project ID: '$project_id'"
           echo "TODO - Trigger GLCI pipeline [GITLAB_API_URL: $GITLAB_API_URL, GITLAB_API_PRIVATE_TOKEN: $GITLAB_API_PRIVATE_TOKEN]"
           echo "TODO - Trigger GLCI pipeline from here"
+          "${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${project_id}/pipelines?ref=glci-testing&order_by=status"   | jq '.[] | select( .status | test("created|waiting_for_resource|preparing|pending|running") )'
+          # .[] | select( .status | test("created|waiting_for_resource|preparing|pending|running") ) | .id
+          # https://jqplay.org/s/oEjNJReM6k
           curl --version
           # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
           curl --http1.0 --fail --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" "${GITLAB_API_URL}/user/status"
