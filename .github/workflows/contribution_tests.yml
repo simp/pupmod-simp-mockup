@@ -228,7 +228,8 @@ jobs:
             active_pipeline_ids+=($(echo "$active_pipelines" |  grep -E '^[0-9]*$'))
           done
           if [ "${#active_pipeline_ids[@]}" -gt 0 ]; then
-            printf "\nFound %s active pipeline ids: %s\n" "${#active_pipeline_ids[@]}" "${active_pipeline_ids[@]}"
+            printf "\nFound %s active pipeline ids:\n" "${#active_pipeline_ids[@]}"
+            echo "${active_pipeline_ids[@]}"
             for pipe_id in "${active_pipeline_ids[@]}"; do
               printf "\n  ------ Cancelling pipeline ID %s...\n" "$pipe_id"
               "${CURL_CMD[@]}" --request POST "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines/${pipe_id}/cancel"
