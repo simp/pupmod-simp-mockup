@@ -40,25 +40,25 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: "bundle exec rake syntax"
+####      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+####        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+####        with:
+####          ruby-version: 2.5
+####          bundler-cache: true
+####      - run: "bundle exec rake syntax"
 
   puppet-style:
     name: 'Puppet Style'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: "bundle exec rake lint"
-      - run: "bundle exec rake metadata_lint"
+####      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+####        uses: ruby/setup-ruby@v1
+####        with:
+####          ruby-version: 2.5
+####          bundler-cache: true
+####      - run: "bundle exec rake lint"
+####      - run: "bundle exec rake metadata_lint"
 
   ruby-style:
     name: 'Ruby Style (experimental)'
@@ -86,18 +86,18 @@ jobs:
           bundler-cache: true
       - run: bundle exec rake simp:ci_lint
 
-  files:
+  file-checks:
     name: 'File checks'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake check:dot_underscore
-      - run: bundle exec rake check:test_file
+####      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
+####        uses: ruby/setup-ruby@v1
+####        with:
+####          ruby-version: 2.5
+####          bundler-cache: true
+####      - run: bundle exec rake check:dot_underscore
+####      - run: bundle exec rake check:test_file
 
 
   releng-checks:
@@ -105,31 +105,31 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-
-      - name: 'Tags and changelogs'
-        run: |
-          bundle exec rake pkg:check_version
-          bundle exec rake pkg:compare_latest_tag
-          bundle exec rake pkg:create_tag_changelog
-
-      - name: 'Test-build the Puppet module'
-        run: 'bundle exec pdk build --force'
+####      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
+####        uses: ruby/setup-ruby@v1
+####        with:
+####          ruby-version: 2.5
+####          bundler-cache: true
+####
+####      - name: 'Tags and changelogs'
+####        run: |
+####          bundle exec rake pkg:check_version
+####          bundle exec rake pkg:compare_latest_tag
+####          bundle exec rake pkg:create_tag_changelog
+####
+####      - name: 'Test-build the Puppet module'
+####        run: 'bundle exec pdk build --force'
 
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
-      - name: 'Validate GLCI file'
-        run: |
-         GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
-         status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
-         [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
+####      - name: 'Validate GLCI file'
+####        run: |
+####         GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
+####         status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
+####         [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
 
   spec-tests:
@@ -143,32 +143,32 @@ jobs:
           - label: 'Puppet 6.18 [SIMP 6.5/PE 2019.8]'
             puppet_version: '~> 6.18.0'
             ruby_version: '2.5'
-          - label: 'Puppet 5.5 [SIMP 6.4/PE 2018.1]'
-            puppet_version: '~> 5.5.22'
-            ruby_version: '2.4'
-          - label: 'Puppet 7.x'
-            puppet_version: '~> 7.0'
-            ruby_version: '2.7'
+####          - label: 'Puppet 5.5 [SIMP 6.4/PE 2018.1]'
+####            puppet_version: '~> 5.5.22'
+####            ruby_version: '2.4'
+####          - label: 'Puppet 7.x'
+####            puppet_version: '~> 7.0'
+####            ruby_version: '2.7'
     env:
       PUPPET_VERSION: '${{matrix.puppet.puppet_version}}'
     steps:
       - uses: actions/checkout@v2
-      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{matrix.puppet.ruby_version}}
-          bundler-cache: true
-      - run: 'command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:'
-      - run: 'bundle exec rake spec'
+####      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
+####        uses: ruby/setup-ruby@v1
+####        with:
+####          ruby-version: ${{matrix.puppet.ruby_version}}
+####          bundler-cache: true
+####      - run: 'command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:'
+####      - run: 'bundle exec rake spec'
 
 
   trigger-if-user-has-repo-permissions:
-    name: 'Trigger CI (if permitted)'
+    name: 'PR-Triggered CI (if permitted)'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
-    if:  github.event_name == 'pull_request' &&  github.event.pull_request.merged == 'false' # <-- the gitlab mirror will pick up the change
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == 'false' }}
     continue-on-error: true
 
-    needs: [puppet-syntax, glci-syntax, files, puppet-style, spec-tests]
+    needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
@@ -218,7 +218,6 @@ jobs:
             --header "Accept: application/json" \
           )
 
-          ###GITLAB_PROJECT_ID="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_ORG}%2F${GITXXB_REPO_NAME}" | jq .id )"
           GITLAB_PROJECT_ID="${GITLAB_ORG}%2F${GITXXB_REPO_NAME}"
           echo "Gitlab project ID: '$GITLAB_PROJECT_ID'"
 
@@ -256,7 +255,7 @@ jobs:
 
 #  trigger-if-user-has-project-permissions:
 #    name: "Trigger if user has Project Permissions"
-#    needs: [syntax, glci-syntax, releng-checks, files, puppet-style, spec-tests]
+#    needs: [syntax, glci-syntax, releng-checks, file-checks, puppet-style, spec-tests]
 #    runs-on: ubuntu-18.04
 #    steps:
 #      - uses: actions/github-script@v3
