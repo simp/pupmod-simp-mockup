@@ -167,6 +167,15 @@ jobs:
 ####      - run: 'command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:'
 ####      - run: 'bundle exec rake spec'
 
+  dump_contexts:
+    name: 'Examine Context contents'
+    needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Dump contexts
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
   trigger-if-user-has-repo-permissions:
     name: 'PR-Triggered CI (if permitted)'
