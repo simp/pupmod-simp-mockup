@@ -183,7 +183,7 @@ jobs:
     # - [ ] Merged PR (the mirror will do this)
     #       github.event.pull_request.merged == false
     #       github.event.pull_request.merged == 'false'
-    if: github.event_name == 'pull_request' &&
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == 'false'
     continue-on-error: true
     needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
