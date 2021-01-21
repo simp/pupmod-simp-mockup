@@ -183,7 +183,7 @@ jobs:
     # - [ ] Merged PR (the mirror will do this)
     #       github.event.pull_request.merged == false
     #       github.event.pull_request.merged == 'false'
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == 'false'
+    if: github.event_name == 'pull_request' && ( github.event.action == 'opened' || github.event.action == 'synchronize' )
     continue-on-error: true
     needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
@@ -216,7 +216,6 @@ jobs:
       # - [X] if there are already pipelines pending/running for this branch, CANCEL THEM
       #       - "created|waiting_for_resource|preparing|pending|running"
       # - [ ] if PR: force-push branch to GitLab
-      #       - if
       - uses: actions/checkout@v2
         if: steps.user-repo-permissions.outputs.result == 'true'
       - name: Trigger when user has Repo Permissions
