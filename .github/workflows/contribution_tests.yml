@@ -165,9 +165,17 @@ jobs:
   trigger-if-user-has-repo-permissions:
     name: 'PR-Triggered CI (if permitted)'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
-    if: ${{ github.event_name == 'pull_request'  }}
+    #
+    # Trigger on:
+    # - [ ] New PR
+    #       github.event_name == 'pull_request'
+    # - [ ] Update to PR
+    #
+    # Do NOT Trigger on:
+    # - [ ] Merged PR (the mirror will do this)
+    #
+    if: github.event_name == 'pull_request'
     continue-on-error: true
-
     needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
     steps:
