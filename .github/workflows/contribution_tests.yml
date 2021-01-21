@@ -21,13 +21,16 @@
 #   provided to untrusted builds (i.e, triggered by PR from another repository)
 #
 # ------------------------------------------------------------------------------
-#  
+#
 # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
 #
 
 name: Tests
 on:
-###  push: {}
+  # As a security measure, the workflow runs from what's defined in the Base
+  # commit, not the PR Head.
+  #
+  # This might confuse folks when submitting a PR to update the workflow itself
   pull_request_target:
     types: [opened, reopened, synchronized]
 
@@ -169,7 +172,7 @@ jobs:
     name: 'PR-Triggered CI (if permitted)'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     #
-    #   
+    #
     # Trigger on:
     # - [ ] New PR
     #       github.event_name == 'pull_request' && github.event.action == 'opened'
@@ -180,7 +183,7 @@ jobs:
     # - [ ] Merged PR (the mirror will do this)
     #       github.event.pull_request.merged == false
     #       github.event.pull_request.merged == 'false'
-    if: github.event_name == 'pull_request' &&  
+    if: github.event_name == 'pull_request' &&
     continue-on-error: true
     needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
@@ -214,6 +217,8 @@ jobs:
       #       - "created|waiting_for_resource|preparing|pending|running"
       # - [ ] if PR: force-push branch to GitLab
       #       - if
+      - uses: actions/checkout@v2
+        if: steps.user-repo-permissions.outputs.result == 'true'
       - name: Trigger when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
