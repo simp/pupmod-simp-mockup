@@ -25,8 +25,8 @@
 name: Tests
 on:
   push: {}
-  pull_request:
-    types: [opened, reopened, edited]
+  pull_request: {}
+#    types: [opened, reopened, edited]
 
 env:
   GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
