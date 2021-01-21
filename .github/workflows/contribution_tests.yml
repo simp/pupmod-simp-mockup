@@ -21,11 +21,14 @@
 #   provided to untrusted builds (i.e, triggered by PR from another repository)
 #
 # ------------------------------------------------------------------------------
+#  
+# https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+#
 
 name: Tests
 on:
-  push: {}
-  pull_request:
+###  push: {}
+  pull_request_target:
     types: [opened, reopened, synchronized]
 
 env:
@@ -166,15 +169,18 @@ jobs:
     name: 'PR-Triggered CI (if permitted)'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     #
+    #   
     # Trigger on:
     # - [ ] New PR
-    #       github.event_name == 'pull_request'
-    # - [ ] Update to PR
+    #       github.event_name == 'pull_request' && github.event.action == 'opened'
+    # - [ ] Add commit to PR
+    #       github.event_name == 'pull_request' && github.event.action == 'synchronize'
     #
     # Do NOT Trigger on:
     # - [ ] Merged PR (the mirror will do this)
-    #
-    if: github.event_name == 'pull_request'
+    #       github.event.pull_request.merged == false
+    #       github.event.pull_request.merged == 'false'
+    if: github.event_name == 'pull_request' &&  
     continue-on-error: true
     needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
     runs-on: ubuntu-18.04
