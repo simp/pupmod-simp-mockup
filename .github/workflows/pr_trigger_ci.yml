@@ -74,9 +74,12 @@ jobs:
       - name: 'Validate GLCI file'
         id: validate-glci-file
         if: steps.glci-file-exists.outputs.result == 'true'
+###        env:
+###          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+###          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
         run: |
           GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
-          CURL_CMD=(curl --http1.0 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
+          CURL_CMD=(curl --http1.1 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
           [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
           status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq .status )
           if [[ "$status" == '"valid"' ]]; then
