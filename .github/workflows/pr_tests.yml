@@ -63,18 +63,6 @@ jobs:
           bundle show
           bundle exec rake rubocop
 
-  glci-style:
-    name: '.gitlab-ci.yml Style (experimental)'
-    continue-on-error: true
-    runs-on: ubuntu-16.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake simp:ci_lint
 
   file-checks:
     name: 'File checks'
@@ -107,19 +95,6 @@ jobs:
           bundle exec rake pkg:create_tag_changelog
       - name: 'Test-build the Puppet module'
         run: 'bundle exec pdk build --force'
-
-  glci-syntax:
-    name: '.gitlab-ci.yml Syntax'
-    runs-on: ubuntu-16.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: 'Validate GLCI file'
-        run: |
-          GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
-          CURL_CMD=(curl --http1.0 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
-          [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
-          status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq .status )
-          [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
   spec-tests:
     name: 'Puppet Spec Tests'

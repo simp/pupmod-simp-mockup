@@ -31,8 +31,22 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
+  glci-syntax:
+    name: '.gitlab-ci.yml Syntax'
+    runs-on: ubuntu-16.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Validate GLCI file'
+        run: |
+          GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
+          CURL_CMD=(curl --http1.0 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
+          [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
+          status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq .status )
+          [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
+
   trigger-if-user-has-repo-permissions:
     name: 'Trigger CI (if permitted)'
+    needs: glci-syntax
     #
     # Trigger on:
     # - [x] New PR
