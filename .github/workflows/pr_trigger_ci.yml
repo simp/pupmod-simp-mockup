@@ -87,7 +87,7 @@ jobs:
             echo '::set-output name=error::The .gitlab-ci.yml" file is invalid!'
             #false
           fi
-      - Name: Final result check
+      - name: Final result check
         id: is-there-a-valid-glci-file
         run: |
           if [ "${{steps.glci-file-exists.outputs.result}}" == 'true' ] && \
