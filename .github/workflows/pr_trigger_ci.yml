@@ -94,7 +94,7 @@ jobs:
             echo "$response" | jq .
             echo
             echo 'The .gitlab-ci.yml file is invalid!'
-            #false
+            false
           fi
       - name: Final result check
         id: is-there-a-valid-glci-file
