@@ -25,6 +25,7 @@
 # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
 #
 ---
+name: PR CI Trigger
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
