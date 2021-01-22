@@ -123,13 +123,13 @@ jobs:
             })
             const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
-            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
-            if (has_write_access(project_permission.data.permission)){
-              console.log('::set-output permitted:: true')
+            if( has_write_access(project_permission.data.permission )){
+              console.log( '::set-output permitted:: true' )
             } else {
-              console.log('::set-output permitted:: false')
+              console.log( '::set-output permitted:: false' )
               console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repo.owner}'`)
             }
+            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
 
 
   trigger-when-user-has-repo-permissions:
