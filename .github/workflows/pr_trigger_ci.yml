@@ -20,7 +20,23 @@
 #   The secure vars will be filtered in GitHub Actions log output, and aren't
 #   provided to untrusted builds (i.e, triggered by PR from another repository)
 #
-# ------------------------------------------------------------------------------
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# WARNING   WARNING   WARNING   WARNING   WARNING   WARNING   WARNING   WARNING
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!V!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+# DO NOT MODIFY this workflow, unless you **REALLY** know what you are doing.
+#
+# This workflow abuses the `pull_request_target` event by checking out the PR's
+# **HEAD**.  Without being VERY CAREFUL, this could easily allow a malcious PR
+# contributor the chance to access secrets or a GITHUB_TOKEN with write scope!!
+#
+# The two jobs in this workflow are designed to handle this safely, but DON'T
+# assume anything else will be.  If you don't know what I'm talking about, ASK
+# FOR ASSISTANCE BEFORE MODIFYING THIS WORKFLOW.
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# WARNING   WARNING   WARNING   WARNING   WARNING   WARNING   WARNING   WARNING
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!V!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #
 # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
 #
@@ -31,11 +47,17 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
+
+  # The ONLY reason we can validate the PR HEAD's content safely here is that
+  # we restrict ourselves to sending data elsewhere.
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: 'Validate GLCI file'
         run: |
           GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
