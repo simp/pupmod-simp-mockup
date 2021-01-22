@@ -68,6 +68,7 @@ jobs:
         id: glci-file-exists
         run: |
           if [ -f .gitlab-ci.yml ]; then
+            echo '.gitlab-ci.yml exists'
             echo '::set-output name=exists::true'
           else
             echo '::error ::The ".gitlab-ci.yml" file is missing!'
@@ -105,12 +106,14 @@ jobs:
     # in the workflow's `on` section are inadventently modified without considering the
     # security implications.
     #
-    # This job will trigger on:
-    # - [x] ONLY pull_request_target:   github.event_name == 'pull_request_target'
-    # AND
+    # This job will ONLY trigger on:
+    # - [x] pull_request_target event:  github.event_name == 'pull_request_target'
+    # AND:
     # - [x] Newly-opened PRs:           github.event.action == 'opened'
-    # - [x] Newly-opened PRs:           github.event.action == 'opened'
+    # - [x] Re-opened PRs:              github.event.action == 'reopened'
     # - [x] Commites are added to PR:   github.event.action == 'synchronize'
+    # AND:
+    # - [x] .gitlab-ci.yml exists/ok:   needs.glci-syntax.outputs.valid == 'true'
     #
     # It will NOT Trigger on:
     # - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
