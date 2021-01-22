@@ -56,6 +56,9 @@ jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax (optional)'
     runs-on: ubuntu-16.04
+    outputs:
+      exists: ${{ steps.glci-file-exists.outputs.exists }}
+      valid: ${{ steps.validate-glci-file.outputs.valid }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -65,11 +68,11 @@ jobs:
         id: glci-file-exists
         run: |
           if [ -f .gitlab-ci.yml ]; then
-            echo '::set-output name=result::true'
+            echo '::set-output name=exists::true'
           else
             echo '::warning ::The ".gitlab-ci.yml" file is missing!'
             echo "::warning ::This will not fail the PR check, but we won't attempt to trigger GLCI"
-            echo '::set-output name=result::false'
+            echo '::set-output name=exists::false'
           fi
       - name: 'Validate GLCI file'
         id: validate-glci-file
