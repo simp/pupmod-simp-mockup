@@ -164,14 +164,14 @@ jobs:
       #       - "created|waiting_for_resource|preparing|pending|running"
       # - [x] if PR: force-push branch to GitLab
       - uses: actions/checkout@v2
-        if: steps.user-repo-permissions.outputs.result == 'true'
+        if: needs.contributor-permissions.outputs.permitted == 'true'
         with:
           fetch-depth: 0  # We need full checkout to push to gitlab mirror
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Trigger CI when user has Repo Permissions
-        if: steps.user-repo-permissions.outputs.result == 'true'
+        if: needs.contributor-permissions.outputs.permitted == 'true'
         env:
           GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
           GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
