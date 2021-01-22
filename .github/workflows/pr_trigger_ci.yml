@@ -99,29 +99,11 @@ jobs:
             false
           fi
 
-  trigger-when-user-has-repo-permissions:
-    name: 'Trigger CI (when trusted)'
-    needs: glci-syntax
-    # This conditional provides an extra safety control, in case the workflow's
-    # `on` section is inadventently modified without considering the security
-    # implications.
-    #
-    # This job will ONLY trigger on:
-    #
-    #   - [x] pull_request_target event:  github.event_name == 'pull_request_target'
-    #   AND:
-    #   - [x] Newly-opened PRs:           github.event.action == 'opened'
-    #   - [x] Re-opened PRs:              github.event.action == 'reopened'
-    #   - [x] Commites are added to PR:   github.event.action == 'synchronize'
-    #   AND:
-    #   - [x] .gitlab-ci.yml exists/ok:   needs.glci-syntax.outputs.valid == 'true'
-    #
-    # It will NOT Trigger on:
-    #
-    #   - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
-    #     -  (the downstream GitLab mirror will take care of that)
-    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true' && needs.glci-syntax.outputs.valid == 'true'
+  contributor-permissions:
+    name: 'PR contributor check'
     runs-on: ubuntu-18.04
+    outputs:
+      permitted: ${{ steps.user-repo-permissions.outputs.permitted }}
     steps:
       - uses: actions/github-script@v3
         id: user-repo-permissions
@@ -142,8 +124,38 @@ jobs:
             const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
             console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
-            return(has_write_access(project_permission.data.permission))
+            if (has_write_access(project_permission.data.permission)){
+              console.log('::set-output permitted:: true')
+            } else {
+              console.log('::set-output permitted:: false')
+              console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repo.owner}'`)
+            }
 
+
+  trigger-when-user-has-repo-permissions:
+    name: 'Trigger CI [when trusted]'
+    needs: glci-syntax, contributor-permissions
+    # This conditional provides an extra safety control, in case the workflow's
+    # `on` section is inadventently modified without considering the security
+    # implications.
+    #
+    # This job will ONLY trigger on:
+    #
+    #   - [x] pull_request_target event:  github.event_name == 'pull_request_target'
+    #   AND:
+    #   - [x] Newly-opened PRs:           github.event.action == 'opened'
+    #   - [x] Re-opened PRs:              github.event.action == 'reopened'
+    #   - [x] Commites are added to PR:   github.event.action == 'synchronize'
+    #   AND:
+    #   - [x] .gitlab-ci.yml exists/ok:   needs.glci-syntax.outputs.valid == 'true'
+    #
+    # It will NOT Trigger on:
+    #
+    #   - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
+    #     -  (the downstream GitLab mirror will take care of that)
+    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true' && needs.glci-syntax.outputs.valid == 'true' && needs.contributor-permissions.outputs.permitted == 'true'
+    runs-on: ubuntu-18.04
+    steps:
       # Things we'd like to do:
       # - [ ] if there's no GitLab mirror, make one
       #   - [ ] if there's no GitLab <-> GitHub integration, make one
@@ -217,20 +229,3 @@ jobs:
         run: |
           echo "Ending gracefully; Contributor $GITHUB_ACTOR does not have permission to trigger CI"
           false
-
-  dump_contexts:
-    name: 'Examine Context contents'
-    if: always()
-    runs-on: ubuntu-16.04
-    needs: glci-syntax
-    steps:
-      - name: Dump contexts
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump needs context
-        env:
-          ENV_CONTEXT: ${{ toJson(needs) }}
-        run: echo "$ENV_CONTEXT"
-      - name: Dump env vars
-        run: env | sort
