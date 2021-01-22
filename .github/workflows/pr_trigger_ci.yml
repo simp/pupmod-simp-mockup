@@ -86,27 +86,13 @@ jobs:
           status=$(  echo "$response" | jq .status )
           if [[ "$status" == '"valid"' ]]; then
             echo '.gitlab-ci.yml is valid'
-            echo '::set-output name=result::true'
+            echo '::set-output name=valid::true'
           else
-            echo 'The .gitlab-ci.yml file is invalid!'
-            echo
-            echo "$response" | jq .
-            echo '::set-output name=result::false'
+            echo '::set-output name=valid::false'
             echo '::error::The .gitlab-ci.yml" file is invalid!'
             printf  "::error ::%s\n" "$response"
-            ##false
+            false
           fi
-###      - name: Final result check
-###        id: is-there-a-valid-glci-file
-###        run: |
-###          if [ "${{steps.glci-file-exists.outputs.result}}" == 'true' ] && \
-###             [ "${{steps.validate-glci-file.outputs.result}}" == 'true' ]; then
-###            echo '.gitlab-ci.yml: valid'
-###            echo '::set-output name=result::true'
-###          else
-###            echo '.gitlab-ci.yml: NOT valid'
-###            echo '::set-output name=result::false'
-###          fi
 
   trigger-when-user-has-repo-permissions:
     name: 'Trigger CI (when trusted)'
