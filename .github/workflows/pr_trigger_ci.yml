@@ -124,9 +124,9 @@ jobs:
             const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
             const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
             if( has_write_access(project_permission.data.permission )){
-              github.setOutput( 'permitted', 'true' )
+              core.setOutput( 'permitted', 'true' )
             } else {
-              github.setOutput( 'permitted', 'false' )
+              core.setOutput( 'permitted', 'false' )
               console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repo.owner}'`)
             }
             console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
