@@ -134,7 +134,7 @@ jobs:
 
   trigger-when-user-has-repo-permissions:
     name: 'Trigger CI [when trusted]'
-    needs: glci-syntax, contributor-permissions
+    needs: [ glci-syntax, contributor-permissions ]
     # This conditional provides an extra safety control, in case the workflow's
     # `on` section is inadventently modified without considering the security
     # implications.
