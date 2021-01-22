@@ -91,7 +91,7 @@ jobs:
             echo '::set-output name=valid::false'
             echo '::error::The .gitlab-ci.yml" file is invalid!'
             errors="$(echo "$response" | jq -r '.errors[] | . = "::error ::\(.)"')"
-            printf  "::error ::Errors: %s\n" "$errors"
+            echo "$errors"
             printf  "::debug ::.gitlab-ci.yml CI Lint response: %s\n" "$response"
             false
           fi
