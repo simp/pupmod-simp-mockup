@@ -2,3 +2,4 @@ foo
 test
 test
 test
+test
