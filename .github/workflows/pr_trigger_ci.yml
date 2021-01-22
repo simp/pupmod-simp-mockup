@@ -81,7 +81,7 @@ jobs:
           GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
           CURL_CMD=(curl --http1.1 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
           [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
-          data="$(jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' )
+          data="$(jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' )"
           response="$(echo "$data" |  "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" )"
           echo "set-ouput name=debug::${response}"
           status=$(  echo "$response" | jq .status )
@@ -93,7 +93,7 @@ jobs:
             echo '::set-output name=result::false'
             echo "$response" | jq .
             echo
-            echo 'The .gitlab-ci.yml" file is invalid!'
+            echo 'The .gitlab-ci.yml file is invalid!'
             #false
           fi
       - name: Final result check
