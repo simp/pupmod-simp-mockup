@@ -271,6 +271,8 @@ jobs:
           echo git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git branch "$GIT_BRANCH" HEAD^1
+          git branch -av
+          git log --color --graph  --abbrev-commit     --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
           git push gitlab ":${GIT_BRANCH}" -f
           git push gitlab "${GIT_BRANCH}" -f
 
