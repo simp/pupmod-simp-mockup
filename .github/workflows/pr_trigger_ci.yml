@@ -87,7 +87,8 @@ jobs:
             echo '::set-output name=error::The .gitlab-ci.yml" file is invalid!'
             #false
           fi
-      - id: is-there-a-valid-glci-file
+      - Name: Final result check
+        id: is-there-a-valid-glci-file
         run: |
           if [ "${{steps.glci-file-exists.outputs.result}}" == 'true' ] && \
              [ "${{steps.validate-glci-file.outputs.result}}" == 'true' ]; then
@@ -113,7 +114,7 @@ jobs:
     # It will NOT Trigger on:
     # - [x] Merged PRs:                 github.event.pull_request.merged == 'false'
     #    -  (the downstream GitLab mirror will take care of that)
-    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged == 'false'
+    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' )
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     ###continue-on-error: true
     runs-on: ubuntu-18.04
