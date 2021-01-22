@@ -224,7 +224,7 @@ jobs:
           echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
 
       - name: When user does NOT have Repo Permissions
-        if: steps.user-repo-permissions.outputs.result == 'false'
+        if: needs.contributor-permissions.outputs.permitted == 'false'
         continue-on-error: true
         run: |
           echo "Ending gracefully; Contributor $GITHUB_ACTOR does not have permission to trigger CI"
