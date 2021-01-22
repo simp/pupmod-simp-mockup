@@ -130,13 +130,12 @@ jobs:
       - name: 'Validate GLCI file'
         env:
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
-          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
         run: |
           GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
-          # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
-          CURL_CMD=(curl --http1.0 --fail --silent --show-error \
-            --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" \
-          )
+          CURL_CMD=(curl --http1.0 --fail --silent --show-error)
+          [ -n "$GITLAB_API_URL" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
+
           status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
           [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
