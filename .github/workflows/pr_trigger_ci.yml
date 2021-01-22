@@ -30,6 +30,7 @@ on:
   pull_request_target:
     types: [opened, reopened, synchronize]
 
+jobs:
   trigger-if-user-has-repo-permissions:
     name: 'Trigger CI (if permitted)'
     #
