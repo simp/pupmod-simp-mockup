@@ -81,8 +81,9 @@ jobs:
         if: steps.user-repo-permissions.outputs.result == 'true'
         with:
           fetch-depth: 0  # We need full checkout to push to gitlab mirror
-          repository: ${{ github.event.pull_request.head.repo.git_url }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Trigger CI when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
