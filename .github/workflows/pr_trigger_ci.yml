@@ -54,7 +54,7 @@ jobs:
   # The ONLY reason we can validate the PR HEAD's content safely here is that
   # we restrict ourselves to sending data elsewhere.
   glci-syntax:
-    name: '.gitlab-ci.yml Syntax'
+    name: '.gitlab-ci.yml Syntax (optional)'
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
@@ -114,9 +114,10 @@ jobs:
     # - [x] Commites are added to PR:   github.event.action == 'synchronize'
     #
     # It will NOT Trigger on:
-    # - [x] Merged PRs:                 github.event.pull_request.merged == 'false'
+    # - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
     #    -  (the downstream GitLab mirror will take care of that)
-    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' )
+    #    - FIXME `&& github.event.pull_request.merged == 'false'` ALWAYS denies the job
+    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     ###continue-on-error: true
     runs-on: ubuntu-18.04
