@@ -60,7 +60,7 @@ jobs:
       - run: "bundle exec rake metadata_lint"
 
   ruby-style:
-    if: false # Modules need: rubocop in Gemfile, .rubocop.yml
+    if: false # TODO Modules will need: rubocop in Gemfile, .rubocop.yml
     name: 'Ruby Style (experimental)'
     runs-on: ubuntu-18.04
     continue-on-error: true
