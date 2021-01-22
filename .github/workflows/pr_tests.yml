@@ -39,25 +39,25 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: "bundle exec rake syntax"
+###      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+###        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###      - run: "bundle exec rake syntax"
 
   puppet-style:
     name: 'Puppet Style'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: "bundle exec rake lint"
-      - run: "bundle exec rake metadata_lint"
+###      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+###        uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###      - run: "bundle exec rake lint"
+###      - run: "bundle exec rake metadata_lint"
 
   ruby-style:
     if: false # TODO Modules will need: rubocop in Gemfile, .rubocop.yml
@@ -81,25 +81,25 @@ jobs:
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake simp:ci_lint
+###      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
+###        uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###      - run: bundle exec rake simp:ci_lint
 
   file-checks:
     name: 'File checks'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake check:dot_underscore
-      - run: bundle exec rake check:test_file
+###      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
+###        uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###      - run: bundle exec rake check:dot_underscore
+###      - run: bundle exec rake check:test_file
 
 
   releng-checks:
@@ -107,20 +107,20 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-
-      - name: 'Tags and changelogs'
-        run: |
-          bundle exec rake pkg:check_version
-          bundle exec rake pkg:compare_latest_tag
-          bundle exec rake pkg:create_tag_changelog
-
-      - name: 'Test-build the Puppet module'
-        run: 'bundle exec pdk build --force'
+###      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
+###        uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###
+###      - name: 'Tags and changelogs'
+###        run: |
+###          bundle exec rake pkg:check_version
+###          bundle exec rake pkg:compare_latest_tag
+###          bundle exec rake pkg:create_tag_changelog
+###
+###      - name: 'Test-build the Puppet module'
+###        run: 'bundle exec pdk build --force'
 
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
@@ -150,23 +150,23 @@ jobs:
           - label: 'Puppet 6.18 [SIMP 6.5/PE 2019.8]'
             puppet_version: '~> 6.18.0'
             ruby_version: '2.5'
-          - label: 'Puppet 5.5 [SIMP 6.4/PE 2018.1]'
-            puppet_version: '~> 5.5.22'
-            ruby_version: '2.4'
-          - label: 'Puppet 7.x'
-            puppet_version: '~> 7.0'
-            ruby_version: '2.7'
+###          - label: 'Puppet 5.5 [SIMP 6.4/PE 2018.1]'
+###            puppet_version: '~> 5.5.22'
+###            ruby_version: '2.4'
+###          - label: 'Puppet 7.x'
+###            puppet_version: '~> 7.0'
+###            ruby_version: '2.7'
     env:
       PUPPET_VERSION: '${{matrix.puppet.puppet_version}}'
     steps:
       - uses: actions/checkout@v2
-      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{matrix.puppet.ruby_version}}
-          bundler-cache: true
-      - run: 'command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:'
-      - run: 'bundle exec rake spec'
+###      - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
+###        uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: ${{matrix.puppet.ruby_version}}
+###          bundler-cache: true
+###      - run: 'command -v rpm || if command -v apt-get; then apt-get update; apt-get install -y rpm; fi ||:'
+###      - run: 'bundle exec rake spec'
 
   dump_contexts:
     name: 'Examine Context contents'
