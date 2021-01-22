@@ -133,10 +133,10 @@ jobs:
           GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}
         run: |
           GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
-          CURL_CMD=(curl --http1.0 --fail --silent --show-error)
+          CURL_CMD=(curl --http1.0 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
           [ -n "$GITLAB_API_URL" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
 
-          status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
+          status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq .status )
           [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
 
