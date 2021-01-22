@@ -1,20 +1,15 @@
-# The testing matrix considers ruby/puppet versions supported by SIMP and PE:
-# ------------------------------------------------------------------------------
-# Release       Puppet   Ruby    EOL
-# SIMP 6.4      5.5      2.40    TBD
-# PE 2018.1     5.5      2.40    2021-01 (LTS overlap)
-# PE 2019.8     6.18     2.5     2022-12 (LTS)
+# Push/Trigger a GitLab CI pipeline for the PR HEAD, **ONLY IF:**
 #
-# https://puppet.com/docs/pe/2018.1/component_versions_in_recent_pe_releases.html
-# https://puppet.com/misc/puppet-enterprise-lifecycle
-# https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
+#   1. The .gitlab-ci.yaml file exists and validates
+#   2. The PR submitter has write access to the target repository.
+#
 # ==============================================================================
 #
 # GitHub Action Secrets variables available for this pipeline:
 #
 #   GitHub Secret variable    Type      Notes
 #   ------------------------  --------  ----------------------------------------
-#   GITLAB_API_PRIVATE_TOKEN  Secure    Only provided to jobs that need it
+#   GITLAB_API_PRIVATE_TOKEN  Secure    Should have `api` scope
 #   GITLAB_API_URL            Optional
 #
 #   The secure vars will be filtered in GitHub Actions log output, and aren't
@@ -26,13 +21,21 @@
 #
 # DO NOT MODIFY this workflow, unless you **REALLY** know what you are doing.
 #
-# This workflow abuses the `pull_request_target` event by checking out the PR's
-# **HEAD**.  Without being VERY CAREFUL, this could easily allow a malcious PR
+# This workflow bypasses some of the built-in protections of the
+# `pull_request_target` event by explicitly checking out the PR's **HEAD**.
+# Without being VERY CAREFUL, this could easily allow a malcious PR
 # contributor the chance to access secrets or a GITHUB_TOKEN with write scope!!
 #
-# The two jobs in this workflow are designed to handle this safely, but DON'T
-# assume anything else will be.  If you don't know what I'm talking about, ASK
-# FOR ASSISTANCE BEFORE MODIFYING THIS WORKFLOW.
+# The jobs in this workflow are designed to handle this safely -- but DO NOT
+# assume any alterations will also be safe.
+#
+# For general information, see:
+#
+#   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target
+#
+# For further information, or if ANY of this seems confusing or unecessary:
+#
+#     ASK FOR ASSISTANCE **BEFORE** ATTEMPTING TO MODIFY THIS WORKFLOW.
 #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # WARNING   WARNING   WARNING   WARNING   WARNING   WARNING   WARNING   WARNING
@@ -41,7 +44,7 @@
 # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
 #
 ---
-name: PR CI Trigger
+name: PR Trigger GLCI
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
@@ -58,29 +61,59 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+      - name: 'GLCI file must exist'
+        id: glci-file-exists
+        run: |
+          if [ -f .gitlab-ci.yml ]; then
+            echo '::set-output name=result::true'
+          else
+            echo '::set-output name=warning::The ".gitlab-ci.yml" file is missing!'
+            echo "::set-output name=warning::This will not fail the PR check, but we won't attempt to trigger GLCI"
+            echo '::set-output name=result::false'
+          fi
       - name: 'Validate GLCI file'
+        id: validate-glci-file
+        if: steps.glci-file-exists.outputs.result == 'true'
         run: |
           GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
           CURL_CMD=(curl --http1.0 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
           [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
           status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq .status )
-          [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
+          if [[ "$status" == '"valid"' ]]; then
+            echo '.gitlab-ci.yml is valid'
+            echo '::set-output name=result::true'
+          else
+            echo '::set-output name=result::false'
+            echo '::set-output name=error::The .gitlab-ci.yml" file is invalid!'
+            #false
+          fi
+      - id: is-there-a-valid-glci-file
+        run: |
+          if [ "${{steps.glci-file-exists.outputs.result}}" == 'true' ] && \
+             [ "${{steps.validate-glci-file.outputs.result}}" == 'true' ]; then
+            echo '::set-output name=result::true'
+          else
+            echo '::set-output name=result::false'
+          fi
 
-  trigger-if-user-has-repo-permissions:
-    name: 'Trigger CI (if permitted)'
+  trigger-when-user-has-repo-permissions:
+    name: 'Trigger CI (when trusted)'
     needs: glci-syntax
+    # This conditional provides an extra safety control, in case the conditions
+    # in the workflow's `on` section are inadventently modified without considering the
+    # security implications.
     #
-    # Trigger on:
-    # - [x] New PR
-    #       startsWith( github.event_name, 'pull_request' ) && github.event.action == 'opened'
-    # - [x] Add commit to PR
-    #       startsWith( github.event_name, 'pull_request' ) && github.event.action == 'synchronize'
+    # This job will trigger on:
+    # - [x] ONLY pull_request_target:   github.event_name == 'pull_request_target'
+    # AND
+    # - [x] Newly-opened PRs:           github.event.action == 'opened'
+    # - [x] Newly-opened PRs:           github.event.action == 'opened'
+    # - [x] Commites are added to PR:   github.event.action == 'synchronize'
     #
-    # Do NOT Trigger on:
-    # - [x] Merged PR (the mirror will do this)
-    #       github.event.pull_request.merged == false
-    #       github.event.pull_request.merged == 'false'
-    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+    # It will NOT Trigger on:
+    # - [x] Merged PRs:                 github.event.pull_request.merged == 'false'
+    #    -  (the downstream GitLab mirror will take care of that)
+    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged == 'false'
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     ###continue-on-error: true
     runs-on: ubuntu-18.04
