@@ -27,7 +27,7 @@
 
 name: Tests
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, synchronize]
 
 env:
@@ -190,7 +190,7 @@ jobs:
     # - [x] Merged PR (the mirror will do this)
     #       github.event.pull_request.merged == false
     #       github.event.pull_request.merged == 'false'
-    if: github.event_name == 'pull_request' && ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'synchronize' )
     ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
     ###continue-on-error: true
     needs: [puppet-syntax, glci-syntax, file-checks, puppet-style, spec-tests]
