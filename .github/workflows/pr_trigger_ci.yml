@@ -1,0 +1,149 @@
+# The testing matrix considers ruby/puppet versions supported by SIMP and PE:
+# ------------------------------------------------------------------------------
+# Release       Puppet   Ruby    EOL
+# SIMP 6.4      5.5      2.40    TBD
+# PE 2018.1     5.5      2.40    2021-01 (LTS overlap)
+# PE 2019.8     6.18     2.5     2022-12 (LTS)
+#
+# https://puppet.com/docs/pe/2018.1/component_versions_in_recent_pe_releases.html
+# https://puppet.com/misc/puppet-enterprise-lifecycle
+# https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
+# ==============================================================================
+#
+# GitHub Action Secrets variables available for this pipeline:
+#
+#   GitHub Secret variable    Type      Notes
+#   ------------------------  --------  ----------------------------------------
+#   GITLAB_API_PRIVATE_TOKEN  Secure    Only provided to jobs that need it
+#   GITLAB_API_URL            Optional
+#
+#   The secure vars will be filtered in GitHub Actions log output, and aren't
+#   provided to untrusted builds (i.e, triggered by PR from another repository)
+#
+# ------------------------------------------------------------------------------
+#
+# https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+#
+---
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+  trigger-if-user-has-repo-permissions:
+    name: 'Trigger CI (if permitted)'
+    #
+    # Trigger on:
+    # - [x] New PR
+    #       startsWith( github.event_name, 'pull_request' ) && github.event.action == 'opened'
+    # - [x] Add commit to PR
+    #       startsWith( github.event_name, 'pull_request' ) && github.event.action == 'synchronize'
+    #
+    # Do NOT Trigger on:
+    # - [x] Merged PR (the mirror will do this)
+    #       github.event.pull_request.merged == false
+    #       github.event.pull_request.merged == 'false'
+    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+    ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
+    ###continue-on-error: true
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/github-script@v3
+        id: user-repo-permissions
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          # See:
+          #   - https://octokit.github.io/rest.js/
+          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
+          script: |
+            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+              headers: {
+                accept: 'application/vnd.github.v3+json'
+              },
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.sender.login,
+            })
+            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+            return(has_write_access(project_permission.data.permission))
+
+      # Things we'd like to do:
+      # - [ ] if there's no GitLab mirror, make one
+      #   - [ ] if there's no GitLab <-> GitHub integration, make one
+      #   - [ ] if there's no PR check on the main GitHub branch, make one (?)
+      # - [X] if there are already pipelines pending/running for this branch, CANCEL THEM
+      #       - "created|waiting_for_resource|preparing|pending|running"
+      # - [ ] if PR: force-push branch to GitLab
+      - uses: actions/checkout@v2
+        if: steps.user-repo-permissions.outputs.result == 'true'
+        with:
+          fetch-depth: 0  # We need full checkout to push to gitlab mirror
+          repository: ${{ github.event.pull_request.head.repo.git_url }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Trigger CI when user has Repo Permissions
+        if: steps.user-repo-permissions.outputs.result == 'true'
+        env:
+          GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+          GITLAB_ORG: 'simp'
+          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
+          GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
+          GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
+          GIT_BRANCH="${GIT_BRANCH:-GITHUB_HEAD_REF}"
+          GITXXB_REPO_NAME="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
+          GITLAB_PROJECT_ID="${GITLAB_ORG}%2F${GITXXB_REPO_NAME}"
+          # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
+          CURL_CMD=(curl --http1.0 --fail --silent --show-error \
+            --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" \
+            --header "Content-Type: application/json" \
+            --header "Accept: application/json" \
+          )
+
+          # Cancel any active/pending GitLab CI pipelines for the same project+branch
+          active_pipeline_ids=()
+          for pipe_status in created waiting_for_resource preparing pending running; do
+            echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
+            active_pipelines="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}" | jq -r '.[] | .id , .web_url')"
+            active_pipeline_ids+=($(echo "$active_pipelines" |  grep -E '^[0-9]*$'))
+            printf "$active_pipelines\n\n"
+          done
+          if [ "${#active_pipeline_ids[@]}" -gt 0 ]; then
+            printf "\nFound %s active pipeline ids:\n" "${#active_pipeline_ids[@]}"
+            echo "${active_pipeline_ids[@]}"
+            for pipe_id in "${active_pipeline_ids[@]}"; do
+              printf "\n  ------ Cancelling pipeline ID %s...\n" "$pipe_id"
+              "${CURL_CMD[@]}" --request POST "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines/${pipe_id}/cancel"
+            done
+          else
+            echo No active pipelines found
+          fi
+
+          echo "== Pushing $GIT_BRANCH to gitlab"
+          echo git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
+          git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
+          git branch "$GIT_BRANCH" HEAD
+          git branch -av
+          git log --color --graph  --abbrev-commit -5 \
+            --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
+          git push gitlab ":${GIT_BRANCH}" -f
+          git push gitlab "${GIT_BRANCH}" -f
+
+      - name: When user does NOT have Repo Permissions
+        if: steps.user-repo-permissions.outputs.result == 'false'
+        continue-on-error: true
+        run: |
+          echo "Ending gracefully; Contributor $GITHUB_ACTOR does not have permission to trigger CI"
+          false
+
+  dump_contexts:
+    name: 'Examine Context contents'
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Dump contexts
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+

@@ -2,8 +2,8 @@
 ---
 name: Diagnostics (for pipeline development)
 on:
-  push: {}
-  pull_request: {}
+  #push: {}
+  pull_request_target: {}
 
 env:
   GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
