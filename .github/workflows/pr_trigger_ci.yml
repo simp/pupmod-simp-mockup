@@ -72,10 +72,10 @@ jobs:
             echo '::set-output name=exists::true'
           else
             echo '::error ::The ".gitlab-ci.yml" file is missing!'
-            echo "::error ::This will not fail the PR check, but we won't attempt to trigger GLCI"
             echo '::set-output name=exists::false'
+            false
           fi
-      - name: 'Validate GLCI file'
+      - name: 'Validate GLCI file syntax'
         id: validate-glci-file
         if: steps.glci-file-exists.outputs.exists == 'true'
         env:
@@ -95,7 +95,7 @@ jobs:
             echo '::set-output name=valid::false'
             echo '::error::The .gitlab-ci.yml" file is invalid!'
             echo "$response" | jq -r '.errors[] | . = "::error ::\(.)"'
-            printf  "::debug ::.gitlab-ci.yml CI Lint response: %s\n" "$response"
+            printf  "::debug ::.gitlab-ci.yml CI lint service response: %s\n" "$response"
             false
           fi
 
