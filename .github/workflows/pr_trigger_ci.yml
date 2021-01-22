@@ -54,7 +54,7 @@ jobs:
   # The ONLY reason we can validate the PR HEAD's content safely here is that
   # we restrict ourselves to sending data elsewhere.
   glci-syntax:
-    name: '.gitlab-ci.yml Syntax (optional)'
+    name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
     outputs:
       exists: ${{ steps.glci-file-exists.outputs.exists }}
@@ -86,8 +86,8 @@ jobs:
           CURL_CMD=(curl --http1.1 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
           [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
           data="$(jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' )"
-          response="$(echo "$data" |  "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq . )"
-          status=$(  echo "$response" | jq .status )
+          response="$(echo "$data" | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq . )"
+          status=$( echo "$response" | jq .status )
           if [[ "$status" == '"valid"' ]]; then
             echo '.gitlab-ci.yml is valid'
             echo '::set-output name=valid::true'
@@ -102,22 +102,24 @@ jobs:
   trigger-when-user-has-repo-permissions:
     name: 'Trigger CI (when trusted)'
     needs: glci-syntax
-    # This conditional provides an extra safety control, in case the conditions
-    # in the workflow's `on` section are inadventently modified without considering the
-    # security implications.
+    # This conditional provides an extra safety control, in case the workflow's
+    # `on` section is inadventently modified without considering the security
+    # implications.
     #
     # This job will ONLY trigger on:
-    # - [x] pull_request_target event:  github.event_name == 'pull_request_target'
-    # AND:
-    # - [x] Newly-opened PRs:           github.event.action == 'opened'
-    # - [x] Re-opened PRs:              github.event.action == 'reopened'
-    # - [x] Commites are added to PR:   github.event.action == 'synchronize'
-    # AND:
-    # - [x] .gitlab-ci.yml exists/ok:   needs.glci-syntax.outputs.valid == 'true'
+    #
+    #   - [x] pull_request_target event:  github.event_name == 'pull_request_target'
+    #   AND:
+    #   - [x] Newly-opened PRs:           github.event.action == 'opened'
+    #   - [x] Re-opened PRs:              github.event.action == 'reopened'
+    #   - [x] Commites are added to PR:   github.event.action == 'synchronize'
+    #   AND:
+    #   - [x] .gitlab-ci.yml exists/ok:   needs.glci-syntax.outputs.valid == 'true'
     #
     # It will NOT Trigger on:
-    # - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
-    #    -  (the downstream GitLab mirror will take care of that)
+    #
+    #   - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
+    #     -  (the downstream GitLab mirror will take care of that)
     if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true' && needs.glci-syntax.outputs.valid == 'true'
     runs-on: ubuntu-18.04
     steps:
@@ -146,9 +148,9 @@ jobs:
       # - [ ] if there's no GitLab mirror, make one
       #   - [ ] if there's no GitLab <-> GitHub integration, make one
       #   - [ ] if there's no PR check on the main GitHub branch, make one (?)
-      # - [X] if there are already pipelines pending/running for this branch, CANCEL THEM
+      # - [x] Cancel any GLCI pipelines already pending/running for this branch
       #       - "created|waiting_for_resource|preparing|pending|running"
-      # - [ ] if PR: force-push branch to GitLab
+      # - [x] if PR: force-push branch to GitLab
       - uses: actions/checkout@v2
         if: steps.user-repo-permissions.outputs.result == 'true'
         with:
@@ -181,8 +183,9 @@ jobs:
           active_pipeline_ids=()
           for pipe_status in created waiting_for_resource preparing pending running; do
             echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
-            active_pipelines="$("${CURL_CMD[@]}" "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}" | jq -r '.[] | .id , .web_url')"
-            active_pipeline_ids+=($(echo "$active_pipelines" |  grep -E '^[0-9]*$'))
+            url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
+            active_pipelines="$("${CURL_CMD[@]}" "$url" | jq -r '.[] | .id , .web_url')"
+            active_pipeline_ids+=($(echo "$active_pipelines" | grep -E '^[0-9]*$'))
             printf "$active_pipelines\n\n"
           done
           if [ "${#active_pipeline_ids[@]}" -gt 0 ]; then
