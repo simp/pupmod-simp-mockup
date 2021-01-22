@@ -70,15 +70,15 @@ jobs:
           if [ -f .gitlab-ci.yml ]; then
             echo '::set-output name=exists::true'
           else
-            echo '::warning ::The ".gitlab-ci.yml" file is missing!'
-            echo "::warning ::This will not fail the PR check, but we won't attempt to trigger GLCI"
+            echo '::error ::The ".gitlab-ci.yml" file is missing!'
+            echo "::error ::This will not fail the PR check, but we won't attempt to trigger GLCI"
             echo '::set-output name=exists::false'
           fi
       - name: 'Validate GLCI file'
         id: validate-glci-file
         if: steps.glci-file-exists.outputs.result == 'true'
-###        env:
-###          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+        env:
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
 ###          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
         run: |
           GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
@@ -115,10 +115,7 @@ jobs:
     # It will NOT Trigger on:
     # - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
     #    -  (the downstream GitLab mirror will take care of that)
-    #    - FIXME `&& github.event.pull_request.merged == 'false'` ALWAYS denies the job
     if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true'
-    ### if: ${{ GITHUB_REPOSITORY_OWNER == 'simp' }}
-    ###continue-on-error: true
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
