@@ -31,9 +31,6 @@ on:
     types: [opened, reopened, synchronize]
 
 env:
-  GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
-  GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
-  GITLAB_ORG: 'simp'
   PUPPET_VERSION: '~> 6'
 
 jobs:
@@ -131,10 +128,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: 'Validate GLCI file'
+        env:
+          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
         run: |
-         GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
-         status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | curl "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
-         [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
+          GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
+          # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
+          CURL_CMD=(curl --http1.0 --fail --silent --show-error \
+            --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" \
+          )
+          status=$( jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml'  | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" --silent --show-error --header 'Content-Type: application/json' --data @- | jq .status )
+          [[ "$status" == '"valid"' ]] && echo '.gitlab-ci.yml is valid' || false
 
 
   spec-tests:
@@ -228,6 +232,9 @@ jobs:
       - name: Trigger CI when user has Repo Permissions
         if: steps.user-repo-permissions.outputs.result == 'true'
         env:
+          GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
+          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+          GITLAB_ORG: 'simp'
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
