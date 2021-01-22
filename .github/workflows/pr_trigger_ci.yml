@@ -115,7 +115,7 @@ jobs:
     # It will NOT Trigger on:
     # - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
     #    -  (the downstream GitLab mirror will take care of that)
-    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true'
+    if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true' && needs.glci-syntax.outputs.valid == 'true'
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/github-script@v3
