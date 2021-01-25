@@ -3,9 +3,10 @@
 name: Manual Trigger GLCI
 on:
   workflow_dispatch:
-    pr:
-      description: "PR to test"
-      required: true
+    inputs:
+      pr_number:
+        description: "PR number to test"
+        required: true
 
 jobs:
   glci-syntax:
@@ -22,7 +23,26 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           # See:
           #   - https://octokit.github.io/rest.js/
-          script: ''
+          script: |
+            // github.event.inputs.logLevel
+            const pr = await github.pulls.get({
+              context.repo.owner,
+              context.repo.repo,
+              github.events.inputs.pr_number,
+            })
+            console.log(`== Found PR ${github.events.inputs.pr_number}`) 
+            console.log(pr)
+            # - [ ]
+
+###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+###            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+###            if( has_write_access(project_permission.data.permission )){
+###              core.setOutput( 'permitted', 'true' )
+###            } else {
+###              core.setOutput( 'permitted', 'false' )
+###              console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repository}; not triggering external CI'`)
+###            }
+###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
       - uses: actions/checkout@v2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
