@@ -32,6 +32,7 @@ jobs:
           #   - https://octokit.github.io/rest.js/
           script: |
             console.log('== start')
+            console.log(`== pr number: ${github.events.inputs.pr_number}`)
 ###            const pr = await github.pulls.get({
 ###              context.repo.owner,
 ###              context.repo.repo,
