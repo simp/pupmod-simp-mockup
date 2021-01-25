@@ -1,4 +1,8 @@
 
+# NOTES:
+#   $secrets.GITHUB_AUTO is not set for workflow_dispatch events
+#
+#   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
 ---
 name: Manual Trigger GLCI
 on:
@@ -8,7 +12,8 @@ on:
         description: "PR number to test"
         required: true
         default: '54'
-
+env:
+  SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE }}
 jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
@@ -18,7 +23,7 @@ jobs:
       valid: ${{ steps.validate-glci-file.outputs.valid }}
       pr_head: ${{ steps.get-pr-head.pr }}
     steps:
-      - run: "echo ==== TOKEN size: \"$( echo '${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}' | wc -l )\""
+      - run: "echo ==== TOKEN size: \"$( echo \"$SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE\" | wc -l )\""
       - uses: actions/github-script@v3
         id: get-pr-head
         with:
