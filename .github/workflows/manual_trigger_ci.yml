@@ -24,10 +24,6 @@ jobs:
           # See:
           #   - https://octokit.github.io/rest.js/
           script: ''
-
-    steps:
-      - id: get-pr-head
-        run:
       - uses: actions/checkout@v2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
