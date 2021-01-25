@@ -127,13 +127,13 @@ jobs:
               core.setOutput( 'permitted', 'true' )
             } else {
               core.setOutput( 'permitted', 'false' )
-              console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repo.owner}'`)
+              console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repository}; not triggering external CI'`)
             }
             console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
 
 
   trigger-when-user-has-repo-permissions:
-    name: 'Trigger CI [when trusted]'
+    name: 'Trigger CI [trusted users only]'
     needs: [ glci-syntax, contributor-permissions ]
     # This conditional provides an extra safety control, in case the workflow's
     # `on` section is inadventently modified without considering the security
