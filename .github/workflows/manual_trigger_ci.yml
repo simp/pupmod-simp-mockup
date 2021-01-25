@@ -16,8 +16,9 @@ jobs:
     outputs:
       exists: ${{ steps.glci-file-exists.outputs.exists }}
       valid: ${{ steps.validate-glci-file.outputs.valid }}
-      pr_head: ${{ steps.user-repo-permissions.outputs.permitted }}
+      pr_head: ${{ steps.get-pr-head.pr }}
     steps:
+      - run: "echo ==== TOKEN size: $( echo '${{secrets.GITHUB_TOKEN}}' | wc -l"
       - uses: actions/github-script@v3
         id: get-pr-head
         with:
