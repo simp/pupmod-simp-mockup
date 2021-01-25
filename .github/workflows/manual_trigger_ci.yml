@@ -18,7 +18,7 @@ jobs:
       valid: ${{ steps.validate-glci-file.outputs.valid }}
       pr_head: ${{ steps.get-pr-head.pr }}
     steps:
-      - run: "echo ==== TOKEN size: $( echo '${{secrets.GITHUB_TOKEN}}' | wc -l"
+      - run: "echo ==== TOKEN size: $( echo '${{secrets.GITHUB_TOKEN}}' | wc -l )"
       - uses: actions/github-script@v3
         id: get-pr-head
         with:
