@@ -32,14 +32,14 @@ jobs:
           #   - https://octokit.github.io/rest.js/
           script: |
             console.log('== start')
-            console.log(`== pr number: ${github.events.inputs.pr_number}`)
-###            const pr = await github.pulls.get({
-###              context.repo.owner,
-###              context.repo.repo,
-###              github.events.inputs.pr_number,
-###            });
-###            console.log(`== Found PR ${github.events.inputs.pr_number}`)
-###            console.log(pr)
+            console.log(`== pr number: ${github.event.inputs.pr_number}`)
+            const pr = await github.pulls.get({
+              context.repo.owner,
+              context.repo.repo,
+              github.event.inputs.pr_number,
+            });
+            console.log(`== Found PR ${github.event.inputs.pr_number}`)
+            console.log(pr)
 ###            # - [ ]
 ###
 ###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
