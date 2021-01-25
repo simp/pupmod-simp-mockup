@@ -32,15 +32,15 @@ jobs:
           #   - https://octokit.github.io/rest.js/
           script: |
             console.log('== start')
-            const pr = await github.pulls.get({
-              context.repo.owner,
-              context.repo.repo,
-              github.events.inputs.pr_number,
-            })
-            console.log(`== Found PR ${github.events.inputs.pr_number}`)
-            console.log(pr)
-            # - [ ]
-
+###            const pr = await github.pulls.get({
+###              context.repo.owner,
+###              context.repo.repo,
+###              github.events.inputs.pr_number,
+###            });
+###            console.log(`== Found PR ${github.events.inputs.pr_number}`)
+###            console.log(pr)
+###            # - [ ]
+###
 ###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
 ###            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
 ###            if( has_write_access(project_permission.data.permission )){
