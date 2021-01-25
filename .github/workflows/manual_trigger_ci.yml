@@ -7,7 +7,6 @@ on:
       description: "PR to test"
       required: true
 
-
 jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
