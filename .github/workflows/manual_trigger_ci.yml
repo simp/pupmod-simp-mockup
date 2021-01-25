@@ -24,13 +24,13 @@ jobs:
           # See:
           #   - https://octokit.github.io/rest.js/
           script: |
-            // github.event.inputs.logLevel
+            console.log('== start')
             const pr = await github.pulls.get({
               context.repo.owner,
               context.repo.repo,
               github.events.inputs.pr_number,
             })
-            console.log(`== Found PR ${github.events.inputs.pr_number}`) 
+            console.log(`== Found PR ${github.events.inputs.pr_number}`)
             console.log(pr)
             # - [ ]
 
