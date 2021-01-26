@@ -24,41 +24,11 @@ jobs:
     outputs:
       exists: ${{ steps.glci-file-exists.outputs.exists }}
       valid: ${{ steps.validate-glci-file.outputs.valid }}
-      pr_head: ${{ steps.get-pr-head.pr }}
+      pr_head: ${{ steps.get-pr.pr_head }}
+      pr_ref: ${{ steps.get-pr.pr_ref }}
     steps:
-      - run: "echo ==== SA G TOKEN size: \"$( echo \"$SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE\" | wc -c )\""
-      - run: "echo ==== G TOKEN size: \"$( echo \"$GITHUB_TOKEN\" | wc -c )\""
-      - run: "echo ==== PR_NUMBER: \"$( echo \"${PR_NUMBER}\" )\""
-      - run: "echo ==== PR_NUMBER2: \"$( echo \"${{ github.event.inputs.pr_number }}\" )\""
       - uses: actions/github-script@v3
-        name: context.payload.inputs.pr_number
-        continue-on-error: true
-        with:
-          github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
-          # See:
-          #   - https://octokit.github.io/rest.js/
-          script: |
-            console.log(`== pr number: ${context.payload.inputs.pr_number}`)
-      - uses: actions/github-script@v3
-        name: context.event.inputs.pr_number
-        continue-on-error: true
-        with:
-          github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
-          # See:
-          #   - https://octokit.github.io/rest.js/
-          script: |
-            console.log(`== pr number: ${context.event.inputs.pr_number}`)
-      - uses: actions/github-script@v3
-        name: github.event.inputs.pr_number
-        continue-on-error: true
-        with:
-          github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
-          # See:
-          #   - https://octokit.github.io/rest.js/
-          script: |
-            console.log(`== pr number: ${github.event.inputs.pr_number}`)
-      - uses: actions/github-script@v3
-        id: get-pr-head
+        id: get-pr
         with:
           github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
           # See:
@@ -74,14 +44,22 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.payload.inputs.pr_number
             })
-            console.log('== pr: ')
-            console.log(pr)
-###            const pr = await github.pulls.get({
-###              context.repo.owner,
-###              context.repo.repo,
-###              context.payload.inputs.pr_number,
-###            });
-#            console.log(pr)
+            console.log("pr: \n" + JSON.stringify(pr))
+            console.log("pr.head.repo: \n" + pr.head.repo)
+            # PR must have been returned
+            if ( !(pr.status == 200) ){
+              console.log(`::error ::Error looking up PR#${context.payload.inputs.pr_number}: HTTP Response ${pr.status}`)
+              return(false)
+            }
+
+            # PR cannot be merged or closed
+            if ( pr.data.merged ) {
+              console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`);
+            }
+
+            core.setOutput( 'head_sha', pr.head.sha )
+            core.setOutput( 'head_ref', pr.head.ref )
+            core.setOutput( 'head_label', pr.head.label )
 ###            # - [ ]
 ###
 ###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
@@ -95,7 +73,8 @@ jobs:
 ###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
       - uses: actions/checkout@v2
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          valid: ${{ steps.get-pr.outputs.head_ref }}
+          repository: ${{ sgithub.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
       - name: 'Does GLCI file exist?'
         id: glci-file-exists
