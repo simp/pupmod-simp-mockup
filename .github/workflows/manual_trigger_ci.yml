@@ -162,6 +162,7 @@ jobs:
           fi
 
           echo "== Pushing '$GIT_BRANCH' to gitlab"
+          echo git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git branch "$GIT_BRANCH" HEAD || :
           git branch -av
