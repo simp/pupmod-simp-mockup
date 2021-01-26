@@ -49,21 +49,22 @@ jobs:
             console.log("== pr.head")
             console.log(pr.head)
 
-            #console.log("pr.head.repo: \n" + pr.head.repo)
-            # PR must have been returned
-            if ( !(pr.status == 200) ){
-              console.log(`::error ::Error looking up PR#${context.payload.inputs.pr_number}: HTTP Response ${pr.status}`)
-              return(false)
-            }
+            ### #console.log("pr.head.repo: \n" + pr.head.repo)
+            ### # PR must have been returned
+            ### if ( !(pr.status == 200) ){
+            ###   console.log(`::error ::Error looking up PR#${context.payload.inputs.pr_number}: HTTP Response ${pr.status}`)
+            ###   return(false)
+            ### }
 
-            # PR cannot be merged or closed
-            if ( pr.data.merged ) {
-              console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
-            }
+            ### # PR cannot be merged or closed
+            ### if ( pr.data.merged ) {
+            ###   console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
+            ### }
 
-            core.setOutput( 'head_sha', pr.head.sha )
-            core.setOutput( 'head_ref', pr.head.ref )
-            core.setOutput( 'head_label', pr.head.label )
+            ### core.setOutput( 'head_sha', pr.head.sha )
+            ### core.setOutput( 'head_ref', pr.head.ref )
+            ### core.setOutput( 'head_label', pr.head.label )
+
 ###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
       - uses: actions/checkout@v2
         with:
