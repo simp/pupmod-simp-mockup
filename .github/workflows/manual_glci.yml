@@ -17,7 +17,7 @@
 #   provided to untrusted builds (i.e, triggered by PR from another repository)
 #
 # ------------------------------------------------------------------------------
-secrets.
+#
 # NOTES:
 #   It is necessary to provide NO_SCOPE_GITHUB_TOKEN because $secrets.GITHUB_AUTO
 #   is NOT provide to manually-triggered (`workflow_dispatch`) events, in order
