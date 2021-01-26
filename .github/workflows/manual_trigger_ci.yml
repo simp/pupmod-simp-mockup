@@ -19,13 +19,15 @@ jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
-###    env:
-###      PR_NUMBER: ${{ github.event.inputs.pr_number }}
-###    outputs:
-###      exists: ${{ steps.glci-file-exists.outputs.exists }}
-###      valid: ${{ steps.validate-glci-file.outputs.valid }}
-###      pr_head: ${{ steps.get-pr.pr_head }}
-###      pr_ref: ${{ steps.get-pr.pr_ref }}
+    env:
+      PR_NUMBER: ${{ github.event.inputs.pr_number }}
+    outputs:
+      exists: ${{ steps.glci-file-exists.outputs.exists }}
+      valid: ${{ steps.validate-glci-file.outputs.valid }}
+      pr_head_clone_url: ${{ steps.get-pr.pr_head_clone_url }}
+      pr_head_ref: ${{ steps.get-pr.pr_head_ref }}
+      pr_head_sha: ${{ steps.get-pr.pr_head_sha }}
+      pr_head_label: ${{ steps.get-pr.pr_head_sha }}
     steps:
       - uses: actions/github-script@v3
         id: get-pr
