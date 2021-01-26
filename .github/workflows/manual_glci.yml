@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "PR number to test"
+        description: "PR number to send to GLCI"
         required: true
 
 jobs:
@@ -157,6 +157,7 @@ jobs:
             echo No active pipelines found
           fi
 
+          # Should we protect against pushing default branches?
           echo "== Pushing '$GIT_BRANCH' to gitlab"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git branch "$GIT_BRANCH" HEAD || :
