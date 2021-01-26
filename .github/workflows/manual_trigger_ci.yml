@@ -44,7 +44,11 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.payload.inputs.pr_number
             })
-            console.log(JSON.stringify(pr))
+            console.log("== pr")
+            console.log(pr)
+            console.log("== pr.head")
+            console.log(pr.head)
+
             #console.log("pr.head.repo: \n" + pr.head.repo)
             # PR must have been returned
             if ( !(pr.status == 200) ){
