@@ -171,7 +171,8 @@ jobs:
           git log --color --graph  --abbrev-commit -5 \
             --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
           git push gitlab ":${GIT_BRANCH}" -f # attempt to un-weird GLCI's `changed` tracking
-          git push --verbose gitlab "${GIT_BRANCH}" 2>&1
+          echo "git push --verbose gitlab ${GIT_BRANCH}"
+          echo git push --verbose gitlab "${GIT_BRANCH}" 2>&1
           echo "Pushed branch '${GIT_BRANCH}' to gitlab"
           echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
   dump_contexts:
