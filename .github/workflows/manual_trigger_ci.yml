@@ -15,6 +15,8 @@ on:
 env:
   SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PR_NUMBER: ${{ context.payload.inputs.pr_number }}
+  PR_NUMBER2: ${{ context.event.inputs.pr_number }}
 jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
@@ -26,6 +28,8 @@ jobs:
     steps:
       - run: "echo ==== SA G TOKEN size: \"$( echo \"$SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE\" | wc -c )\""
       - run: "echo ==== G TOKEN size: \"$( echo \"$GITHUB_TOKEN\" | wc -c )\""
+      - run: "echo ==== PR_NUMBER: \"$( echo \"$PR_NUMBER\" )\""
+      - run: "echo ==== PR_NUMBER2: \"$( echo \"$PR_NUMBER2\" )\""
       - uses: actions/github-script@v3
         id: get-pr-head
         with:
