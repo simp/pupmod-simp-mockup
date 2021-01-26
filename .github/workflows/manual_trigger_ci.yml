@@ -34,7 +34,6 @@ jobs:
           # See:
           #   - https://octokit.github.io/rest.js/
           script: |
-            console.log('== start')
             console.log(`== pr number: ${context.payload.inputs.pr_number}`)
             const pr = await github.request('get /repos/{owner}/{repo}/pulls/{pull_number}', {
               headers: {
@@ -69,7 +68,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ steps.get-pr.outputs.head_ref }}
+          ref: ddd #${{ steps.get-pr.outputs.head_ref }}
       - name: 'Does GLCI file exist?'
         id: glci-file-exists
         run: |
