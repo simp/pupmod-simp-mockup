@@ -45,7 +45,7 @@ jobs:
               pull_number: context.payload.inputs.pr_number
             })
             console.log("== pr")
-            console.log(pr)
+            #console.log(pr)
             #console.log("== pr.head")
             #console.log(pr.head)
 
