@@ -19,6 +19,8 @@ jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
+    env:
+      PR_NUMBER: ${{ github.event.inputs.pr_number }}
     outputs:
       exists: ${{ steps.glci-file-exists.outputs.exists }}
       valid: ${{ steps.validate-glci-file.outputs.valid }}
@@ -26,8 +28,8 @@ jobs:
     steps:
       - run: "echo ==== SA G TOKEN size: \"$( echo \"$SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE\" | wc -c )\""
       - run: "echo ==== G TOKEN size: \"$( echo \"$GITHUB_TOKEN\" | wc -c )\""
-      - run: "echo ==== PR_NUMBER: \"$( echo \"${{ context.payload.inputs.pr_number }}\" )\""
-      - run: "echo ==== PR_NUMBER2: \"$( echo \"${{ context.payload.inputs.pr_number }}\" )\""
+      - run: "echo ==== PR_NUMBER: \"$( echo \"${PR_NUMBER}\" )\""
+      - run: "echo ==== PR_NUMBER2: \"$( echo \"${{ github.event.inputs.pr_number }}\" )\""
       - uses: actions/github-script@v3
         id: get-pr-head
         with:
