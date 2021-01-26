@@ -42,67 +42,68 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.inputs.pr_number
-            })
+            });
+
             console.log('== pr')
-            #console.log(pr)
-            #console.log("== pr.head")
-            #console.log(pr.head)
-
-            ### #console.log("pr.head.repo: \n" + pr.head.repo)
-            ### # PR must have been returned
-            ### if ( !(pr.status == 200) ){
-            ###   console.log(`::error ::Error looking up PR#${context.payload.inputs.pr_number}: HTTP Response ${pr.status}`)
-            ###   return(false)
-            ### }
-
-            ### # PR cannot be merged or closed
-            ### if ( pr.data.merged ) {
-            ###   console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
-            ### }
-
-            ### core.setOutput( 'head_sha', pr.head.sha )
-            ### core.setOutput( 'head_ref', pr.head.ref )
-            ### core.setOutput( 'head_label', pr.head.label )
-
-###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
-      - uses: actions/checkout@v2
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ddd #${{ steps.get-pr.outputs.head_ref }}
-      - name: 'Does GLCI file exist?'
-        id: glci-file-exists
-        run: |
-          if [ -f .gitlab-ci.yml ]; then
-            echo '.gitlab-ci.yml exists'
-            echo '::set-output name=exists::true'
-          else
-            echo '::error ::The ".gitlab-ci.yml" file is missing!'
-            echo '::set-output name=exists::false'
-            false
-          fi
-      - name: 'Validate GLCI file syntax'
-        id: validate-glci-file
-        if: steps.glci-file-exists.outputs.exists == 'true'
-        env:
-          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
-          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
-        run: |
-          GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
-          CURL_CMD=(curl --http1.1 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
-          [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
-          data="$(jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' )"
-          response="$(echo "$data" | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq . )"
-          status=$( echo "$response" | jq .status )
-          if [[ "$status" == '"valid"' ]]; then
-            echo '.gitlab-ci.yml is valid'
-            echo '::set-output name=valid::true'
-          else
-            echo '::set-output name=valid::false'
-            echo '::error::The .gitlab-ci.yml" file is invalid!'
-            echo "$response" | jq -r '.errors[] | . = "::error ::\(.)"'
-            printf  "::debug ::.gitlab-ci.yml CI lint service response: %s\n" "$response"
-            false
-          fi
+###            #console.log(pr)
+###            #console.log("== pr.head")
+###            #console.log(pr.head)
+###
+###            ### #console.log("pr.head.repo: \n" + pr.head.repo)
+###            ### # PR must have been returned
+###            ### if ( !(pr.status == 200) ){
+###            ###   console.log(`::error ::Error looking up PR#${context.payload.inputs.pr_number}: HTTP Response ${pr.status}`)
+###            ###   return(false)
+###            ### }
+###
+###            ### # PR cannot be merged or closed
+###            ### if ( pr.data.merged ) {
+###            ###   console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
+###            ### }
+###
+###            ### core.setOutput( 'head_sha', pr.head.sha )
+###            ### core.setOutput( 'head_ref', pr.head.ref )
+###            ### core.setOutput( 'head_label', pr.head.label )
+###
+######            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
+###      - uses: actions/checkout@v2
+###        with:
+###          repository: ${{ github.event.pull_request.head.repo.full_name }}
+###          ref: ddd #${{ steps.get-pr.outputs.head_ref }}
+###      - name: 'Does GLCI file exist?'
+###        id: glci-file-exists
+###        run: |
+###          if [ -f .gitlab-ci.yml ]; then
+###            echo '.gitlab-ci.yml exists'
+###            echo '::set-output name=exists::true'
+###          else
+###            echo '::error ::The ".gitlab-ci.yml" file is missing!'
+###            echo '::set-output name=exists::false'
+###            false
+###          fi
+###      - name: 'Validate GLCI file syntax'
+###        id: validate-glci-file
+###        if: steps.glci-file-exists.outputs.exists == 'true'
+###        env:
+###          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+###          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
+###        run: |
+###          GITLAB_API_URL="${GITLAB_API_URL:-https://gitlab.com/api/v4}"
+###          CURL_CMD=(curl --http1.1 --fail --silent --show-error --header 'Content-Type: application/json' --data @-)
+###          [ -n "$GITLAB_API_PRIVATE_TOKEN" ] && CURL_CMD+=(--header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN")
+###          data="$(jq --null-input --arg yaml "$(<.gitlab-ci.yml)" '.content=$yaml' )"
+###          response="$(echo "$data" | "${CURL_CMD[@]}" "${GITLAB_API_URL}/ci/lint?include_merged_yaml=true" | jq . )"
+###          status=$( echo "$response" | jq .status )
+###          if [[ "$status" == '"valid"' ]]; then
+###            echo '.gitlab-ci.yml is valid'
+###            echo '::set-output name=valid::true'
+###          else
+###            echo '::set-output name=valid::false'
+###            echo '::error::The .gitlab-ci.yml" file is invalid!'
+###            echo "$response" | jq -r '.errors[] | . = "::error ::\(.)"'
+###            printf  "::debug ::.gitlab-ci.yml CI lint service response: %s\n" "$response"
+###            false
+###          fi
 
   dump_contexts:
     name: 'Examine Context contents'
