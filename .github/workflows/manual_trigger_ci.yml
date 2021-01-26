@@ -118,8 +118,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # We need full checkout to push to gitlab mirror
-          repository: ${{ needs.glci-syntax.pr_head_full_name }}
-          ref: ${{ needs.glci-syntax.pr_head_sha }}
+          repository: ${{ needs.glci-syntax.outputs.pr_head_full_name }}
+          ref: ${{ needs.glci-syntax.outputs.pr_head_sha }}
           token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
           clean: true
       - name: Trigger CI
@@ -128,11 +128,10 @@ jobs:
           GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
           GITLAB_ORG: 'simp'
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
-          GIT_BRANCH: ${{ needs.glci-syntax.pr_head_ref }}
+          GIT_BRANCH: ${{ needs.glci-syntax.outputs.pr_head_ref }}
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
-          GIT_BRANCH="${GIT_BRANCH:-GITHUB_HEAD_REF}"
           GITXXB_REPO_NAME="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
           GITLAB_PROJECT_ID="${GITLAB_ORG}%2F${GITXXB_REPO_NAME}"
           # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
