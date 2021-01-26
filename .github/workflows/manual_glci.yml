@@ -27,7 +27,7 @@
 #
 #   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
 ---
-name: 'Manual: GLCI for PR'
+name: 'Manual: PR GLCI'
 
 on:
   workflow_dispatch:
