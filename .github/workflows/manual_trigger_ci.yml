@@ -48,6 +48,7 @@ jobs:
             console.log(pr);
             console.log("\n\n== pr.data.head\n");
             console.log(pr.data.head);
+            console.log(pr.status);
 
 ##            # PR must have been returned
 ##            if ( !(pr.status == 200) ) {
