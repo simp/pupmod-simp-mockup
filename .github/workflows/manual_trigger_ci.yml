@@ -44,7 +44,7 @@ jobs:
               pull_number: context.payload.inputs.pr_number
             });
 
-            console.log("\n\n== pr\n');
+            console.log("\n\n== pr\n");
             console.log(pr);
             console.log("\n\n== pr.data.head\n");
             console.log(pr.data.head);
