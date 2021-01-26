@@ -4,7 +4,7 @@
 #
 #   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
 ---
-name: 'Manual: Trigger GLCI for PR'
+name: 'Manual: GLCI for PR'
 
 on:
   workflow_dispatch:
@@ -162,34 +162,30 @@ jobs:
           fi
 
           echo "== Pushing '$GIT_BRANCH' to gitlab"
-          echo == git remote add gitlab "https://oauth2:GITLAB_API_PRIVATE_TOKEN@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
-          echo "== GITLAB_API_PRIVATE_TOKEN length: $( echo $GITLAB_API_PRIVATE_TOKEN | wc -c )"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
-          git fetch gitlab
           git branch "$GIT_BRANCH" HEAD || :
           git branch -av
-          git remote -v
           git log --color --graph  --abbrev-commit -5 \
             --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
           git push gitlab ":${GIT_BRANCH}" -f || : # attempt to un-weird GLCI's `changed` tracking
           echo "== git push --verbose gitlab ${GIT_BRANCH}"
-          echo git push --verbose gitlab "${GIT_BRANCH}" 2>&1
+          git push --verbose gitlab "${GIT_BRANCH}"
           echo "Pushed branch '${GIT_BRANCH}' to gitlab"
           echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
-  dump_contexts:
-    needs: [ glci-syntax ]
-    name: 'Examine Context contents'
-    if: always()
-    runs-on: ubuntu-16.04
-    steps:
-      - name: Dump contexts
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump 'needs' context
-        env:
-          ENV_CONTEXT: ${{ toJson(needs) }}
-        run: echo "$ENV_CONTEXT"
-      - name: Dump env vars
-        run: env | sort
+###  examine_contexts:
+###    needs: [ glci-syntax ]
+###    name: 'Examine Context contents'
+###    if: always()
+###    runs-on: ubuntu-16.04
+###    steps:
+###      - name: Dump contexts
+###        env:
+###          GITHUB_CONTEXT: ${{ toJson(github) }}
+###        run: echo "$GITHUB_CONTEXT"
+###      - name: Dump 'needs' context
+###        env:
+###          ENV_CONTEXT: ${{ toJson(needs) }}
+###        run: echo "$ENV_CONTEXT"
+###      - name: Dump env vars
+###        run: env | sort
 

@@ -44,7 +44,7 @@
 # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
 #
 ---
-name: PR Trigger GLCI
+name: GLCI
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
@@ -214,10 +214,9 @@ jobs:
           echo "== Pushing $GIT_BRANCH to gitlab"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           #git branch "$GIT_BRANCH" HEAD
-          git branch -av
           git log --color --graph  --abbrev-commit -5 \
             --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
-          git push gitlab ":${GIT_BRANCH}" -f 2>/dev/null # attempt to un-weird GLCI's `changed` tracking
+          git push gitlab ":${GIT_BRANCH}" -f || : # attempt to un-weird GLCI's `changed` tracking
           git push gitlab "${GIT_BRANCH}" -f
           echo "Pushed branch '${GIT_BRANCH}' to gitlab"
           echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
@@ -229,20 +228,20 @@ jobs:
           echo "Ending gracefully; Contributor $GITHUB_ACTOR does not have permission to trigger CI"
           false
 
-  dump_contexts:
-    name: 'Examine Context contents'
-    if: always()
-    runs-on: ubuntu-16.04
-    needs: [ glci-syntax, contributor-permissions ]
-    steps:
-      - name: Dump contexts
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump needs context
-        env:
-          ENV_CONTEXT: ${{ toJson(needs) }}
-        run: echo "$ENV_CONTEXT"
-      - name: Dump env vars
-        run: env | sort
+###  examine_contexts:
+###    name: 'Examine Context contents'
+###    if: always()
+###    runs-on: ubuntu-16.04
+###    needs: [ glci-syntax, contributor-permissions ]
+###    steps:
+###      - name: Dump contexts
+###        env:
+###          GITHUB_CONTEXT: ${{ toJson(github) }}
+###        run: echo "$GITHUB_CONTEXT"
+###      - name: Dump needs context
+###        env:
+###          ENV_CONTEXT: ${{ toJson(needs) }}
+###        run: echo "$ENV_CONTEXT"
+###      - name: Dump env vars
+###        run: env | sort
 
