@@ -44,10 +44,10 @@ jobs:
               pull_number: context.payload.inputs.pr_number
             });
 
-            console.log("\n\n== pr\n')
-            console.log(pr)
-            console.log("\n\n== pr.data.head\n")
-            console.log(pr.data.head)
+            console.log("\n\n== pr\n');
+            console.log(pr);
+            console.log("\n\n== pr.data.head\n");
+            console.log(pr.data.head);
 
 ###            # PR must have been returned
 ###            if ( !(pr.status == 200) ){
