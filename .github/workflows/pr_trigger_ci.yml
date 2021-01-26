@@ -166,7 +166,7 @@ jobs:
       - uses: actions/checkout@v2
         if: needs.contributor-permissions.outputs.permitted == 'true'
         with:
-          fetch-depth: 0  # We need full checkout to push to gitlab mirror
+          fetch-depth: 0  # Need full checkout to push to gitlab mirror
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 

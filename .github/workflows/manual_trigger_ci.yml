@@ -117,10 +117,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # We need full checkout to push to gitlab mirror
           repository: ${{ needs.glci-syntax.outputs.pr_head_full_name }}
           ref: ${{ needs.glci-syntax.outputs.pr_head_sha }}
           token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
+          fetch-depth: 0  # Need full checkout to push to gitlab mirror
           clean: true
       - name: Trigger CI
         env:
@@ -162,7 +162,7 @@ jobs:
           fi
 
           echo "== Pushing '$GIT_BRANCH' to gitlab"
-          echo git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
+          echo git remote add gitlab "https://oauth2:GITLAB_API_PRIVATE_TOKEN@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git branch "$GIT_BRANCH" HEAD || :
           git branch -av
