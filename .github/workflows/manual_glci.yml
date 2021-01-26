@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "PR number to send to GLCI"
+        description: "PR number to trigger GLCI"
         required: true
 
 jobs:
