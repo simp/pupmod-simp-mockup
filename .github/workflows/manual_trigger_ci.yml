@@ -46,8 +46,8 @@ jobs:
             })
             console.log("== pr")
             console.log(pr)
-            console.log("== pr.head")
-            console.log(pr.head)
+            #console.log("== pr.head")
+            #console.log(pr.head)
 
             ### #console.log("pr.head.repo: \n" + pr.head.repo)
             ### # PR must have been returned
