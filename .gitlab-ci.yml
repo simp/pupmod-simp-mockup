@@ -339,6 +339,5 @@ pup6.16.0-unit:
 
 pup6.16.0:
   <<: *pup_6_16_0
-  <<: *acceptance_base
   script:
     - 'echo "++ dummy acceptance test works!"'

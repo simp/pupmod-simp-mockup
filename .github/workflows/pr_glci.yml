@@ -44,7 +44,7 @@
 # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
 #
 ---
-name: GLCI
+name: PR GLCI
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]

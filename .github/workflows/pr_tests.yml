@@ -97,7 +97,7 @@ jobs:
         run: 'bundle exec pdk build --force'
 
   spec-tests:
-    name: 'Puppet Spec Tests'
+    name: 'Puppet Spec'
     needs: [puppet-syntax]
     runs-on: ubuntu-18.04
     strategy:
