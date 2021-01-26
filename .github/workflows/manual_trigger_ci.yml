@@ -4,7 +4,7 @@
 #
 #   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
 ---
-name: Manual Trigger GLCI
+name: 'Manual: Trigger GLCI for PR'
 on:
   workflow_dispatch:
     inputs:
@@ -14,6 +14,7 @@ on:
         default: '54'
 env:
   SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
@@ -23,7 +24,8 @@ jobs:
       valid: ${{ steps.validate-glci-file.outputs.valid }}
       pr_head: ${{ steps.get-pr-head.pr }}
     steps:
-      - run: "echo ==== TOKEN size: \"$( echo \"$SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE\" | wc -c )\""
+      - run: "echo ==== SA G TOKEN size: \"$( echo \"$SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE\" | wc -c )\""
+      - run: "echo ==== G TOKEN size: \"$( echo \"$GITHUB_TOKEN\" | wc -c )\""
       - uses: actions/github-script@v3
         id: get-pr-head
         with:
@@ -33,12 +35,12 @@ jobs:
           script: |
             console.log('== start')
             console.log(`== pr number: ${context.payload.inputs.pr_number}`)
-            console.log(`== pr number: ${github.event.inputs.pr_number}`)
-#            const pr = await github.pulls.get({
-#              context.repo.owner,
-#              context.repo.repo,
-#              github.event.inputs.pr_number,
-#            });
+            console.log(`== pr number: ${context.event.inputs.pr_number}`)
+            const pr = await github.pulls.get({
+              context.repo.owner,
+              context.repo.repo,
+              context.event.inputs.pr_number,
+            });
 #            console.log(`== Found PR ${github.event.inputs.pr_number}`)
 #            console.log(pr)
 ###            # - [ ]
