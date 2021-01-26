@@ -36,16 +36,16 @@ jobs:
           script: |
             console.log('== start')
             console.log(`== pr number: ${context.payload.inputs.pr_number}`)
-            const pr = await github.request('get /repos/{owner}/{repo}/pulls/{pull_number}', {
-              headers: {
-                accept: 'application/vnd.github.v3+json'
-              },
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.inputs.pr_number
-            })
-            console.log("== pr")
-            console.log(pr)
+###            const pr = await github.request('get /repos/{owner}/{repo}/pulls/{pull_number}', {
+###              headers: {
+###                accept: 'application/vnd.github.v3+json'
+###              },
+###              owner: context.repo.owner,
+###              repo: context.repo.repo,
+###              pull_number: context.payload.inputs.pr_number
+###            })
+###            console.log("== pr")
+###            console.log(pr)
             #console.log("== pr.head")
             #console.log(pr.head)
 
