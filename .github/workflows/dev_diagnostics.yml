@@ -4,6 +4,7 @@ name: (Dev only) Diagnostics
 on:
   #push: {}
   pull_request_target: {}
+  pull_request: {}
 
 env:
   GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
