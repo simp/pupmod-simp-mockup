@@ -5,6 +5,7 @@
 #   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
 ---
 name: 'Manual: Trigger GLCI for PR'
+
 on:
   workflow_dispatch:
     inputs:
@@ -12,15 +13,11 @@ on:
         description: "PR number to test"
         required: true
         default: '54'
-env:
-  SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
-    env:
-      PR_NUMBER: ${{ github.event.inputs.pr_number }}
     outputs:
       exists: ${{ steps.glci-file-exists.outputs.exists }}
       valid: ${{ steps.validate-glci-file.outputs.valid }}
