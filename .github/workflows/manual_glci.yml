@@ -66,9 +66,6 @@ jobs:
             core.setOutput( 'pr_head_ref', pr.data.head.ref )
             core.setOutput( 'pr_head_label', pr.data.head.label )
             core.setOutput( 'pr_head_full_name', pr.data.head.full_name )
-
-######            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
-
       - uses: actions/checkout@v2
         with:
           repository: ${{ steps.get-pr.outputs.pr_head_full_name }}
@@ -172,6 +169,7 @@ jobs:
           git push --verbose gitlab "${GIT_BRANCH}"
           echo "Pushed branch '${GIT_BRANCH}' to gitlab"
           echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
+
 ###  examine_contexts:
 ###    needs: [ glci-syntax ]
 ###    name: 'Examine Context contents'
