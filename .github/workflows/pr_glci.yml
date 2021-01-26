@@ -145,14 +145,16 @@ jobs:
     #   AND:
     #   - [x] Newly-opened PRs:           github.event.action == 'opened'
     #   - [x] Re-opened PRs:              github.event.action == 'reopened'
-    #   - [x] Commites are added to PR:   github.event.action == 'synchronize'
+    #   - [x] Commits are added to PR:    github.event.action == 'synchronize'
     #   AND:
     #   - [x] .gitlab-ci.yml exists/ok:   needs.glci-syntax.outputs.valid == 'true'
     #
-    # It will NOT Trigger on:
+    # [Not implemented] It should NEVER trigger on:
     #
     #   - [ ] Merged PRs:                 github.event.pull_request.merged == 'false'
-    #     -  (the downstream GitLab mirror will take care of that)
+    #     - (the downstream GitLab mirror will take care of that)
+    #     - Not implemented: For some reason, this conditional always fails
+    #     - Unnecessary if on>pull_request_target>types doesn't include 'closed'
     if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true' && needs.glci-syntax.outputs.valid == 'true' && needs.contributor-permissions.outputs.permitted == 'true'
     runs-on: ubuntu-18.04
     steps:
@@ -175,7 +177,7 @@ jobs:
         env:
           GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
           GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
-          GITLAB_ORG: 'simp'
+          GITLAB_ORG: ${{ github.event.organization.login }}
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
