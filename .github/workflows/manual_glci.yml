@@ -1,6 +1,29 @@
 
+# When a PR is closed, clean up any associated GitLab CI pipelines & branch
+#
+# * Cancels all GLCI pipelines associated with the PR HEAD ref (branch)
+# * Removes the PR HEAD branch from the corresponding gitlab.com/org/ project
+#
+# ==============================================================================
+#
+# This pipeline uses the following GitHub Action Secrets:
+#
+#   GitHub Secret variable    Type      Notes
+#   ------------------------  --------  ----------------------------------------
+#   GITLAB_API_PRIVATE_TOKEN  Required  GitLab token (should have `api` scope)
+#   NO_SCOPE_GITHUB_TOKEN     Required  GitHub token (should have no scopes)
+#   GITLAB_SERVER_URL         Optional  Specify a GL server other than gitlab.com
+#   The secure vars will be filtered in GitHub Actions log output, and aren't
+#   provided to untrusted builds (i.e, triggered by PR from another repository)
+#
+# ------------------------------------------------------------------------------
+secrets.
 # NOTES:
-#   $secrets.GITHUB_AUTO is not set for workflow_dispatch events
+#   It is necessary to provide NO_SCOPE_GITHUB_TOKEN because $secrets.GITHUB_AUTO
+#   is NOT provide to manually-triggered (`workflow_dispatch`) events, in order
+#   to prevent recursive triggers between workflows
+#
+#   Reference:
 #
 #   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
 ---
@@ -28,7 +51,7 @@ jobs:
       - uses: actions/github-script@v3
         id: get-pr
         with:
-          github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
+          github-token: ${{secrets.NO_SCOPE_GITHUB_TOKEN}}
           # See:
           #   - https://octokit.github.io/rest.js/
           script: |
@@ -69,7 +92,7 @@ jobs:
         with:
           repository: ${{ steps.get-pr.outputs.pr_head_full_name }}
           ref: ${{ steps.get-pr.outputs.pr_head_sha }}
-          token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
+          token: ${{secrets.NO_SCOPE_GITHUB_TOKEN}}
           clean: true
       - name: 'Does GLCI file exist?'
         id: glci-file-exists
@@ -115,14 +138,14 @@ jobs:
         with:
           repository: ${{ needs.glci-syntax.outputs.pr_head_full_name }}
           ref: ${{ needs.glci-syntax.outputs.pr_head_sha }}
-          token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
+          token: ${{secrets.NO_SCOPE_GITHUB_TOKEN}}
           fetch-depth: 0  # Need full checkout to push to gitlab mirror
           clean: true
       - name: Trigger CI
         env:
           GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
           GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
-          GITLAB_ORG: 'simp'
+          GITLAB_ORG: ${{ github.event.organization.login }}
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           GIT_BRANCH: ${{ needs.glci-syntax.outputs.pr_head_ref }}
         run: |
