@@ -31,6 +31,33 @@ jobs:
       - run: "echo ==== PR_NUMBER: \"$( echo \"${PR_NUMBER}\" )\""
       - run: "echo ==== PR_NUMBER2: \"$( echo \"${{ github.event.inputs.pr_number }}\" )\""
       - uses: actions/github-script@v3
+        name: context.payload.inputs.pr_number
+        continue-on-error: true
+        with:
+          github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
+          # See:
+          #   - https://octokit.github.io/rest.js/
+          script: |
+            console.log(`== pr number: ${context.payload.inputs.pr_number}`)
+      - uses: actions/github-script@v3
+        name: context.event.inputs.pr_number
+        continue-on-error: true
+        with:
+          github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
+          # See:
+          #   - https://octokit.github.io/rest.js/
+          script: |
+            console.log(`== pr number: ${context.event.inputs.pr_number}`)
+      - uses: actions/github-script@v3
+        name: github.event.inputs.pr_number
+        continue-on-error: true
+        with:
+          github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
+          # See:
+          #   - https://octokit.github.io/rest.js/
+          script: |
+            console.log(`== pr number: ${github.event.inputs.pr_number}`)
+      - uses: actions/github-script@v3
         id: get-pr-head
         with:
           github-token: ${{secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE}}
@@ -38,8 +65,6 @@ jobs:
           #   - https://octokit.github.io/rest.js/
           script: |
             console.log('== start')
-            console.log(`== pr number: ${context.payload.inputs.pr_number}`)
-            console.log(`== pr number: ${context.event.inputs.pr_number}`)
             const pr = await github.pulls.get({
               context.repo.owner,
               context.repo.repo,
