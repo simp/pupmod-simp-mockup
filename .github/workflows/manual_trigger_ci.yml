@@ -55,17 +55,17 @@ jobs:
               return(false)
             }
 
-            # TODO: should either of these conditions really prevent a GLCI trigger?
-            if ( pr.data.status != 'open' ) {
-              console.log(`::error ::PR#${context.payload.inputs.pr_number} is not open!`)
-            }
-            if ( pr.data.merged ) {
-              console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
-            }
-            core.setOutput( 'pr_head_sha', pr.data.head.sha )
-            core.setOutput( 'pr_head_ref', pr.data.head.ref )
-            core.setOutput( 'pr_head_label', pr.data.head.label )
-            core.setOutput( 'pr_head_clone_url', pr.data.head.repo.clone_url )
+###            # TODO: should either of these conditions really prevent a GLCI trigger?
+###            if ( pr.data.status != 'open' ) {
+###              console.log(`::error ::PR#${context.payload.inputs.pr_number} is not open!`)
+###            }
+###            if ( pr.data.merged ) {
+###              console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
+###            }
+###            core.setOutput( 'pr_head_sha', pr.data.head.sha )
+###            core.setOutput( 'pr_head_ref', pr.data.head.ref )
+###            core.setOutput( 'pr_head_label', pr.data.head.label )
+###            core.setOutput( 'pr_head_clone_url', pr.data.head.repo.clone_url )
 ###
 ###
 ###
