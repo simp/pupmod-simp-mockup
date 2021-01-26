@@ -56,7 +56,7 @@ jobs:
               return(false)
             }
 
-            # TODO: should either of these conditions really prevent a GLCI trigger?
+            // TODO: should either of these conditions really prevent a GLCI trigger?
             if ( pr.data.status != 'open' ) {
               console.log(`::error ::PR# ${context.payload.inputs.pr_number} is not open`)
             }
