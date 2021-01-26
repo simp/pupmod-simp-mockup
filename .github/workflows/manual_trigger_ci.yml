@@ -73,9 +73,8 @@ jobs:
 ###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
       - uses: actions/checkout@v2
         with:
-          valid: ${{ steps.get-pr.outputs.head_ref }}
-          repository: ${{ sgithub.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ steps.get-pr.outputs.head_ref }}
       - name: 'Does GLCI file exist?'
         id: glci-file-exists
         run: |
