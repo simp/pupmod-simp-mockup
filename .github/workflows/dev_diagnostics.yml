@@ -39,7 +39,7 @@ on:
 env:
   GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
   GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
-  GITLAB_ORG: 'simp'
+  GITLAB_ORG: ${{ github.event.organization.login }}
   PUPPET_VERSION: '~> 6'
 
 jobs:
