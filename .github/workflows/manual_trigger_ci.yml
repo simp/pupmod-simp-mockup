@@ -161,7 +161,7 @@ jobs:
             echo No active pipelines found
           fi
 
-          echo "== Pushing $GIT_BRANCH to gitlab"
+          echo "== Pushing '$GIT_BRANCH' to gitlab"
           echo git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
           git branch -av
@@ -172,6 +172,7 @@ jobs:
           echo "Pushed branch '${GIT_BRANCH}' to gitlab"
           echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
   dump_contexts:
+    needs: [ glci-syntax ]
     name: 'Examine Context contents'
     if: always()
     runs-on: ubuntu-16.04
