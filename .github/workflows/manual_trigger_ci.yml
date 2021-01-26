@@ -65,12 +65,22 @@ jobs:
           #   - https://octokit.github.io/rest.js/
           script: |
             console.log('== start')
-            const pr = await github.pulls.get({
-              context.repo.owner,
-              context.repo.repo,
-              context.payload.inputs.pr_number,
-            });
-#            console.log(`== Found PR ${github.event.inputs.pr_number}`)
+            console.log(`== pr number: ${context.payload.inputs.pr_number}`)
+            const pr = await github.request('get /repos/{owner}/{repo}/pulls/{pull_number}', {
+              headers: {
+                accept: 'application/vnd.github.v3+json'
+              },
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_request: context.payload.inputs.pr_number
+            })
+            console.log('== pr: ')
+            console.log(pr)
+###            const pr = await github.pulls.get({
+###              context.repo.owner,
+###              context.repo.repo,
+###              context.payload.inputs.pr_number,
+###            });
 #            console.log(pr)
 ###            # - [ ]
 ###
