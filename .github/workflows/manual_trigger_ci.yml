@@ -44,8 +44,8 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.payload.inputs.pr_number
             })
-            console.log("pr: \n" + JSON.stringify(pr))
-            console.log("pr.head.repo: \n" + pr.head.repo)
+            console.log(JSON.stringify(pr))
+            #console.log("pr.head.repo: \n" + pr.head.repo)
             # PR must have been returned
             if ( !(pr.status == 200) ){
               console.log(`::error ::Error looking up PR#${context.payload.inputs.pr_number}: HTTP Response ${pr.status}`)
@@ -54,22 +54,12 @@ jobs:
 
             # PR cannot be merged or closed
             if ( pr.data.merged ) {
-              console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`);
+              console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
             }
 
             core.setOutput( 'head_sha', pr.head.sha )
             core.setOutput( 'head_ref', pr.head.ref )
             core.setOutput( 'head_label', pr.head.label )
-###            # - [ ]
-###
-###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
-###            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
-###            if( has_write_access(project_permission.data.permission )){
-###              core.setOutput( 'permitted', 'true' )
-###            } else {
-###              core.setOutput( 'permitted', 'false' )
-###              console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repository}; not triggering external CI'`)
-###            }
 ###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
       - uses: actions/checkout@v2
         with:
