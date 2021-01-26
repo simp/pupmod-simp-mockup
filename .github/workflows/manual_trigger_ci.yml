@@ -15,12 +15,13 @@ on:
 env:
   SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__NO_SCOPE }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  PR_NUMBER: ${{ context.payload.inputs.pr_number }}
-  PR_NUMBER2: ${{ context.event.inputs.pr_number }}
 jobs:
   glci-syntax:
     name: '.gitlab-ci.yml Syntax'
     runs-on: ubuntu-16.04
+    env:
+      PR_NUMBER: ${{ context.payload.inputs.pr_number }}
+      PR_NUMBER2: ${{ context.event.inputs.pr_number }}
     outputs:
       exists: ${{ steps.glci-file-exists.outputs.exists }}
       valid: ${{ steps.validate-glci-file.outputs.valid }}
