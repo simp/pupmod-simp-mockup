@@ -43,6 +43,7 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.payload.inputs.pr_number
             });
+
             console.log("\n\n== pr\n");
             console.log(pr);
             console.log("\n\n== pr.data.head\n");
@@ -62,10 +63,10 @@ jobs:
             // if ( pr.data.merged ) {
             //   console.log(`::error ::PR#${context.payload.inputs.pr_number} is already merged!`)
             // }
-            // core.setOutput( 'pr_head_sha', pr.data.head.sha )
-            // core.setOutput( 'pr_head_ref', pr.data.head.ref )
-            // core.setOutput( 'pr_head_label', pr.data.head.label )
-            // core.setOutput( 'pr_head_clone_url', pr.data.head.repo.clone_url )
+            core.setOutput( 'pr_head_sha', pr.data.head.sha )
+            core.setOutput( 'pr_head_ref', pr.data.head.ref )
+            core.setOutput( 'pr_head_label', pr.data.head.label )
+            core.setOutput( 'pr_head_clone_url', pr.data.head.repo.clone_url )
 
 ###
 ###
