@@ -29,11 +29,8 @@ on:
       - '[0-9]+\.[0-9]+\.[0-9]+'
 
 env:
-  # Workaround: secrets cannot be used in conditionals
-  #
-  #   https://github.com/actions/runner/issues/520)
-  #
-  PUBLISH_TO_FORGE: ${{ secrets.PUBLISH_TO_FORGE }}  # non-sensitive "secret"
+  PUPPET_VERSION: '~> 6'
+
 jobs:
   releng-checks:
     name: "RELENG checks"
