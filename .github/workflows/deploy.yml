@@ -52,7 +52,7 @@ jobs:
 
   create-github-release:
     name: Deploy GitHub Release
-    needs: [ releng-checks ]
+###    needs: [ releng-checks ]
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -74,6 +74,8 @@ jobs:
           echo
           echo == attempt 2
           git tag -l -n10000 "$tag"
+          echo == attempt 3
+          git show-ref --tags "$GITHUB_REF"
           echo ::endgroup::
           tag="${GITHUB_REF/refs\/tags\//}"
           annotation="$(git tag -l -n10000 "$tag")"
@@ -103,7 +105,7 @@ jobs:
 
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
-    needs: [ releng-checks ]
+###    needs: [ releng-checks ]
     runs-on: ubuntu-18.04
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
