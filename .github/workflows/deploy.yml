@@ -60,8 +60,16 @@ jobs:
           [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }
           echo "::set-output name=tag::${tag}"
           echo << MULTI_LINE
+          :set-output name=annotation::${annotation}"
+          MULTI_LINE
+          echo << MULTI_LINE
           ::set-output name=annotation::${annotation}"
           MULTI_LINE
+
+          annotation_title="$(echo "$annotation" | head -1)"
+          printf "== ANNOTATION:\n-------\n%s\n-------\n\n" "$annotation"
+          echo
+          printf "== ANNOTATION title:\n-------\n%s\n-------\n\n" "$annotation_title"
 
       - name: FAKE GitHub release for ${{ github.event.repository.name }} ${{steps.tag-check.outputs.tag}}
         run: |
