@@ -1,0 +1,43 @@
+# Validate API tokens in GitHub Secrets against their respective services
+#
+# ==============================================================================
+#
+# This pipeline uses the following GitHub Action Secrets:
+#
+#   GitHub Secret variable    Type      Notes
+#   ------------------------  --------  ----------------------------------------
+#   PUPPETFORGE_API_TOKEN     Required
+#   GITLAB_API_PRIVATE_TOKEN  Required  GitLab token (should have `api` scope)
+#   NO_SCOPE_GITHUB_TOKEN     Required  GitHub token (should have no scopes)
+#   GITLAB_SERVER_URL         Optional  Specify a GL server other than gitlab.com
+#   The secure vars will be filtered in GitHub Actions log output, and aren't
+#   provided to untrusted builds (i.e, triggered by PR from another repository)
+#
+---
+name: 'Manual: Validate API tokens'
+
+on:
+  - workflow_dispatch
+
+jobs:
+  puppetforge:
+    name: 'Validate CI Puppet Forge token authenticates with API'
+    runs-on: ubuntu-16.04
+    env:
+      PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
+    steps:
+      - run: |
+         echo; echo "===== PUPPETFORGE_API_TOKEN validation"; echo
+         curl -sS --fail -A "$FORGE_USER_AGENT" \
+           -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN:-default_content_to_cause_401_response}" \
+           https://forgeapi.puppet.com/v3/users > /dev/null'
+
+##  github-no-scope:
+##    name: 'Validate GitHub NO_SCOPE_GITHUB_TOKEN Lab CI Puppet Forge token authenticates with API'
+##    runs-on: ubuntu-16.04
+##    steps:
+##      - run: |
+##         echo; echo "===== PUPPETFORGE_API_TOKEN validation"; echo
+##         curl -sS --fail -A "$FORGE_USER_AGENT" \
+##           -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN:-default_content_to_cause_401_response}" \
+##           https://forgeapi.puppet.com/v3/users > /dev/null'

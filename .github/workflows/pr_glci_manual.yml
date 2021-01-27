@@ -1,9 +1,4 @@
-
-# When a PR is closed, clean up any associated GitLab CI pipelines & branch
-#
-# * Cancels all GLCI pipelines associated with the PR HEAD ref (branch)
-# * Removes the PR HEAD branch from the corresponding gitlab.com/org/ project
-#
+# Manually trigger GLCI pipelines for a PR
 # ==============================================================================
 #
 # This pipeline uses the following GitHub Action Secrets:
@@ -107,7 +102,6 @@ jobs:
           fi
       - name: 'Validate GLCI file syntax'
         id: validate-glci-file
-        if: steps.glci-file-exists.outputs.exists == 'true'
         env:
           GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
