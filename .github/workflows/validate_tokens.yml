@@ -57,7 +57,8 @@ jobs:
           fi
           scopes="$( echo "$scopes" | strings )"
           echo "scopes lines = $(echo \"$scopes\" | wc -l)"
-          echo "scopes characters = $(echo \"$scopes\" | wc -l)"
+          echo "scopes characters = $(echo \"$scopes\" | wc -c)"
+          echo "scopes: '$scopes'"
 
           if ! echo "$scopes" | sed -e '/^$/d' | awk -F: '{print $2}'  | grep -E '\w' ; then
             echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! ($scopes)"
