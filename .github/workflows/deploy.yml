@@ -38,6 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          ref: ${{ github.ref }}
           clean: true
       - uses: ruby/setup-ruby@v1
         with:
@@ -58,6 +59,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
+          ref: ${{ github.ref }}
           clean: true
           fetch-depth: 0
       - name: Get tag info (${{github.ref}})
@@ -114,6 +116,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
+          ref: ${{ github.ref }}
           clean: true
       - uses: ruby/setup-ruby@v1
         with:
