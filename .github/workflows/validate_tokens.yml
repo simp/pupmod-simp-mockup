@@ -25,11 +25,12 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
-      FORGE_USER_AGENT: GitHubActions-ForgeReleng-Script/0.3.3 (Purpose/forge-ops-for-${{ github.name }})
+      FORGE_USER_AGENT: GitHubActions-ForgeReleng-Script/0.3.3 (Purpose/forge-ops-for-${{ github.repository.name }})
     steps:
       - run: |
-         curl -sS --fail --silent --show-error -A "$FORGE_USER_AGENT" \
-           -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN:-default_content_to_cause_401_response}" \
+         curl -sS --fail --silent --show-error \
+           --user-agent "$FORGE_USER_AGENT" \
+           --header "Authorization: Bearer ${PUPPETFORGE_API_TOKEN:-default_content_to_cause_401_response}" \
            https://forgeapi.puppet.com/v3/users > /dev/null
 
   github-no-scope:
