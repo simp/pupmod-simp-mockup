@@ -76,9 +76,9 @@ jobs:
           echo == attempt 2
           git tag -l -n10000 "$tag"
 
-      - name: Fake release
+      - name: FAKE GitHub release for ${{steps.tag-check.outputs.tag}}
         run: |
-          echo "== LATEST TAG:  ${{ steps.tag-check.outputs.tag }}"
+          echo "== TAG:  ${{ steps.tag-check.outputs.tag }}"
           printf "== ANNOTATION:\n-------\n%s\n-------\n\n" "${{ steps.tag-check.outputs.annotation }}"
 ####      - name: Create Release
 ####        uses: actions/create-release@v1
