@@ -31,8 +31,6 @@ on:
 jobs:
   releng-checks:
     name: "RELENG checks"
-    if: always()
-    needs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -52,6 +50,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
+    if: ${{ secrets.PUBLISH_TO_FORGE }} != 'false'
     steps:
       - name: Check tag ref
         id: tag-check
