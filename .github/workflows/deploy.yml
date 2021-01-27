@@ -47,7 +47,6 @@ jobs:
       - run: bundle exec rake pkg:compare_latest_tag
       - run: bundle exec rake pkg:create_tag_changelog
 
-  tag-version-check:
   build:
     needs: [ releng-checks ]
     runs-on: ubuntu-18.04
