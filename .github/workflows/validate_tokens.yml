@@ -49,13 +49,13 @@ jobs:
             exit 1
           fi
 
-          if ! scopes="$(echo "$response" | grep -E '^X-OAuth-Scopes:' )"; then
-            echo "::error ::No X-OAuth-Scopes in response!"
+          if ! scopes="$(echo "$response" | grep '^X-OAuth-Scopes:' )"; then
+            echo "::error ::No X-OAuth-Scopes in response headers!"
             echo "::debug ::$response"
             exit 1
           fi
 
-          if ! echo "$scopes" | awk -F: '{print $2}'  | grep \\w ; then
+          if ! echo "$scopes" | sed -e '/^$/d' | awk -F: '{print $2}'  | grep \\w ; then
             echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! ($scopes)"
             echo "::debug ::$scopes"
             exit 1
