@@ -30,7 +30,7 @@ jobs:
       - run: |
          curl -sS --fail -A "$FORGE_USER_AGENT" \
            -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN:-default_content_to_cause_401_response}" \
-           https://forgeapi.puppet.com/v3/users > /dev/null'
+           https://forgeapi.puppet.com/v3/users > /dev/null
 
 ##  github-no-scope:
 ##    name: 'Validate GitHub NO_SCOPE_GITHUB_TOKEN Lab CI Puppet Forge token authenticates with API'
