@@ -68,7 +68,6 @@ jobs:
         id: tag-check
         run: |
           tag="${GITHUB_REF/refs\/tags\//}"
-          annotation="$(git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1)"
           [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }
           echo "::set-output name=tag::${tag}"
           echo "::set-output name=annotation::${annotation}"
@@ -76,8 +75,8 @@ jobs:
       - name: FAKE GitHub release for ${{ github.event.repository.name }} ${{steps.tag-check.outputs.tag}}
         run: |
           echo "== TAG:  ${{ steps.tag-check.outputs.tag }}"
-          printf "== ANNOTATION:\n-------\n%s\n-------\n\n" "${{ steps.tag-check.outputs.annotation }}"
-          echo "$annotation"
+          annotation="$(git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1)"
+          printf "== ANNOTATION:\n-------\n%s\n-------\n\n" "$annotation"
 ####      - name: Create Release
 ####        uses: actions/create-release@v1
 ####        ### id: create_release
