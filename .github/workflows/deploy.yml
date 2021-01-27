@@ -63,22 +63,25 @@ jobs:
       - name: Get tag info (${{github.ref}})
         id: tag-check
         run: |
+          echo "::group::Git tests"
           git config -l
           git --version
           git remote -v
           git tag -l -n10000
-          tag="${GITHUB_REF/refs\/tags\//}"
-          annotation="$(git tag -l -n10000 "$tag")"
-          [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }
-          echo "::set-output name=tag::${tag}"
-          echo "::set-output name=annotation::${annotation}"
+          echo
           echo == attempt 1
           git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1
           echo
           echo == attempt 2
           git tag -l -n10000 "$tag"
+          echo ::endgroup::
+          tag="${GITHUB_REF/refs\/tags\//}"
+          annotation="$(git tag -l -n10000 "$tag")"
+          [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }
+          echo "::set-output name=tag::${tag}"
+          echo "::set-output name=annotation::${annotation}"
 
-      - name: FAKE GitHub release for ${{steps.tag-check.outputs.tag}}
+      - name: FAKE GitHub release for ${{ github.event.repository.name }} ${{steps.tag-check.outputs.tag}}
         run: |
           echo "== TAG:  ${{ steps.tag-check.outputs.tag }}"
           printf "== ANNOTATION:\n-------\n%s\n-------\n\n" "${{ steps.tag-check.outputs.annotation }}"
