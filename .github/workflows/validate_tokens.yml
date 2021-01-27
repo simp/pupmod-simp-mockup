@@ -54,6 +54,7 @@ jobs:
             echo "::debug ::$response"
             exit 1
           fi
+          scopes="${scopes%$''}" # Remove any trailing newline
           echo "scopes lines = $(echo \"$scopes\" | wc -l)"
 
           if ! echo "$scopes" | sed -e '/^$/d' | awk -F: '{print $2}'  | grep \\w ; then
