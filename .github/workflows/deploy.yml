@@ -30,6 +30,7 @@ on:
 
 env:
   PUPPET_VERSION: '~> 6'
+  FORGE_USER_AGENT: GitHubActions-ForgeReleng-Workflow/0.4.0 (Purpose/forge-ops-for-${{ github.event.repository.name }})
 
 jobs:
   releng-checks:
@@ -79,7 +80,7 @@ jobs:
 
 
   deploy-to-puppet-forge:
-    name: Deploy to PuppetForge
+    name: Deploy PuppetForge Release
     needs: [ releng-checks ]
     runs-on: ubuntu-18.04
     env:
