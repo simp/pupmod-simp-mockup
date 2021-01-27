@@ -44,11 +44,42 @@ jobs:
         with:
           ruby-version: 2.5
           bundler-cache: true
+      - run: echo '::group::RELENG versioned asset checks'
       - run: bundle exec rake pkg:check_version
       - run: bundle exec rake pkg:compare_latest_tag
       - run: bundle exec rake pkg:create_tag_changelog
+      - run: echo '::endgroup::'
+      - run: echo '::group::RELENG Puppet module build checks'
+      - run: bundle exec rake metadata_lint
+      - name: "Test that Puppet module can build"
+        run: "bundle exec pdk build --force"
+      - run: echo '::endgroup::'
 
-  build:
+  create-github-release:
+    name: Deploy GitHub Release
+    needs: [ releng-checks ]
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+####      - name: Create Release
+####        uses: actions/create-release@v1
+####        ### id: create_release
+####        env:
+####          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+####        with:
+####          tag_name: ${{ github.ref }}
+####          release_name: Release ${{ github.ref }}
+####          body: |
+####            Changes in this Release
+####            - First Change
+####            - Second Change
+####          draft: false
+####          prerelease: false
+
+
+  deploy-to-puppet-forge:
+    name: Deploy to PuppetForge
     needs: [ releng-checks ]
     runs-on: ubuntu-18.04
     env:
@@ -59,9 +90,9 @@ jobs:
         run: |
           tag=${GITHUB_REF/refs\/tags\//}
           ### [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is nott a tag: ${GITHUB_REF}"; exit 1 ; }
-          echo "::set-output name=VERSION::${tag}"
+          echo "::set-output name=tag::${tag}"
           echo "::set-failed ::error message"
-      - name: Clone repository
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
           ref: ${{ steps.tag-check.outputs.tag }}
@@ -70,17 +101,12 @@ jobs:
           ruby-version: 2.5
           bundler-cache: true
       - run: bundle exec rake metadata_lint
-      - name: "Build Puppet module"
-        run: "bundle exec pdk build --force"
+      - name: Build Puppet module
+        run: bundle exec pdk build --force
       - run: 'echo "== LATEST TAG:  ${{ steps.tag-check.outputs.tag }}"'
       - run: 'jq . metadata.json'
-      - run: 'echo -- curl -sS --fail -A "$FORGE_USER_AGENT" -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" -X POST -F "file=@$(find $PWD/pkg -name ''*.tar.gz'')" https://forgeapi.puppet.com/v3/releases'
-#    - name: Build and publish module
-#      uses: barnumbirr/action-forge-publish@v2.3.0
-#      env:
-#       FORGE_API_KEY: ${{ secrets.FORGE_API_KEY }}
-#       REPOSITORY_URL: https://forgeapi.puppet.com/v3/releases
-#
+      - name: Deploy to Puppet Forge
+        run: 'curl -sS --fail -A "$FORGE_USER_AGENT" -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" -X POST -F "file=@$(find $PWD/pkg -name ''*.tar.gz'')" https://forgeapi.puppet.com/v3/releases'
 
   examine-contexts:
     name: 'Examine Context contents'
