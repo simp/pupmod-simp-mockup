@@ -42,26 +42,26 @@ jobs:
     steps:
       - name: Test token scopes with curl (expect no scopes)
         run: |
-          if ! response="$(curl -I --http1.1 --fail --silent --show-error \
+          if ! response="$(curl -I --http1.0 --fail --silent --show-error \
             --header 'Content-Type: application/json' \
             --header "Authorization: token ${NO_SCOPE_GITHUB_TOKEN:-default_content_to_cause_error}" \
              "https://api.github.com/users/${GITHUB_ORG}")" 2>/tmp/x.$$.err; then
             echo "::error ::$(cat /tmp/x.$$.err)"
-            exit 1
+            echo exit 1
           fi
 
           if ! scopes="$(echo "$response" | grep '^X-OAuth-Scopes:' )"; then
             echo "::error ::No X-OAuth-Scopes in response headers!"
             echo "::debug ::$response"
-            exit 1
+            echo exit 1
           fi
-          scopes="${scopes%$''}" # Remove any trailing newline
+          scopes="$( echo "$scopes" | strings )"
           echo "scopes lines = $(echo \"$scopes\" | wc -l)"
 
           if ! echo "$scopes" | sed -e '/^$/d' | awk -F: '{print $2}'  | grep \\w ; then
             echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! ($scopes)"
             echo "::debug ::$scopes"
-            exit 1
+            echo exit 1
           fi
 
   examine-context:
