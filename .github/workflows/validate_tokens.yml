@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
-      FORGE_USER_AGENT: GitHubActions-ForgeReleng-Script/0.3.3 (Purpose/forge-ops-for-${{ github.repository.name }})
+      FORGE_USER_AGENT: GitHubActions-ForgeReleng-Script/0.3.3 (Purpose/forge-ops-for-${{ github.event.repository.name }})
     steps:
       - run: |
          curl -sS --fail --silent --show-error \
@@ -58,11 +58,11 @@ jobs:
           scopes="$( echo "$scopes" | strings )"
           echo "scopes lines = $(echo \"$scopes\" | wc -l)"
           echo "scopes characters = $(echo \"$scopes\" | wc -c)"
-          echo "scopes: '$scopes'"
+          echo "scopes: '''${scopes}'''"
 
-          if ! echo "$scopes" | sed -e '/^$/d' | awk -F: '{print $2}'  | grep -E '\w' ; then
-            echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! ($scopes)"
-            echo "::debug ::$scopes"
+          if ! echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' ; then
+            echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! (${scopes})"
+            echo "::debug ::${scopes}"
             exit 1
           fi
 
