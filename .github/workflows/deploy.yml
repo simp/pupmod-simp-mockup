@@ -50,8 +50,8 @@ jobs:
   build:
     needs: [ releng-checks ]
     runs-on: ubuntu-18.04
-    ## outputs:
-    ##   version: {{ $steps.tag-check.outputs.VERSION }}
+    env:
+      PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
     steps:
       - name: Check tag ref
         id: tag-check
@@ -68,6 +68,7 @@ jobs:
         run: "bundle exec pdk build --force"
       - run: 'echo "== LATEST TAG:  ${{ steps.tag-check.outputs.tag }}"'
       - run: 'jq . metadata.json'
+      - run: 'echo -- curl -sS --fail -A "$FORGE_USER_AGENT" -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" -X POST -F "file=@$(find $PWD/pkg -name ''*.tar.gz'')" https://forgeapi.puppet.com/v3/releases'
 #    - name: Build and publish module
 #      uses: barnumbirr/action-forge-publish@v2.3.0
 #      env:
