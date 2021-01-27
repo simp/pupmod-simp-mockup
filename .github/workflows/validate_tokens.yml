@@ -56,18 +56,7 @@ jobs:
             exit 1
           fi
           scopes="$( echo "$scopes" | strings )"
-          echo "scopes lines = $(echo \"$scopes\" | wc -l)"
-          echo "scopes characters = $(echo \"$scopes\" | wc -c)"
-          echo "scopes F: '''${scopes}'''"
-          echo "scopes A: '''$(echo "$scopes" | awk -F: '{print $2}')'''"
-          echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' && echo yes || echo no
-          echo "$scopes" | awk -F: '{print $2}' | grep -E '\\w' && echo yes || echo no
-          echo "$scopes" | awk -F: '{print $2}' | grep -E '[a-z]' && echo yes || echo no
-          ! echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' && echo yes || echo no
-          ! echo "$scopes" | awk -F: '{print $2}' | grep -E '\\w' && echo yes || echo no
-          ! echo "$scopes" | awk -F: '{print $2}' | grep -E '[a-z]' && echo yes || echo no
-
-          if ! echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' ; then
+          if echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' ; then
             echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! (${scopes})"
             echo "::debug ::${scopes}"
             exit 1
