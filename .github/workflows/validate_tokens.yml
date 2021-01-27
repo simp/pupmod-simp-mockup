@@ -28,16 +28,35 @@ jobs:
       FORGE_USER_AGENT: GitHubActions-ForgeReleng-Script/0.3.3 (Purpose/forge-ops-for-${{ github.name }})
     steps:
       - run: |
-         curl -sS --fail -A "$FORGE_USER_AGENT" \
+         curl -sS --fail --silent --show-error -A "$FORGE_USER_AGENT" \
            -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN:-default_content_to_cause_401_response}" \
            https://forgeapi.puppet.com/v3/users > /dev/null
 
-##  github-no-scope:
-##    name: 'Validate GitHub NO_SCOPE_GITHUB_TOKEN Lab CI Puppet Forge token authenticates with API'
-##    runs-on: ubuntu-16.04
-##    steps:
-##      - run: |
-##         echo; echo "===== PUPPETFORGE_API_TOKEN validation"; echo
-##         curl -sS --fail -A "$FORGE_USER_AGENT" \
-##           -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN:-default_content_to_cause_401_response}" \
-##           https://forgeapi.puppet.com/v3/users > /dev/null'
+  github-no-scope:
+    name: 'Validate CI NO_SCOPE_GITHUB_TOKEN token has NO scopes'
+    runs-on: ubuntu-16.04
+    env:
+      GITHUB_ORG: ${{ github.event.organization.login }}
+      NO_SCOPE_GITHUB_TOKEN: ${{secrets.NO_SCOPE_GITHUB_TOKEN}}
+    steps:
+      - name: Test token scopes with curl (expect no scopes)
+        run: |
+          if ! response="$(curl -I --http1.1 --fail --silent --show-error \
+            --header 'Content-Type: application/json' \
+            --header "Authorization: token ${NO_SCOPE_GITHUB_TOKEN:-default_content_to_cause_error}" \
+             "https://api.github.com/users/${GITHUB_ORG}")" 2>/tmp/x.$$.err; then
+            echo "::error ::$(cat /tmp/x.$$.err)"
+            exit 1
+          fi
+
+          if ! scopes="$(echo "$response" | grep -E '^X-OAuth-Scopes:' )"; then
+            echo "::error ::No X-OAuth-Scopes in response!"
+            echo "::debug ::$response"
+            exit 1
+          fi
+
+          if ! echo "$scopes" | awk -F: '{print $2}'  | grep \\w ; then
+            echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes!"
+            echo "::debug ::$scopes"
+            exit 1
+          fi
