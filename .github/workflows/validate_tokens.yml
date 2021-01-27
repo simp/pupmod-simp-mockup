@@ -54,9 +54,45 @@ jobs:
             echo "::debug ::$response"
             exit 1
           fi
+          echo "scopes lines = $(echo \"$scopes\" | wc -l)"
 
           if ! echo "$scopes" | sed -e '/^$/d' | awk -F: '{print $2}'  | grep \\w ; then
             echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! ($scopes)"
             echo "::debug ::$scopes"
             exit 1
           fi
+
+  examine-context:
+    name: 'Examine Context contents'
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Dump contexts
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+      - name: Dump env context
+        env:
+          ENV_CONTEXT: ${{ toJson(env) }}
+        run: echo "$ENV_CONTEXT"
+      - name: Dump env vars
+        run: env | sort
