@@ -63,6 +63,8 @@ jobs:
       - name: Get tag info (${{github.ref}})
         id: tag-check
         run: |
+          git remote -v
+          git fetch --all --tags
           tag="${GITHUB_REF/refs\/tags\//}"
           annotation="$(git tag -l -n10000 "$tag")"
           [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }
