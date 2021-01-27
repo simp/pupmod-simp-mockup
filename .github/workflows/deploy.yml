@@ -29,7 +29,11 @@ on:
       - '[0-9]+\.[0-9]+\.[0-9]+'
 
 env:
-  PUBLISH_TO_FORGE: ${{ secrets.PUBLISH_TO_FORGE }}
+  # Workaround: secrets cannot be used in conditionals
+  #
+  #   https://github.com/actions/runner/issues/520)
+  #
+  PUBLISH_TO_FORGE: ${{ secrets.PUBLISH_TO_FORGE }}  # non-sensitive "secret"
 jobs:
   releng-checks:
     name: "RELENG checks"
@@ -52,7 +56,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
-    if: env.PUBLISH_TO_FORGE != 'no' && env.PUBLISH_TO_FORGE != 'false'
+    if: ${{ env.PUBLISH_TO_FORGE != 'no' && env.PUBLISH_TO_FORGE != 'false' }}
     steps:
       - name: Check tag ref
         id: tag-check
