@@ -53,7 +53,7 @@ jobs:
 
   create-github-release:
     name: Deploy GitHub Release
-###    needs: [ releng-checks ]
+    needs: [ releng-checks ]
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -68,7 +68,7 @@ jobs:
         id: tag-check
         run: |
           tag="${GITHUB_REF/refs\/tags\//}"
-          annotation="$(git tag -l -n10000 "$tag")"
+          annotation="$(git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1)"
           [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }
           echo "::set-output name=tag::${tag}"
           echo "::set-output name=annotation::${annotation}"
@@ -96,7 +96,7 @@ jobs:
 
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
-###    needs: [ releng-checks ]
+    needs: [ releng-checks ]
     runs-on: ubuntu-18.04
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
