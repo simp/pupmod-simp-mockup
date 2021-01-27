@@ -16,7 +16,7 @@
 # [2]: https://github.com/github/renaming/
 # ------------------------------------------------------------------------------
 ---
-name: 'Release (Alpha workflow)'
+name: 'Release (EXPERIMENTAL)'
 on:
   workflow_dispatch:
     inputs:
@@ -28,8 +28,6 @@ on:
         description: 'Generate documentation'
         required: true
         default: 'true'
-
-
       auto_bump_version:
         description: '(TODO) Automatically bump unresolved assets to the latest version'
         required: true
@@ -47,6 +45,8 @@ env:
   PUPPET_VERSION: "~> 6"
 
 jobs:
+  # TODO: Must find passing tests from previous
+
   generate-docs:
     name: "Generate REFERENCE.md"
     if: github.event.inputs.generate_docs == 'true'
@@ -56,8 +56,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch}}
           clean: true
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
+      - uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
         with:
           ruby-version: 2.5
           bundler-cache: true
@@ -101,8 +100,7 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git remote add github "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@${GITHUB_SERVER_URL#*://}/${GITHUB_REPOSITORY}.git"
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.5
           bundler-cache: true
@@ -193,14 +191,12 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch}}
           clean: true
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.5
           bundler-cache: true
       - run: bundle exec rake check:dot_underscore
       - run: bundle exec rake check:test_file
-
 
   releng-checks:
     name: "RELENG checks"
@@ -212,17 +208,12 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch}}
           clean: true
-      - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.5
           bundler-cache: true
-
-      - name: "Tags and changelogs"
-        run: |
-          bundle exec rake pkg:check_version
-          bundle exec rake pkg:compare_latest_tag
-          bundle exec rake pkg:create_tag_changelog
-
+      - run: bundle exec rake pkg:check_version
+      - run: bundle exec rake pkg:compare_latest_tag
+      - run: bundle exec rake pkg:create_tag_changelog
       - name: "Build Puppet module"
         run: "bundle exec pdk build --force"

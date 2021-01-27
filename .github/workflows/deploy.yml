@@ -1,13 +1,26 @@
+# Build & Deploy Puppet module when a valid versioned tag is pushed
+# ==============================================================================
+#
+# This pipeline uses the following GitHub Action Secrets:
+#
+#   GitHub Secret variable    Type      Notes
+#   ------------------------  --------  ----------------------------------------
+#   NO_SCOPE_GITHUB_TOKEN     Required  GitHub token (should have no scopes)
+#   GITLAB_SERVER_URL         Optional  Specify a GL server other than gitlab.com
+#   The secure vars will be filtered in GitHub Actions log output, and aren't
+#   provided to untrusted builds (i.e, triggered by PR from another repository)
+#
 # ------------------------------------------------------------------------------
-# NOTES
 #
-# To help decipher the syntax of `echo ::set-output name=tag::${GITHUB_REF:10}`:
+# NOTES:
+#   It is necessary to provide NO_SCOPE_GITHUB_TOKEN because $secrets.GITHUB_AUTO
+#   is NOT provide to manually-triggered (`workflow_dispatch`) events, in order
+#   to prevent recursive triggers between workflows
 #
-# - On tag pushes, the value of $GITHUB_REF will be 'refs/tags/<tag_name>'
-# - ${GITHUB_REF:10} is an obscure shell expansion syntax to lop off the
-#   (10-character-long) 'refs/tags/' prefix
+#   Reference:
 #
-# ------------------------------------------------------------------------------
+#   https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token
+---
 ---
 name: Build and publish to Puppet Forge
 
@@ -17,19 +30,46 @@ on:
       - '[0-9]+\.[0-9]+\.[0-9]+'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  releng-checks:
+    name: "RELENG checks"
+    if: always()
+    needs:
+    runs-on: ubuntu-18.04
     steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch}}
+          clean: true
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: bundle exec rake pkg:check_version
+      - run: bundle exec rake pkg:compare_latest_tag
+      - run: bundle exec rake pkg:create_tag_changelog
 
-    - name: Get latest tag
-      id: vars
-      run: echo ::set-output name=tag::${GITHUB_REF:10}
-    - name: Clone repository
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ steps.vars.outputs.tag }}
-    - run: 'echo "== LATEST TAG:  ${{ steps.vars.outputs.tag }}"'
-    - run: 'jq . metadata.json'
+  tag-version-check:
+  build:
+    needs: [ releng-checks ]
+    runs-on: ubuntu-18.04
+    ## outputs:
+    ##   version: {{ $steps.tag-check.outputs.VERSION }}
+    steps:
+      - name: Check tag ref
+        id: tag-check
+        run: |
+          tag=${GITHUB_REF/refs\/tags\//}
+          ### [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is nott a tag: ${GITHUB_REF}"; exit 1 ; }
+          echo "::set-output name=VERSION::${tag}"
+          echo "::set-failed ::error message"
+      - name: Clone repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.tag-check.outputs.tag }}
+      - name: "Build Puppet module"
+        run: "bundle exec pdk build --force"
+      - run: 'echo "== LATEST TAG:  ${{ steps.tag-check.outputs.tag }}"'
+      - run: 'jq . metadata.json'
 #    - name: Build and publish module
 #      uses: barnumbirr/action-forge-publish@v2.3.0
 #      env:
