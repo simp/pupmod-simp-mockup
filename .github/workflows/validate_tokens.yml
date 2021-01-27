@@ -63,6 +63,9 @@ jobs:
           echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' && echo yes || echo no
           echo "$scopes" | awk -F: '{print $2}' | grep -E '\\w' && echo yes || echo no
           echo "$scopes" | awk -F: '{print $2}' | grep -E '[a-z]' && echo yes || echo no
+          ! echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' && echo yes || echo no
+          ! echo "$scopes" | awk -F: '{print $2}' | grep -E '\\w' && echo yes || echo no
+          ! echo "$scopes" | awk -F: '{print $2}' | grep -E '[a-z]' && echo yes || echo no
 
           if ! echo "$scopes" | awk -F: '{print $2}' | grep -E '\w' ; then
             echo "::error ::The NO_SCOPE_GITHUB_TOKEN token has scopes! (${scopes})"
