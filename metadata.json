@@ -1,6 +1,6 @@
 {
   "name": "simp-dummy",
-  "version": "0.3.5",
+  "version": "0.3.7",
   "author": "SIMP",
   "summary": "A mock module used to test SIMP CI, RELENG, and the SIMP puppet module skeleton",
   "license": "Apache-2.0",
