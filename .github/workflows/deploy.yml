@@ -61,9 +61,12 @@ jobs:
           annotation="$(git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1)"
           annotation_title="$(echo "$annotation" | head -1)"
 
-          echo "$annotation" | tail -n +3 | sed -e '/^\* \(Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Sun\)/d' > /tmp/annotation.body
+          # Reformat without RPM-style list headers (which don''t render well)
+          ###echo "$annotation" | tail -n +3 | sed -e '/^\* \(Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Sun\) /d' > /tmp/annotation.body
+          echo "$annotation" |  tail -n +2 | perl -pe 'BEGIN{undef $/;} s/\n\* (Mon|Tue|Wed|Thu|Fri|Sat|Sun) .*?\n//smg;'  > /tmp/annotation.body
           echo "::set-output name=tag::${tag}"
           echo "::set-output name=annotation_title::${annotation_title}"
+          echo /tmp/annotation.body
 
       - name: Create Release
         uses: actions/create-release@v1
