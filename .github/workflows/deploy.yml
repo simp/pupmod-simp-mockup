@@ -8,6 +8,11 @@
 #   PUPPETFORGE_API_TOKEN     Required
 #
 # ------------------------------------------------------------------------------
+#
+# NOTES:
+#
+# * The CHANGLOG text is altered to remove RPM-style date headers, which don't
+#   render well as markdown on the GitHub release pages
 ---
 name: 'Tag: Release to GitHub & Puppet Forge'
 
@@ -52,21 +57,25 @@ jobs:
           ref: ${{ github.ref }}
           clean: true
           fetch-depth: 0
-      - run: git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1
-      - run: git tag -l -n10000 "${GITHUB_REF/refs\/tags\//}"
-      - name: Get tag info (${{github.ref}})
+      - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
         run: |
           tag="${GITHUB_REF/refs\/tags\//}"
           annotation="$(git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1)"
           annotation_title="$(echo "$annotation" | head -1)"
 
-          # Reformat without RPM-style list headers (which don''t render well)
-          ###echo "$annotation" | tail -n +3 | sed -e '/^\* \(Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Sun\) /d' > /tmp/annotation.body
-          echo "$annotation" |  tail -n +2 | perl -pe 'BEGIN{undef $/;} s/\n\* (Mon|Tue|Wed|Thu|Fri|Sat|Sun) .*?\n//smg;'  > /tmp/annotation.body
           echo "::set-output name=tag::${tag}"
           echo "::set-output name=annotation_title::${annotation_title}"
-          echo /tmp/annotation.body
+
+          # Prepare annotation body as a file for the next step
+          #
+          # * The GitHub Release render the text in this file as markdown
+          # * The file is needed because :set-output only supports single lines
+          # * The `perl -pe` removes RPM-style date headers from the CHANGELOG,
+          #   because they don't render well as markdown on the Release page
+          #
+          echo "$annotation" |  tail -n +2 | \
+            perl -pe 'BEGIN{undef $/;} s/\n\* (Mon|Tue|Wed|Thu|Fri|Sat|Sun) .*?\n//smg;' > /tmp/annotation.body
 
       - name: Create Release
         uses: actions/create-release@v1
