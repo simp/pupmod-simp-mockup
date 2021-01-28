@@ -24,6 +24,8 @@ jobs:
     name: "RELENG checks"
     runs-on: ubuntu-18.04
     steps:
+      - name: "Assert '${{ github.ref }}' is a tag"
+        run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
@@ -41,7 +43,7 @@ jobs:
 
   create-github-release:
     name: Deploy GitHub Release
-###    needs: [ releng-checks ]
+    needs: [ releng-checks ]
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
@@ -57,23 +59,12 @@ jobs:
         run: |
           tag="${GITHUB_REF/refs\/tags\//}"
           annotation="$(git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1)"
-          [[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }
           annotation_title="$(echo "$annotation" | head -1)"
-          printf "== ANNOTATION title:\n-------\n%s\n-------\n\n" "$annotation_title"
-          printf "== ANNOTATION:\n-------\n%s\n-------\n\n" "$annotation"
 
-          echo "$annotation" | tail -n +3 > /tmp/annotation.body
+          echo "$annotation" | tail -n +3 | sed -e '/^\* \(Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Sun\)/d' > /tmp/annotation.body
           echo "::set-output name=tag::${tag}"
           echo "::set-output name=annotation_title::${annotation_title}"
 
-      - name: FAKE GitHub release for ${{ github.event.repository.name }} ${{steps.tag-check.outputs.tag}}
-        run: |
-          echo "== TAG:  ${{ steps.tag-check.outputs.tag }}"
-          annotation="${{ steps.tag-check.outputs.annotation }}"
-          annotation_title="$(echo "$annotation" | head -1)"
-          printf "== ANNOTATION:\n-------\n%s\n-------\n\n" "$annotation"
-          echo
-          printf "== ANNOTATION title:\n-------\n%s\n-------\n\n" "$annotation_title"
       - name: Create Release
         uses: actions/create-release@v1
         id: create_release
@@ -93,6 +84,7 @@ jobs:
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
       FORGE_USER_AGENT: GitHubActions-ForgeReleng-Workflow/0.4.0 (Purpose/forge-ops-for-${{ github.event.repository.name }})
+      FORGE_API_URL: https://forgeapi.puppet.com/v3/releases
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -106,39 +98,9 @@ jobs:
       - name: Build Puppet module (PDK)
         run: bundle exec pdk build --force
       - name: Deploy to Puppet Forge
-        run: 'curl -sS --fail -A "$FORGE_USER_AGENT" -H "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" -X POST -F "file=@$(find $PWD/pkg -name ''*.tar.gz'')" https://forgeapi.puppet.com/v3/releases'
-
-  examine-contexts:
-    name: 'Examine Context contents'
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Dump contexts
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-        run: echo "$STEPS_CONTEXT"
-      - name: Dump runner context
-        env:
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-        run: echo "$RUNNER_CONTEXT"
-      - name: Dump strategy context
-        env:
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: echo "$STRATEGY_CONTEXT"
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-      - name: Dump env context
-        env:
-          ENV_CONTEXT: ${{ toJson(env) }}
-        run: echo "$ENV_CONTEXT"
-      - name: Dump env vars
-        run: env | sort
+        run: |
+          curl -X POST --silent --show-error --fail \
+            --user-agent "$FORGE_USER_AGENT" \
+            --header "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" \
+            --form "file=@$(find $PWD/pkg -name ''*.tar.gz'')" \
+            "$FORGE_API_URL"
