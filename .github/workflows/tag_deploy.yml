@@ -1,4 +1,4 @@
-# Build & Deploy Puppet module when a valid versioned tag is pushed
+# Build & Deploy Puppet module & GitHub release when a SemVer tag is pushed
 # ==============================================================================
 #
 # This pipeline uses the following GitHub Action Secrets:
