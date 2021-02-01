@@ -188,7 +188,7 @@ jobs:
           GITLAB_ORG: ${{ github.event.organization.login }}
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           GIT_BRANCH: ${{ github.event.pull_request.head.ref }} # TODO check for/avoid protected branches?
-          PR_HEAD_HASHREF: ${{ github.event.pull_request.head.sha }}
+          TARGET_HASHREF: ${{ github.event.pull_request.head.sha }}
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
@@ -204,11 +204,10 @@ jobs:
 
           # Cancel any active/pending GitLab CI pipelines for the same
           # project+branch, UNLESS it's already for this commit
-          echo "  --- PR HEAD commit: $PR_HEAD_HASHREF"
           active_pipeline_ids=()
           for pipe_status in created waiting_for_resource preparing pending running; do
             echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
-            jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$PR_HEAD_HASHREF")"
+            jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$TARGET_HASHREF")"
             url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
             curl_response_body="$("${CURL_CMD[@]}" "$url")"
 
@@ -229,7 +228,10 @@ jobs:
             echo No active pipelines found
           fi
 
-          if [ -n "$same_sha_pipeline_id" ] && [ "$pipe_id" == "$same_sha_pipeline_id" ]; then
+          echo "  ## same_sha_pipeline_id: '$same_sha_pipeline_id'"
+          echo "  --- This commit: $TARGET_HASHREF"
+
+          if [ -n "$same_sha_pipeline_id" ]; then
             echo "== No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit running at:"
             echo "   https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/${same_sha_pipeline_id}"
             exit 0
