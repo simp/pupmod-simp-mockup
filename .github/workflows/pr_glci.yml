@@ -202,16 +202,19 @@ jobs:
             --header "Accept: application/json" \
           )
 
+          echo "  --- This commit: $TARGET_HASHREF"
+
           # Cancel any active/pending GitLab CI pipelines for the same
           # project+branch, UNLESS it's already for this commit
           active_pipeline_ids=()
+          same_sha_pipeline_id=""
           for pipe_status in created waiting_for_resource preparing pending running; do
             echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
             jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$TARGET_HASHREF")"
             url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
-            curl_response_body="$("${CURL_CMD[@]}" "$url")"
 
-            same_sha_pipeline_id="$(echo "$curl_response_body" |  jq -r "$jq_same_pipeline_id_query")"
+            curl_response_body="$("${CURL_CMD[@]}" "$url")"
+            same_sha_pipeline_id="${same_sha_pipeline_id}$(echo "$curl_response_body" |  jq -r "$jq_same_pipeline_id_query")"
             active_pipelines="$(echo "$curl_response_body" | jq -r '.[] | .id , .web_url')"
             active_pipeline_ids+=($(echo "$active_pipelines" | grep -E '^[0-9]*$'))
             printf "$active_pipelines\n\n"
@@ -228,11 +231,10 @@ jobs:
             echo No active pipelines found
           fi
 
-          echo "  ## same_sha_pipeline_id: '$same_sha_pipeline_id'"
-          echo "  --- This commit: $TARGET_HASHREF"
+          echo "  --- same_sha_pipeline_id: '${same_sha_pipeline_id}'"
 
           if [ -n "$same_sha_pipeline_id" ]; then
-            echo "== No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit running at:"
+            echo "== No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit '$TARGET_HASHREF' running at:"
             echo "   https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/${same_sha_pipeline_id}"
             exit 0
           fi
