@@ -230,7 +230,6 @@ jobs:
           fi
 
           if [ -n "$same_sha_pipeline_id" ] && [ "$pipe_id" == "$same_sha_pipeline_id" ]; then
-            echo
             echo "== No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit running at:"
             echo "   https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/${same_sha_pipeline_id}"
             exit 0
