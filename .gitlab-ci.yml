@@ -398,8 +398,8 @@ pup7.x-unit:
 ###   script:
 ###     - 'BEAKER_fips=yes bundle exec rake beaker:suites[compliance,default]'
 
-pup6.16.0:
-  <<: *pup_6_16_0
+pup6.pe:
+  <<: *pup_6_pe
   stage: acceptance
   script:
     - 'echo "++ dummy acceptance test works!"'
