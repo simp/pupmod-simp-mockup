@@ -187,11 +187,12 @@ jobs:
           GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
           GITLAB_ORG: ${{ github.event.organization.login }}
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
-          GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
+          GIT_BRANCH: ${{ github.event.pull_request.head.ref }} # TODO check for/avoid protected branches?
+          PR_HEAD_HASHREF: ${{ github.event.pull_request.head.sha }}
         run: |
           GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
           GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
-          GIT_BRANCH="${GIT_BRANCH:-GITHUB_HEAD_REF}"
+          GIT_BRANCH="${GIT_BRANCH:-$GITHUB_HEAD_REF}"
           GITXXB_REPO_NAME="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
           GITLAB_PROJECT_ID="${GITLAB_ORG}%2F${GITXXB_REPO_NAME}"
           # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
@@ -205,8 +206,12 @@ jobs:
           active_pipeline_ids=()
           for pipe_status in created waiting_for_resource preparing pending running; do
             echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
+            jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$PR_EVENT_AFTER_HASHREF")"
             url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
-            active_pipelines="$("${CURL_CMD[@]}" "$url" | jq -r '.[] | .id , .web_url')"
+            curl_response_body="$("${CURL_CMD[@]}" "$url")"
+
+            same_sha_pipeline_id="$(echo "$curl_response_body" |  jq -r "$jq_same_pipeline_id_query")"
+            active_pipelines="$(echo "$curl_response_body" | jq -r '.[] | .id , .web_url')"
             active_pipeline_ids+=($(echo "$active_pipelines" | grep -E '^[0-9]*$'))
             printf "$active_pipelines\n\n"
           done
@@ -214,11 +219,19 @@ jobs:
             printf "\nFound %s active pipeline ids:\n" "${#active_pipeline_ids[@]}"
             echo "${active_pipeline_ids[@]}"
             for pipe_id in "${active_pipeline_ids[@]}"; do
+            [ -n "$same_sha_pipeline_id" ] && [ "$pipe_id" == "$same_sha_pipeline_id" ] && continue
               printf "\n  ------ Cancelling pipeline ID %s...\n" "$pipe_id"
-              "${CURL_CMD[@]}" --request POST "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines/${pipe_id}/cancel"
+              echo -- "${CURL_CMD[@]}" --request POST "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines/${pipe_id}/cancel"
             done
           else
             echo No active pipelines found
+          fi
+
+          if [ -n "$same_sha_pipeline_id" ] && [ "$pipe_id" == "$same_sha_pipeline_id" ]; then
+            echo
+            echo "== No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit running at:"
+            echo "   https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/${same_sha_pipeline_id}"
+            exit 0
           fi
 
           echo "== Pushing $GIT_BRANCH to gitlab"
@@ -227,7 +240,7 @@ jobs:
           git log --color --graph  --abbrev-commit -5 \
             --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
           git push gitlab ":${GIT_BRANCH}" -f || : # attempt to un-weird GLCI's `changed` tracking
-          git push gitlab "${GIT_BRANCH}" -f
+          git push gitlab "${GIT_BRANCH}" -f || exit 99
           echo "Pushed branch '${GIT_BRANCH}' to gitlab"
           echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
 
