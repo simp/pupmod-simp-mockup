@@ -214,7 +214,9 @@ jobs:
             url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
 
             curl_response_body="$("${CURL_CMD[@]}" "$url")"
-            same_sha_pipeline_id="${same_sha_pipeline_id}$(echo "$curl_response_body" |  jq -r "$jq_same_pipeline_id_query")"
+            if [ -z "$same_sha_pipeline_id" ]; then
+              same_sha_pipeline_id="$(echo "$curl_response_body" | jq -r "$jq_same_pipeline_id_query")"
+            fi
             active_pipelines="$(echo "$curl_response_body" | jq -r '.[] | .id , .web_url')"
             active_pipeline_ids+=($(echo "$active_pipelines" | grep -E '^[0-9]*$'))
             printf "$active_pipelines\n\n"
@@ -230,6 +232,7 @@ jobs:
           else
             echo No active pipelines found
           fi
+          printf "\n\n"
 
           echo "  --- same_sha_pipeline_id: '${same_sha_pipeline_id}'"
 
