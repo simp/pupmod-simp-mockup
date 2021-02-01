@@ -204,10 +204,11 @@ jobs:
 
           # Cancel any active/pending GitLab CI pipelines for the same
           # project+branch, UNLESS it's already for this commit
+          echo "  --- PR HEAD commit: $PR_HEAD_HASHREF"
           active_pipeline_ids=()
           for pipe_status in created waiting_for_resource preparing pending running; do
             echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
-            jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$PR_EVENT_AFTER_HASHREF")"
+            jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$PR_HEAD_HASHREF")"
             url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
             curl_response_body="$("${CURL_CMD[@]}" "$url")"
 
