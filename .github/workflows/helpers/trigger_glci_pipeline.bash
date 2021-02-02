@@ -35,12 +35,14 @@ jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$TARGET_HA
 for pipe_status in created waiting_for_resource preparing pending running; do
   pipe_status_url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
 
-  echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
+  printf "\n\n  ---- checking for CI pipelines with status '%s' for project '%s', branch '%s'\n" \
+    "$pipe_status" "$GITLAB_PROJECT_ID" "$GIT_BRANCH"
   curl_response_body="$("${CURL_CMD[@]}" "$pipe_status_url")"
 
   active_pipelines="$(echo "$curl_response_body" | jq -r '.[] | .id , .web_url')"
   active_pipeline_ids+=($(echo "$active_pipelines" | grep -E '^[0-9]*$'))
-  printf "  ---- Found active GLCI pipelines:\n%s\n\n" "$active_pipelines"
+  echo "$active_pipelines"
+  echo
 
   if [ -z "$same_sha_pipeline_id" ]; then
     same_sha_pipeline_id="$(echo "$curl_response_body" | jq -r "$jq_same_pipeline_id_query")"
