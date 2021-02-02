@@ -4,7 +4,7 @@
 # shellcheck disable=SC2016
 [ -z "$GITLAB_ORG" ] && { echo '::error ::$GITLAB_ORG cannot be empty!'; exit 88; }
 # shellcheck disable=SC2016
-[ -z "$GITLAB_API_TOKEN" ] && { echo '::error ::$GITLAB_API_TOKEN cannot be empty!'; exit 88; }
+[ -z "$GITLAB_API_PRIVATE_TOKEN" ] && { echo '::error ::$GITLAB_API_PRIVATE_TOKEN cannot be empty!'; exit 88; }
 # shellcheck disable=SC2016
 [ -z "$TARGET_HASHREF" ] && { echo '::error ::$TARGET_HASHREF cannot be empty!'; exit 88; }
 # shellcheck disable=SC2016
