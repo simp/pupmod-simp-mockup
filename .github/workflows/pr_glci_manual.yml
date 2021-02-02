@@ -153,10 +153,12 @@ jobs:
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           GIT_BRANCH: ${{ needs.glci-syntax.outputs.pr_head_ref }}
         run: |
-          git log -1
+          git log -1 "$GIT_BRANCH" --pretty='GIT_BRANCH: %H'
+          git log -1 --pretty='checked out: %H'
+          git log -1 HEAD --pretty='HEAD: %H'
           git log --oneline -3
           echo "=== TARGET_HASHREF (shuold be empty): '$TARGET_HASHREF'"
-          TARGET_HASHREF="$(git show-ref HEAD -s)"
+          TARGET_HASHREF="$(git log -1 --pretty='%H')"
           echo "=== TARGET_HASHREF (1/2): '$TARGET_HASHREF'"
           export TARGET_HASHREF
           echo "=== TARGET_HASHREF (2/2): '$TARGET_HASHREF'"
