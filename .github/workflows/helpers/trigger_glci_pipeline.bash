@@ -63,8 +63,10 @@ printf "\n\n"
 
 # Short-circuit GLCI trigger if there's already a pipeline for our ref
 if [ -n "$same_sha_pipeline_id" ]; then
-  echo "== No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit '$TARGET_HASHREF' running at:"
-  echo "   https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/${same_sha_pipeline_id}"
+  msg="No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit '$TARGET_HASHREF' running at:"
+  msg_url="https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/${same_sha_pipeline_id}"
+  printf "== %s\n   %s\n" "$msg" "$msg_url"
+  echo "::warning ::$msg $msg_url"
   exit 0
 fi
 
@@ -78,3 +80,4 @@ git push gitlab ":${GIT_BRANCH}" -f || : # attempt to un-weird GLCI's `changed` 
 git push gitlab "${GIT_BRANCH}" -f || exit 99
 echo "Pushed branch '${GIT_BRANCH}' to gitlab"
 echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
+
