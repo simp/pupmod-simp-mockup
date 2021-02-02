@@ -166,6 +166,9 @@ jobs:
     if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true' && needs.glci-syntax.outputs.valid == 'true' && needs.contributor-permissions.outputs.permitted == 'true'
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/checkout@v2
+      - run: cp .github/workflows/helpers/trigger_glci_pipeline.bash /tmp/
+
       # Things we'd like to do:
       # - [ ] if there's no GitLab mirror, make one
       #   - [ ] if there's no GitLab <-> GitHub integration, make one
@@ -176,6 +179,7 @@ jobs:
       - uses: actions/checkout@v2
         if: needs.contributor-permissions.outputs.permitted == 'true'
         with:
+          clean: true
           fetch-depth: 0  # Need full checkout to push to gitlab mirror
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -189,67 +193,7 @@ jobs:
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           GIT_BRANCH: ${{ github.event.pull_request.head.ref }} # TODO check for/avoid protected branches?
           TARGET_HASHREF: ${{ github.event.pull_request.head.sha }}
-        run: |
-          GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
-          GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
-          GIT_BRANCH="${GIT_BRANCH:-$GITHUB_HEAD_REF}"
-          GITXXB_REPO_NAME="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
-          GITLAB_PROJECT_ID="${GITLAB_ORG}%2F${GITXXB_REPO_NAME}"
-          # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
-          CURL_CMD=(curl --http1.0 --fail --silent --show-error \
-            --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" \
-            --header "Content-Type: application/json" \
-            --header "Accept: application/json" \
-          )
-
-          echo "  --- This commit: $TARGET_HASHREF"
-
-          # Cancel any active/pending GitLab CI pipelines for the same
-          # project+branch, UNLESS it's already for this commit
-          active_pipeline_ids=()
-          same_sha_pipeline_id=""
-          for pipe_status in created waiting_for_resource preparing pending running; do
-            echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
-            jq_same_pipeline_id_query="$(printf '.[] | select(.sha=="%s") | .id' "$TARGET_HASHREF")"
-            url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
-
-            curl_response_body="$("${CURL_CMD[@]}" "$url")"
-            if [ -z "$same_sha_pipeline_id" ]; then
-              same_sha_pipeline_id="$(echo "$curl_response_body" | jq -r "$jq_same_pipeline_id_query")"
-            fi
-            active_pipelines="$(echo "$curl_response_body" | jq -r '.[] | .id , .web_url')"
-            active_pipeline_ids+=($(echo "$active_pipelines" | grep -E '^[0-9]*$'))
-            printf "$active_pipelines\n\n"
-          done
-          if [ "${#active_pipeline_ids[@]}" -gt 0 ]; then
-            printf "\nFound %s active pipeline ids:\n" "${#active_pipeline_ids[@]}"
-            echo "${active_pipeline_ids[@]}"
-            for pipe_id in "${active_pipeline_ids[@]}"; do
-            [ -n "$same_sha_pipeline_id" ] && [ "$pipe_id" == "$same_sha_pipeline_id" ] && continue
-              printf "\n  ------ Cancelling pipeline ID %s...\n" "$pipe_id"
-              "${CURL_CMD[@]}" --request POST "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines/${pipe_id}/cancel"
-            done
-          else
-            echo No active pipelines found
-          fi
-          printf "\n\n"
-
-          echo "  --- same_sha_pipeline_id: '${same_sha_pipeline_id}'"
-          if [ -n "$same_sha_pipeline_id" ]; then
-            echo "== No need to push '$GIT_BRANCH' to gitlab; Pipeline for same commit '$TARGET_HASHREF' running at:"
-            echo "   https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/${same_sha_pipeline_id}"
-            exit 0
-          fi
-
-          echo "== Pushing $GIT_BRANCH to gitlab"
-          git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
-          #git branch "$GIT_BRANCH" HEAD
-          git log --color --graph  --abbrev-commit -5 \
-            --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
-          git push gitlab ":${GIT_BRANCH}" -f || : # attempt to un-weird GLCI's `changed` tracking
-          git push gitlab "${GIT_BRANCH}" -f || exit 99
-          echo "Pushed branch '${GIT_BRANCH}' to gitlab"
-          echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
+        run: 'bash /tmp/trigger_glci_pipeline.bash'
 
       - name: When user does NOT have Repo Permissions
         if: needs.contributor-permissions.outputs.permitted == 'false'
