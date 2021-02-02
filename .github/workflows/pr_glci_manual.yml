@@ -155,8 +155,8 @@ jobs:
         run: |
           git log -1
           git log --oneline -3
-          export TARGET_HASHREF="$(git show-ref HEAD -s)"
-          bash /tmp/trigger_glci_pipeline.bash
+          TARGET_HASHREF="$(git show-ref HEAD -s)" bash /tmp/trigger_glci_pipeline.bash
+
 
 ###  examine_contexts:
 ###    needs: [ glci-syntax ]
