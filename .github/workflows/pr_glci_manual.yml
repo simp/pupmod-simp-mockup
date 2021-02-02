@@ -146,8 +146,8 @@ jobs:
           fetch-depth: 0  # Need full checkout to push to gitlab mirror
           clean: true
       - id: target-commit
-           run: |
-             echo "::set-output ::hashref="$(git log -1 --pretty='%H')""
+        run: |
+          echo "::set-output ::hashref="$(git log -1 --pretty='%H')""
       - name: Trigger CI when user has Repo Permissions
         uses: simp/github-action-gitlab-ci-pipeline-trigger@main
         with:
