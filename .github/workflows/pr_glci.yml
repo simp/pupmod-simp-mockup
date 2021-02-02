@@ -193,7 +193,7 @@ jobs:
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           GIT_BRANCH: ${{ github.event.pull_request.head.ref }} # TODO check for/avoid protected branches?
           TARGET_HASHREF: ${{ github.event.pull_request.head.sha }}
-        run: 'bash /tmp/trigger_glci_pipeline.bash'
+        run: 'source /tmp/trigger_glci_pipeline.bash'
 
       - name: When user does NOT have Repo Permissions
         if: needs.contributor-permissions.outputs.permitted == 'false'
