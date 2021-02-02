@@ -145,15 +145,20 @@ jobs:
           token: ${{secrets.NO_SCOPE_GITHUB_TOKEN}}
           fetch-depth: 0  # Need full checkout to push to gitlab mirror
           clean: true
-      - name: Trigger CI
-        env:
-          GITLAB_SERVER_URL: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
-          GITLAB_API_URL: ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
-          GITLAB_ORG: ${{ github.event.organization.login }}
-          GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
-          GIT_BRANCH: ${{ needs.glci-syntax.outputs.pr_head_ref }}
-        run: |
-          TARGET_HASHREF="$(git log -1 --pretty='%H')" bash /tmp/trigger_glci_pipeline.bash
+      - id: target-commit
+           run: |
+             echo "::set-output ::hashref="$(git log -1 --pretty='%H')""
+      - name: Trigger CI when user has Repo Permissions
+        uses: simp/github-action-gitlab-ci-pipeline-trigger@main
+        with:
+          gitlab_group: ${{ github.event.organization.login }}
+          github_repository: ${{ github.repository }}
+          github_repository_owner: ${{ github.repository_owner }}
+          git_branch: ${{ needs.glci-syntax.outputs.pr_head_ref }}
+          target_hashref:  ${{ steps.target-commit.hashref }}
+          gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
+          gitlab_server_url: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
+          gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
 
 
 ###  examine_contexts:
