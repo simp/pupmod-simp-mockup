@@ -155,9 +155,11 @@ jobs:
         run: |
           git log -1
           git log --oneline -3
+          echo "=== TARGET_HASHREF (shuold be empty): '$TARGET_HASHREF'"
           TARGET_HASHREF="$(git show-ref HEAD -s)"
+          echo "=== TARGET_HASHREF (1/2): '$TARGET_HASHREF'"
           export TARGET_HASHREF
-          echo "TARGET_HASHREF: '$TARGET_HASHREF'"
+          echo "=== TARGET_HASHREF (2/2): '$TARGET_HASHREF'"
           bash /tmp/trigger_glci_pipeline.bash
 
 
