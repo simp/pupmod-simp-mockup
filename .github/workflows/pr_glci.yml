@@ -192,7 +192,7 @@ jobs:
           github_repository_owner: ${{ github.repository_owner }}
           git_branch: ${{ github.event.pull_request.head.ref }} # TODO check for/avoid protected branches?
           target_hashref:  ${{ github.event.pull_request.head.sha }}
-          gitlab_api_private_token: : ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
+          gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           gitlab_server_url: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
           gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
 
