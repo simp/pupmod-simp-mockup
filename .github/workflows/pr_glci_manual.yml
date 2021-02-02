@@ -1,4 +1,12 @@
 # Manually trigger GLCI pipelines for a PR
+# ------------------------------------------------------------------------------
+#
+#             NOTICE: **This file is maintained with puppetsync**
+#
+# This file is updated automatically as part of a puppet module baseline.
+#
+# The next baseline sync will overwrite any local changes to this file!
+#
 # ==============================================================================
 #
 # This pipeline uses the following GitHub Action Secrets:
@@ -129,6 +137,8 @@ jobs:
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
+      - run: 'cp .github/workflows/helpers/trigger_glci_pipeline.bash /tmp/'
+      - uses: actions/checkout@v2
         with:
           repository: ${{ needs.glci-syntax.outputs.pr_head_full_name }}
           ref: ${{ needs.glci-syntax.outputs.pr_head_sha }}
@@ -143,64 +153,25 @@ jobs:
           GITLAB_API_PRIVATE_TOKEN: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           GIT_BRANCH: ${{ needs.glci-syntax.outputs.pr_head_ref }}
         run: |
-          GITLAB_SERVER_URL="${GITLAB_SERVER_URL:-https://gitlab.com}"
-          GITLAB_API_URL="${GITLAB_API_URL:-${GITLAB_SERVER_URL}/api/v4}"
-          GITXXB_REPO_NAME="${GITHUB_REPOSITORY/$GITHUB_REPOSITORY_OWNER\//}"
-          GITLAB_PROJECT_ID="${GITLAB_ORG}%2F${GITXXB_REPO_NAME}"
-          # --http1.0 avoids an HTTP/2 load balancing issue when run from GA
-          CURL_CMD=(curl --http1.0 --fail --silent --show-error \
-            --header "Authorization: Bearer $GITLAB_API_PRIVATE_TOKEN" \
-            --header "Content-Type: application/json" \
-            --header "Accept: application/json" \
-          )
+          git log -1
+          git log --oneline -3
+          export TARGET_HASHREF="$(git show-ref HEAD -s)"
+          bash /tmp/trigger_glci_pipeline.bash'
 
-          # Cancel any active/pending GitLab CI pipelines for the same project+branch
-          active_pipeline_ids=()
-          for pipe_status in created waiting_for_resource preparing pending running; do
-            echo "  ---- checking for CI pipelines with status '$pipe_status' for project '$GITLAB_PROJECT_ID', branch '$GIT_BRANCH'"
-            url="${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines?ref=${GIT_BRANCH}&status=${pipe_status}"
-            active_pipelines="$("${CURL_CMD[@]}" "$url" | jq -r '.[] | .id , .web_url')"
-            active_pipeline_ids+=($(echo "$active_pipelines" | grep -E '^[0-9]*$'))
-            printf "$active_pipelines\n\n"
-          done
-          if [ "${#active_pipeline_ids[@]}" -gt 0 ]; then
-            printf "\nFound %s active pipeline ids:\n" "${#active_pipeline_ids[@]}"
-            echo "${active_pipeline_ids[@]}"
-            for pipe_id in "${active_pipeline_ids[@]}"; do
-              printf "\n  ------ Cancelling pipeline ID %s...\n" "$pipe_id"
-              "${CURL_CMD[@]}" --request POST "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}/pipelines/${pipe_id}/cancel"
-            done
-          else
-            echo No active pipelines found
-          fi
-
-          # Should we protect against pushing default branches?
-          echo "== Pushing '$GIT_BRANCH' to gitlab"
-          git remote add gitlab "https://oauth2:${GITLAB_API_PRIVATE_TOKEN}@${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}.git"
-          git branch "$GIT_BRANCH" HEAD || :
-          git branch -av
-          git log --color --graph  --abbrev-commit -5 \
-            --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset'
-          git push gitlab ":${GIT_BRANCH}" -f || : # attempt to un-weird GLCI's `changed` tracking
-          echo "== git push --verbose gitlab ${GIT_BRANCH}"
-          git push --verbose gitlab "${GIT_BRANCH}"
-          echo "Pushed branch '${GIT_BRANCH}' to gitlab"
-          echo "   A new pipeline should be at: https://${GITLAB_SERVER_URL#*://}/${GITLAB_ORG}/${GITXXB_REPO_NAME}/-/pipelines/"
-
-###  examine_contexts:
-###    needs: [ glci-syntax ]
-###    name: 'Examine Context contents'
-###    if: always()
-###    runs-on: ubuntu-16.04
-###    steps:
-###      - name: Dump contexts
-###        env:
-###          GITHUB_CONTEXT: ${{ toJson(github) }}
-###        run: echo "$GITHUB_CONTEXT"
-###      - name: Dump 'needs' context
-###        env:
-###          ENV_CONTEXT: ${{ toJson(needs) }}
-###        run: echo "$ENV_CONTEXT"
-###      - name: Dump env vars
-###        run: env | sort
+  examine_contexts:
+    needs: [ glci-syntax ]
+    name: 'Examine Context contents'
+    if: always()
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Dump contexts
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump 'needs' context
+        env:
+          ENV_CONTEXT: ${{ toJson(needs) }}
+        run: echo "$ENV_CONTEXT"
+      - name: Dump env vars
+        run: env | sort
 
