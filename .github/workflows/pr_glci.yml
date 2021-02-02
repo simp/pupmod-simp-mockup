@@ -185,6 +185,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Trigger CI when user has Repo Permissions
+        if: needs.contributor-permissions.outputs.permitted == 'true'
         uses: simp/github-action-gitlab-ci-pipeline-trigger@main
         with:
           gitlab_group: ${{ github.event.organization.login }}

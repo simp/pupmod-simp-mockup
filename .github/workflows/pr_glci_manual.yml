@@ -158,7 +158,7 @@ jobs:
           target_hashref:  ${{ steps.target-commit.hashref }}
           gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           gitlab_server_url: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
-          gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
+          gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}      # https://gitlab.com/api/v4
 
 
 ###  examine_contexts:
