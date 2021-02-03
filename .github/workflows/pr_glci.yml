@@ -188,14 +188,14 @@ jobs:
         if: needs.contributor-permissions.outputs.permitted == 'true'
         uses: simp/github-action-gitlab-ci-pipeline-trigger@main
         with:
+          git_branch: ${{ github.event.pull_request.head.ref }} # TODO check for/avoid protected branches?
+          git_hashref:  ${{ github.event.pull_request.head.sha }}
+          gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           gitlab_group: ${{ github.event.organization.login }}
+###          gitlab_server_url: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
+###          gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
           github_repository: ${{ github.repository }}
           github_repository_owner: ${{ github.repository_owner }}
-          git_branch: ${{ github.event.pull_request.head.ref }} # TODO check for/avoid protected branches?
-          target_hashref:  ${{ github.event.pull_request.head.sha }}
-          gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
-          gitlab_server_url: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
-          gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}       # https://gitlab.com/api/v4
 
 
       - name: When user does NOT have Repo Permissions
@@ -205,20 +205,20 @@ jobs:
           echo "Ending gracefully; Contributor $GITHUB_ACTOR does not have permission to trigger CI"
           false
 
-###  examine_contexts:
-###    name: 'Examine Context contents'
+  examine_contexts:
+    name: 'Examine Context contents'
 ###    if: always()
-###    runs-on: ubuntu-16.04
+    runs-on: ubuntu-16.04
 ###    needs: [ glci-syntax, contributor-permissions ]
-###    steps:
-###      - name: Dump contexts
-###        env:
-###          GITHUB_CONTEXT: ${{ toJson(github) }}
-###        run: echo "$GITHUB_CONTEXT"
-###      - name: Dump needs context
-###        env:
-###          ENV_CONTEXT: ${{ toJson(needs) }}
-###        run: echo "$ENV_CONTEXT"
-###      - name: Dump env vars
-###        run: env | sort
+    steps:
+      - name: Dump contexts
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump needs context
+        env:
+          ENV_CONTEXT: ${{ toJson(needs) }}
+        run: echo "$ENV_CONTEXT"
+      - name: Dump env vars
+        run: env | sort
 
