@@ -150,26 +150,22 @@ jobs:
           git_branch: ${{ needs.glci-syntax.outputs.pr_head_ref }}
           gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           gitlab_group: ${{ github.event.organization.login }}
-###          gitlab_server_url: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
-###          gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}      # https://gitlab.com/api/v4
           github_repository: ${{ github.repository }}
           github_repository_owner: ${{ github.repository_owner }}
 
-
-  examine_contexts:
+###  examine_contexts:
 ###    needs: [ glci-syntax ]
-    name: 'Examine Context contents'
+###    name: 'Examine Context contents'
 ###    if: always()
-    runs-on: ubuntu-16.04
-    steps:
-      - name: Dump contexts
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump 'needs' context
-        env:
-          ENV_CONTEXT: ${{ toJson(needs) }}
-        run: echo "$ENV_CONTEXT"
-      - name: Dump env vars
-        run: env | sort
-
+###    runs-on: ubuntu-16.04
+###    steps:
+###      - name: Dump contexts
+###        env:
+###          GITHUB_CONTEXT: ${{ toJson(github) }}
+###        run: echo "$GITHUB_CONTEXT"
+###      - name: Dump 'needs' context
+###        env:
+###          ENV_CONTEXT: ${{ toJson(needs) }}
+###        run: echo "$ENV_CONTEXT"
+###      - name: Dump env vars
+###        run: env | sort
