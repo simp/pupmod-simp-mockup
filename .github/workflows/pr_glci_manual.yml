@@ -137,7 +137,6 @@ jobs:
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
         with:
           repository: ${{ needs.glci-syntax.outputs.pr_head_full_name }}
           ref: ${{ needs.glci-syntax.outputs.pr_head_sha }}
