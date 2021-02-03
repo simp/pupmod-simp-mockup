@@ -166,6 +166,9 @@ jobs:
     if: github.event_name == 'pull_request_target' && ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' ) && github.event.pull_request.merged != 'true' && needs.glci-syntax.outputs.valid == 'true' && needs.contributor-permissions.outputs.permitted == 'true'
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/checkout@v2
+      - run: cp .github/workflows/helpers/trigger_glci_pipeline.bash /tmp/
+
       # Things we'd like to do:
       # - [ ] if there's no GitLab mirror, make one
       #   - [ ] if there's no GitLab <-> GitHub integration, make one
@@ -173,11 +176,18 @@ jobs:
       # - [x] Cancel any GLCI pipelines already pending/running for this branch
       #       - "created|waiting_for_resource|preparing|pending|running"
       # - [x] if PR: force-push branch to GitLab
+      - uses: actions/checkout@v2
+        if: needs.contributor-permissions.outputs.permitted == 'true'
+        with:
+          clean: true
+          fetch-depth: 0  # Need full checkout to push to gitlab mirror
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - name: Trigger CI when user has Repo Permissions
         if: needs.contributor-permissions.outputs.permitted == 'true'
         uses: simp/github-action-gitlab-ci-pipeline-trigger@main
         with:
-          github_repo_full_name: ${{ github.event.pull_request.head.repo.full_name }}
           gitlab_group: ${{ github.event.organization.login }}
           github_repository: ${{ github.repository }}
           github_repository_owner: ${{ github.repository_owner }}

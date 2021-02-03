@@ -136,16 +136,22 @@ jobs:
     needs: [ glci-syntax ]
     runs-on: ubuntu-16.04
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ needs.glci-syntax.outputs.pr_head_full_name }}
+          ref: ${{ needs.glci-syntax.outputs.pr_head_sha }}
+          token: ${{secrets.NO_SCOPE_GITHUB_TOKEN}}
+          fetch-depth: 0  # Need full checkout to push to gitlab mirror
+          clean: true
       - name: Trigger CI when user has Repo Permissions
         uses: simp/github-action-gitlab-ci-pipeline-trigger@main
         with:
-          token: ${{secrets.NO_SCOPE_GITHUB_TOKEN}}
-          github_repo_full_name: ${{ needs.glci-syntax.outputs.pr_head_full_name }}
-          gitlab_group: ${{ github.event.organization.login }}
           github_repository: ${{ github.repository }}
           github_repository_owner: ${{ github.repository_owner }}
           git_branch: ${{ needs.glci-syntax.outputs.pr_head_ref }}
-          target_hashref: ${{ needs.glci-syntax.outputs.pr_head_sha }}
+          target_hashref:  ${{ needs.glci-syntax.outputs.pr_head_sha }}
+          gitlab_group: ${{ github.event.organization.login }}
           gitlab_api_private_token: ${{ secrets.GITLAB_API_PRIVATE_TOKEN }}
           gitlab_server_url: ${{ secrets.GITLAB_SERVER_URL }} # https://gitlab.com
           gitlab_api_url:  ${{ secrets.GITLAB_API_URL }}      # https://gitlab.com/api/v4
