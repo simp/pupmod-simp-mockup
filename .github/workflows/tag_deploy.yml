@@ -61,26 +61,6 @@ jobs:
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
     steps:
-      # TODO:
-      # - [ ] Add Docker access token to secrets
-      # - [x] Run container
-      # - [x] Clone pupmod inside container
-      # - [x] Build RPM inside container
-      # - [ ] Copy RPM out of container
-      # - [ ] Kill & remove container
-      - run: |
-          BUILD_IMAGE=docker.io/simpproject/simp_build_centos8:latest
-          BUILD_CONTAINER=build_el8
-          # docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin <<< "$DOCKER_PASSWORD"
-          docker pull "$BUILD_IMAGE"
-          docker rm -f "$BUILD_CONTAINER" &> /dev/null || :
-          docker run --rm -dt --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash
-          docker exec "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} _pupmod_to_build; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
-          docker cp "$BUILD_CONTAINER:/home/build_user/simp-core/_pupmod_to_build/dist/" dist
-          docker container rm -f "$BUILD_CONTAINER"
-          RPM_FILE="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
-          echo ::set-output rpm_file="$RPM_FILE"
-          echo "Built RPM '$RPM_FILE'"
 
           # FIXME the input devide is not a tty
       #- name: Checkout simp-core
@@ -122,6 +102,26 @@ jobs:
           ref: ${{ github.ref }}
           clean: true
           fetch-depth: 0
+
+      - name: Build Release RPM
+        id: build_rpm
+      - run: |
+          BUILD_IMAGE=docker.io/simpproject/simp_build_centos8:latest
+          BUILD_CONTAINER=build_el8
+          BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
+          # docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin <<< "$DOCKER_PASSWORD"
+          docker pull "$BUILD_IMAGE"
+          docker rm -f "$BUILD_CONTAINER" &> /dev/null || :
+          docker run --rm -dt --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash
+          docker cp ./ "$BUILD_CONTAINER:$BUILD_PATH"
+          docker exec "$BUILD_CONTAINER" /bin/bash -c "chown --reference=$BUILD_PATH su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
+          docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist/" dist
+          docker container rm -f "$BUILD_CONTAINER"
+          RPM_FILE="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
+          echo ::set-output rpm_file="$RPM_FILE"
+          echo ::set-output rpm_filename="$(basename "$RPM_FILE")"
+          echo "Built RPM '$RPM_FILE'"
+
       - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
         run: |
@@ -153,6 +153,22 @@ jobs:
           body_path: /tmp/annotation.body
           draft: false
           prerelease: false
+
+
+      - name: Upload RPM
+        id: upload_rpm_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # This pulls from the CREATE RELEASE step above, referencing
+          # its ID to get its outputs object, which include a
+          # `upload_url`. See this blog post for more info:
+          # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.build_rpm.outputs.rpm_file }}
+          asset_name: ${{ steps.build_rpm.outputs.rpm_filename }}
+          asset_content_type: application/octet-stream
 
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
