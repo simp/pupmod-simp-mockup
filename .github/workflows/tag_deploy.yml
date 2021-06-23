@@ -63,10 +63,15 @@ jobs:
     steps:
       # TODO:
       # - [ ] Add Docker access token to secrets
-      # - [ ]
+      # - [ ] Run container
+      # - [ ] Clone pupmod inside container
+      # - [ ] Build RPM inside container
+      # - [ ] Copy RPM out of container
+      # - [ ] Kill & remove container
       - run: |
           docker pull docker.io/simpproject/simp_build_centos8:latest
-          docker run -it docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'ls -l'"
+          docker run docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'ls -l'"
+          # FIXME the input devide is not a tty
       #- name: Checkout simp-core
       #  uses: actions/checkout@v2
       #  with:
