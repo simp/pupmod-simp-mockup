@@ -134,7 +134,7 @@ jobs:
 
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
-    needs: [ releng-checks ]
+    needs: [ create-github-release ]
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
     env:
