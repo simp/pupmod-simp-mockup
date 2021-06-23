@@ -70,7 +70,7 @@ jobs:
       # - [ ] Kill & remove container
       - run: |
           docker pull docker.io/simpproject/simp_build_centos8:latest
-          docker run docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'ls -l'"
+          docker run docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; bundle exec rake -T '"
           # FIXME the input devide is not a tty
       #- name: Checkout simp-core
       #  uses: actions/checkout@v2
