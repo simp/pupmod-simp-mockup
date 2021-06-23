@@ -62,11 +62,11 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       # TODO:
-      # - [ ] Add Docker access token to secrets 
-      # - [ ] https://www.docker.com/blog/docker-github-actions/
+      # - [ ] Add Docker access token to secrets
+      # - [ ]
       - run: |
-        docker pull docker.io/simpproject/simp_build_centos8:latest
-        docker run -it docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'ls -l'"
+          docker pull docker.io/simpproject/simp_build_centos8:latest
+          docker run -it docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'ls -l'"
       #- name: Checkout simp-core
       #  uses: actions/checkout@v2
       #  with:
