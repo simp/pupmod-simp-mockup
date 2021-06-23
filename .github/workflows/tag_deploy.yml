@@ -33,31 +33,31 @@ env:
   PUPPET_VERSION: '~> 6'
 
 jobs:
-  releng-checks:
-    name: "RELENG checks"
-    if: github.repository_owner == 'simp'
-    runs-on: ubuntu-18.04
-    steps:
-      - name: "Assert '${{ github.ref }}' is a tag"
-        run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-          clean: true
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake pkg:check_version
-      - run: bundle exec rake pkg:compare_latest_tag
-      - run: bundle exec rake pkg:create_tag_changelog
-      - run: bundle exec rake metadata_lint
-      - name: "Test that Puppet module can build"
-        run: "bundle exec pdk build --force"
+###  releng-checks:
+###    name: "RELENG checks"
+###    if: github.repository_owner == 'simp'
+###    runs-on: ubuntu-18.04
+###    steps:
+###      - name: "Assert '${{ github.ref }}' is a tag"
+###        run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
+###      - uses: actions/checkout@v2
+###        with:
+###          ref: ${{ github.ref }}
+###          clean: true
+###      - uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###      - run: bundle exec rake pkg:check_version
+###      - run: bundle exec rake pkg:compare_latest_tag
+###      - run: bundle exec rake pkg:create_tag_changelog
+###      - run: bundle exec rake metadata_lint
+###      - name: "Test that Puppet module can build"
+###        run: "bundle exec pdk build --force"
 
   build-rpm:
     name: 'Build RPM (signed with unstable dev key)'
-    needs: [ releng-checks ]
+###    needs: [ releng-checks ]
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
     steps:
@@ -70,7 +70,7 @@ jobs:
       # - [ ] Kill & remove container
       - run: |
           docker pull docker.io/simpproject/simp_build_centos8:latest
-          docker run docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} _pupmod_to_release; bundle exec rake pkg:single[\$PWD/_pupmod_to_release]'; ls -l \$PWD/dist"
+          docker run docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} _pupmod_to_release; bundle exec rake pkg:single[\$PWD/_pupmod_to_release]; ls -l \$PWD/dist'"
           # FIXME the input devide is not a tty
       #- name: Checkout simp-core
       #  uses: actions/checkout@v2
