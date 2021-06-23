@@ -63,14 +63,22 @@ jobs:
     steps:
       # TODO:
       # - [ ] Add Docker access token to secrets
-      # - [ ] Run container
-      # - [ ] Clone pupmod inside container
-      # - [ ] Build RPM inside container
+      # - [x] Run container
+      # - [x] Clone pupmod inside container
+      # - [x] Build RPM inside container
       # - [ ] Copy RPM out of container
       # - [ ] Kill & remove container
       - run: |
-          docker pull docker.io/simpproject/simp_build_centos8:latest
-          docker run docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} _pupmod_to_release; bundle exec rake pkg:single[\$PWD/_pupmod_to_release]; ls -l \$PWD/dist'"
+          BUILD_IMAGE=docker.io/simpproject/simp_build_centos8:latest
+          BUILD_CONTAINER=build_el8
+          # docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin <<< "$DOCKER_PASSWORD"
+          docker pull "$BUILD_IMAGE"
+          docker run --rm -d --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} _pupmod_to_build; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
+          docker cp "$BUILD_CONTAINER:/home/build_user/simp-core/_pupmod_to_build/dist" dist
+          ls -lart dist
+          RPM_FILE="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
+          echo ::set-output rpm_file="$RPM_FILE"
+          docker container rm -f "$BUILD_CONTAINER"
           # FIXME the input devide is not a tty
       #- name: Checkout simp-core
       #  uses: actions/checkout@v2
