@@ -11,10 +11,11 @@
 #
 # This pipeline uses the following GitHub Action Secrets:
 #
-#   GitHub Secret variable    Type      Notes
-#   ------------------------  --------  ----------------------------------------
-#   PUPPETFORGE_API_TOKEN     Required
-#
+#   GitHub Secret variable           Type      Notes
+#   -------------------------------  --------  ---------------------------------
+#   PUPPETFORGE_API_TOKEN            Required
+#   SIMP_CORE_REF_FOR_BUILDING_RPMS  Required  simp-core ref (tag) to use to
+#                                              build RPMs with `rake pkg:single`
 # ------------------------------------------------------------------------------
 #
 # NOTES:
@@ -84,10 +85,10 @@ jobs:
           docker exec "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
           docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist/" dist
           docker container rm -f "$BUILD_CONTAINER"
-          RPM_FILE="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
-          echo ::set-output rpm_file::"$RPM_FILE"
-          echo ::set-output rpm_filename::"$(basename "$RPM_FILE")"
-          echo "Built RPM '$RPM_FILE'"
+          rpm_file="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
+          echo "::set-output name=rpm_file::${rpm_file}"
+          echo "::set-output name=rpm_filename::$(basename "$rpm_file")"
+          echo "Built RPM '$rpm_file'"
 
       - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
