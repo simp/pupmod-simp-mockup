@@ -73,12 +73,15 @@ jobs:
           BUILD_CONTAINER=build_el8
           # docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin <<< "$DOCKER_PASSWORD"
           docker pull "$BUILD_IMAGE"
-          docker run --rm -d --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} _pupmod_to_build; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
-          docker cp "$BUILD_CONTAINER:/home/build_user/simp-core/_pupmod_to_build/dist" dist
-          ls -lart dist
+          docker rm -f "$BUILD_CONTAINER" &> /dev/null || :
+          docker run --rm -dt --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash
+          docker exec "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY} _pupmod_to_build; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
+          docker cp "$BUILD_CONTAINER:/home/build_user/simp-core/_pupmod_to_build/dist/" dist
+          docker container rm -f "$BUILD_CONTAINER"
           RPM_FILE="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
           echo ::set-output rpm_file="$RPM_FILE"
-          docker container rm -f "$BUILD_CONTAINER"
+          echo "Built RPM '$RPM_FILE'"
+
           # FIXME the input devide is not a tty
       #- name: Checkout simp-core
       #  uses: actions/checkout@v2
