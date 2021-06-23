@@ -85,8 +85,8 @@ jobs:
           docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist/" dist
           docker container rm -f "$BUILD_CONTAINER"
           RPM_FILE="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
-          echo ::set-output rpm_file="$RPM_FILE"
-          echo ::set-output rpm_filename="$(basename "$RPM_FILE")"
+          echo ::set-output rpm_file::"$RPM_FILE"
+          echo ::set-output rpm_filename::"$(basename "$RPM_FILE")"
           echo "Built RPM '$RPM_FILE'"
 
       - name: Get tag & annotation info (${{github.ref}})
