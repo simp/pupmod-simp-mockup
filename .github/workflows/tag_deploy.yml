@@ -90,7 +90,7 @@ jobs:
 
   create-github-release:
     name: Deploy GitHub Release
-    needs: [ releng-checks ]
+    needs: [ build-rpm ]
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
     steps:
