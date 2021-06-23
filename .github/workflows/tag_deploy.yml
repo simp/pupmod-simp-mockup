@@ -71,7 +71,7 @@ jobs:
 
       - name: Build Release RPM
         id: build_rpm
-      - run: |
+        run: |
           BUILD_IMAGE=docker.io/simpproject/simp_build_centos8:latest
           BUILD_CONTAINER=build_el8
           BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
