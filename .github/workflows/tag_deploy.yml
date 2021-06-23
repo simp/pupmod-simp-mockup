@@ -61,31 +61,37 @@ jobs:
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
     steps:
-      - name: Checkout simp-core
-        uses: actions/checkout@v2
-        with:
-          repository: https://github.com/simp/simp-core.git
-          ref: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
-          clean: true
-          fetch-depth: 0
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: mkdir -p src/puppet/modules
-      - name: Checkout code for ${{ github.event.repository.name }}
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-          clean: true
-          fetch-depth: 0
-          path: src/puppet/modules/${{ github.event.repository.name }}
-      - name: Build RPM
-        id: tag-check
-        # NOTE requires rpmdev-setuptree from rpmdevtools
-        run: |
-          PUPMOD_NAME="$(jq -r '.name|split("-")[1]' "src/puppet/modules/${{ github.event.repository.name }}/metadata.json")"
-          mv "src/puppet/modules/${{ github.event.repository.name }}" "src/puppet/modules/${PUPMOD_NAME}"
+      # TODO:
+      # - [ ] Add Docker access token to secrets 
+      # - [ ] https://www.docker.com/blog/docker-github-actions/
+      - run: |
+        docker pull docker.io/simpproject/simp_build_centos8:latest
+        docker run -it docker.io/simpproject/simp_build_centos8:latest /bin/bash -c "su -l build_user -c 'ls -l'"
+      #- name: Checkout simp-core
+      #  uses: actions/checkout@v2
+      #  with:
+      #    repository: https://github.com/simp/simp-core.git
+      #    ref: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
+      #    clean: true
+      #    fetch-depth: 0
+      #- uses: ruby/setup-ruby@v1
+      #  with:
+      #    ruby-version: 2.5
+      #    bundler-cache: true
+      #- run: mkdir -p src/puppet/modules
+      #- name: Checkout code for ${{ github.event.repository.name }}
+      #  uses: actions/checkout@v2
+      #  with:
+      #    ref: ${{ github.ref }}
+      #    clean: true
+      #    fetch-depth: 0
+      #    path: src/puppet/modules/${{ github.event.repository.name }}
+      #- name: Build RPM
+      #  id: tag-check
+      #  # NOTE requires rpmdev-setuptree from rpmdevtools
+      #  run: |
+      #    PUPMOD_NAME="$(jq -r '.name|split("-")[1]' "src/puppet/modules/${{ github.event.repository.name }}/metadata.json")"
+      #    mv "src/puppet/modules/${{ github.event.repository.name }}" "src/puppet/modules/${PUPMOD_NAME}"
 
 
   create-github-release:
