@@ -58,7 +58,7 @@ jobs:
 
   create-github-release:
     name: Deploy GitHub Release
-    needs: [ build-rpm ]
+###    needs: [ releng-checks ]
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
     steps:
@@ -120,8 +120,7 @@ jobs:
           draft: false
           prerelease: false
 
-
-      - name: Upload RPM
+      - name: Upload RPM file to Release
         id: upload_rpm_asset
         uses: actions/upload-release-asset@v1
         env:
