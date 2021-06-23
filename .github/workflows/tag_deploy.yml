@@ -80,7 +80,7 @@ jobs:
           docker rm -f "$BUILD_CONTAINER" &> /dev/null || :
           docker run --rm -dt --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash
           docker cp ./ "$BUILD_CONTAINER:$BUILD_PATH"
-          docker exec "$BUILD_CONTAINER" /bin/bash -c 'chown --reference=\"$(dirname $BUILD_PATH)\" \"$BUILD_PATH\"'"
+          docker exec "$BUILD_CONTAINER" /bin/bash -c "chown --reference=\"$(dirname '$BUILD_PATH')\" '$BUILD_PATH'"
           docker exec "$BUILD_CONTAINER" /bin/bash -c 'su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
           docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist/" dist
           docker container rm -f "$BUILD_CONTAINER"
