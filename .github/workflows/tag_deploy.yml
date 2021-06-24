@@ -16,6 +16,9 @@
 #   PUPPETFORGE_API_TOKEN            Required
 #   SIMP_CORE_REF_FOR_BUILDING_RPMS  Required  simp-core ref (tag) to use to
 #                                              build RPMs with `rake pkg:single`
+#   SIMP_DEV_GPG_SIGNING_KEY         Required
+#   SIMP_DEV_GPG_SIGNING_KEY_ID      Required
+#
 # ------------------------------------------------------------------------------
 #
 # NOTES:
@@ -82,7 +85,20 @@ jobs:
           docker run --rm -dt --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash
           docker cp ./ "$BUILD_CONTAINER:$BUILD_PATH"
           docker exec "$BUILD_CONTAINER" /bin/bash -c "chown --reference=\"\$(dirname '$BUILD_PATH')\" -R '$BUILD_PATH'"
+
+          # pupmod RPMs must be build from simp-core using `rake pkg:single`
           docker exec "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
+
+          # (This was so much simpler without GPG signing)
+          docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY" "$BUILD_CONTAINER" /bin/bash -c 'echo "$KEY" | su -l build_user -c "gpg --batch --import"'
+          docker exec -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf; gpg-connect-agent reloadagent /bye'"
+          docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" "$BUILD_CONTAINER" sudo -E -u build_user echo $(printf '$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE')
+          keygrip_cmd="$(printf 'grp="$(gpg --with-keygrip --with-colons -K "%s" | awk -F: "/grp:/ {print \$10}")"; /usr/libexec/gpg-preset-passphrase --preset %s <<< %s' "$SIMP_DEV_GPG_SIGNING_KEY_ID" '"$grp"' "$(printf "'\$PASS'\n")" )
+          docker exec -e "PASS=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf ; gpg-connect-agent reloadagent /bye; $keygrip_cmd'"
+          sign_cmd="$(printf 'rpmsign --define "_gpg_name %s" --define "_gpg_path ~/.gnupg" --resign ' "$SIMP_DEV_GPG_SIGNING_KEY_ID")"
+          docker exec -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'ls -1 $BUILD_PATH/dist/*.rpm | grep -v src.rpm$ | xargs $sign_cmd'"
+
+          # copy RPM back out
           docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist/" dist
           docker container rm -f "$BUILD_CONTAINER"
           rpm_file="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
