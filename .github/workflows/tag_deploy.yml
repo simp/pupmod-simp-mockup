@@ -87,7 +87,7 @@ jobs:
           docker exec "$BUILD_CONTAINER" /bin/bash -c "chown --reference=\"\$(dirname '$BUILD_PATH')\" -R '$BUILD_PATH'"
 
           # pupmod RPMs must be build from simp-core using `rake pkg:single`
-          docker exec "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }} ; bundle; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
+          docker exec "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
 
           # (This was so much simpler without GPG signing)
           docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY" "$BUILD_CONTAINER" /bin/bash -c 'echo "$KEY" | su -l build_user -c "gpg --batch --import"'
@@ -108,6 +108,7 @@ jobs:
           SIMP_DEV_GPG_SIGNING_KEY: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
           SIMP_DEV_GPG_SIGNING_KEY_ID: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
           SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+          SIMP_CORE_REF_FOR_BUILDING_RPMS: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
 
       - name: Get tag & annotation info (${{github.ref}})
