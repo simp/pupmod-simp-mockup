@@ -105,6 +105,11 @@ jobs:
           echo "::set-output name=rpm_file::${rpm_file}"
           echo "::set-output name=rpm_filename::$(basename "$rpm_file")"
           echo "Built RPM '$rpm_file'"
+        env:
+          SIMP_DEV_GPG_SIGNING_KEY: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
+          SIMP_DEV_GPG_SIGNING_KEY_ID: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
+          SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+
 
       - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
