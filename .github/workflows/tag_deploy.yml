@@ -74,41 +74,13 @@ jobs:
           fetch-depth: 0
 
       - name: Build Release RPM
-        id: build_rpm
-        run: |
-          BUILD_IMAGE=docker.io/simpproject/simp_build_centos8:latest
-          BUILD_CONTAINER=build_el8
-          BUILD_PATH=/home/build_user/simp-core/_pupmod_to_build
-          # docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin <<< "$DOCKER_PASSWORD"
-          docker pull "$BUILD_IMAGE"
-          docker rm -f "$BUILD_CONTAINER" &> /dev/null || :
-          docker run --rm -dt --name "$BUILD_CONTAINER" "$BUILD_IMAGE" /bin/bash
-          docker cp ./ "$BUILD_CONTAINER:$BUILD_PATH"
-          docker exec "$BUILD_CONTAINER" /bin/bash -c "chown --reference=\"\$(dirname '$BUILD_PATH')\" -R '$BUILD_PATH'"
-
-          # pupmod RPMs must be build from simp-core using `rake pkg:single`
-          docker exec "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'cd simp-core; git fetch origin; git checkout $SIMP_CORE_REF_FOR_BUILDING_RPMS; bundle; bundle exec rake pkg:single[\$PWD/_pupmod_to_build]'"
-
-          # (This was so much simpler without GPG signing)
-          docker exec -i -e "KEY=$SIMP_DEV_GPG_SIGNING_KEY" "$BUILD_CONTAINER" /bin/bash -c 'echo "$KEY" | su -l build_user -c "gpg --batch --import"'
-          docker exec -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf; gpg-connect-agent reloadagent /bye'"
-          keygrip_cmd="$(printf 'grp="$(gpg --with-keygrip --with-colons -K "%s" | awk -F: "/grp:/ {print \$10}")"; /usr/libexec/gpg-preset-passphrase --preset %s <<< %s' "$SIMP_DEV_GPG_SIGNING_KEY_ID" '"$grp"' "$(printf "'\$PASS'\n")" )"
-          docker exec -e "PASS=$SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE" -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf ; gpg-connect-agent reloadagent /bye; $keygrip_cmd'"
-          sign_cmd="$(printf 'rpmsign --define "_gpg_name %s" --define "_gpg_path ~/.gnupg" --resign ' "$SIMP_DEV_GPG_SIGNING_KEY_ID")"
-          docker exec -i "$BUILD_CONTAINER" /bin/bash -c "su -l build_user -c 'ls -1 $BUILD_PATH/dist/*.rpm | grep -v src.rpm$ | xargs $sign_cmd'"
-
-          # copy RPM back out
-          docker cp "$BUILD_CONTAINER:$BUILD_PATH/dist/" dist
-          docker container rm -f "$BUILD_CONTAINER"
-          rpm_file="$(ls -1r dist/*.rpm | grep -v 'src\.rpm' | head -1)"
-          echo "::set-output name=rpm_file::${rpm_file}"
-          echo "::set-output name=rpm_filename::$(basename "$rpm_file")"
-          echo "Built RPM '$rpm_file'"
-        env:
-          SIMP_DEV_GPG_SIGNING_KEY: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
-          SIMP_DEV_GPG_SIGNING_KEY_ID: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
-          SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-          SIMP_CORE_REF_FOR_BUILDING_RPMS: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+        id: build-and-sign-rpm
+        with:
+          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
+          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
+          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
 
       - name: Get tag & annotation info (${{github.ref}})
@@ -154,8 +126,8 @@ jobs:
           # `upload_url`. See this blog post for more info:
           # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.build_rpm.outputs.rpm_file }}
-          asset_name: ${{ steps.build_rpm.outputs.rpm_filename }}
+          asset_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+          asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
           asset_content_type: application/octet-stream
 
   deploy-to-puppet-forge:
