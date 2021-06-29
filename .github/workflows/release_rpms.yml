@@ -1,0 +1,115 @@
+# Manual action to build, sign, and attach a release's RPMs
+# ------------------------------------------------------------------------------
+#
+#             NOTICE: **This file is maintained with puppetsync**
+#
+# This file is updated automatically as part of a puppet module baseline.
+#
+# The next baseline sync will overwrite any local changes to this file!
+#
+# ==============================================================================
+#
+# This pipeline uses the following GitHub Action Secrets:
+#
+#   GitHub Secret variable               Notes
+#   -------------------------------      ---------------------------------------
+#   PUPPETFORGE_API_TOKEN
+#   SIMP_CORE_REF_FOR_BUILDING_RPMS      simp-core ref (tag) to use to build
+#                                        RPMs with `rake pkg:single`
+#   SIMP_DEV_GPG_SIGNING_KEY             GPG signing key's secret key
+#   SIMP_DEV_GPG_SIGNING_KEY_ID          User ID (name) of signing key
+#   SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE  Passphrase to use GPG signing key
+#
+# ------------------------------------------------------------------------------
+#
+# NOTES:
+#
+# * The CHANGLOG text is altered to remove RPM-style date headers, which don't
+#   render well as markdown on the GitHub release pages
+---
+name: 'RELENG: Build + attach RPMs to GitHub Release'
+
+on:
+  workflow_dispatchpush:
+    inputs:
+      release_tag:
+        description: "Release tag"
+        required: true
+      overwrite:
+        description: "Overwrite existing assets?"
+        required: true
+        default: false
+
+env:
+  PUPPET_VERSION: '~> 6'
+
+jobs:
+  releng-checks:
+    name: "RELENG checks"
+    if: github.repository_owner == 'simp'
+    runs-on: ubuntu-20.04
+    steps:
+      # FIXME: use git refs
+      - name: "Assert '${{ github.event.inputs.release_tag }}' is a tag"
+        run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.release_tag }}
+          clean: true
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+          bundler-cache: true
+      - run: bundle exec rake pkg:check_version
+      - run: bundle exec rake pkg:compare_latest_tag
+      - run: bundle exec rake pkg:create_tag_changelog
+      - run: bundle exec rake metadata_lint
+      - name: "Test that Puppet module can build"
+        run: "bundle exec pdk build --force"
+
+
+  create-and-attach-rpms-to-github-release:
+    name: Build and attach RPMs to Release
+    needs: [ releng-checks ]
+    if: github.repository_owner == 'simp'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Get urls on release ${{ github.event.inputs.release_tag }}
+        id: release-api
+        run: |
+          set -e -u -o pipefail
+          url="$(curl -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/simp/pupmod-simp-dummy/releases/tags/${{ github.event.inputs.release_tag }} \
+            | jq -r .url)"
+          assets_url="$(curl -H "Accept: application/vnd.github.v3+json" \
+          echo "::set-output name=url::{$url}"
+          echo "::set-output name=assets_url::{$assets_url}"
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.release_tag }}
+          clean: true
+          fetch-depth: 0
+
+      - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
+        # FIXME don't stay on @main; switch to @v? before release
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+        id: build-and-sign-rpm
+        with:
+          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
+          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
+          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
+
+
+      - name: Upload RPM file(s) to GitHub Release
+        id: upload_rpm_assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release-api.outputs.assets_url }}
+          asset_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+          asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+          asset_content_type: application/octet-stream
+
