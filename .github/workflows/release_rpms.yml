@@ -38,40 +38,14 @@ on:
       overwrite:
         description: "Overwrite existing assets?"
         required: true
-        default: false
+        default: no
 
 env:
   PUPPET_VERSION: '~> 6'
 
 jobs:
-  releng-checks:
-    name: "RELENG checks"
-    if: github.repository_owner == 'simp'
-    runs-on: ubuntu-20.04
-    steps:
-      # FIXME: use git refs
-      - name: "Assert '${{ github.event.inputs.release_tag }}' is a tag"
-        run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.release_tag }}
-          clean: true
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake pkg:check_version
-      - run: bundle exec rake pkg:compare_latest_tag
-      - run: bundle exec rake pkg:create_tag_changelog
-      - run: bundle exec rake metadata_lint
-      - name: "Test that Puppet module can build"
-        run: "bundle exec pdk build --force"
-
-
   create-and-attach-rpms-to-github-release:
     name: Build and attach RPMs to Release
-    needs: [ releng-checks ]
-    if: github.repository_owner == 'simp'
     runs-on: ubuntu-20.04
     steps:
       - name: Get urls on release ${{ github.event.inputs.release_tag }}
@@ -102,14 +76,15 @@ jobs:
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
-
-      - name: Upload RPM file(s) to GitHub Release
+      # TODO: implement me!
+      - name: TODO: Upload RPM file(s) to GitHub Release
         id: upload_rpm_assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release-api.outputs.assets_url }}
-          asset_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-          asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
-          asset_content_type: application/octet-stream
+        run: echo TODO imlement me!
+        #env:
+        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #with:
+        #  upload_url: ${{ steps.release-api.outputs.assets_url }}
+        #  asset_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+        #  asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+        #  asset_content_type: application/octet-stream
 
