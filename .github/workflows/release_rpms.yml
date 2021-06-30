@@ -82,7 +82,10 @@ jobs:
       # TODO: implement me!
       - name: 'TODO: Upload RPM file(s) to GitHub Release'
         id: upload_rpm_assets
-        run: echo TODO imlement me!
+        run: |
+          echo "assets url: ${{ steps.release-api.outputs.assets_url }}"
+          echo TODO imlement me!
+          echo "::warning ::files: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
         #env:
         #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #with:
