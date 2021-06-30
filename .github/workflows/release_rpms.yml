@@ -74,7 +74,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.release_tag }}
+          repository: ${{ env.TARGET_REPO }}
+          ref: ${{ env.RELEASE_TAG }}
           clean: true
           fetch-depth: 0
 
