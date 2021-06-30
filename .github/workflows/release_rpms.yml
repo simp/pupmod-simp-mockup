@@ -61,6 +61,15 @@ jobs:
         run: |
           echo "::warning ::TARGET_REPO: $TARGET_REPO"
           echo "::warning ::RELEASE_TAG: $RELEASE_TAG"
+
+          if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]
+            printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
+            exit 88
+          fi
+          if ! [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]$ ]]; then
+            printf '::error ::Release Tag is not SemVer: %s\n' "$RELEASE_TAG"
+            exit 88
+          fi
           set -e -u -o pipefail
           ###api_url="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${{ github.event.inputs.release_tag }}"
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
@@ -69,7 +78,7 @@ jobs:
           echo "::set-output name=url::${url}"
           echo "::set-output name=assets_url::${assets_url}"
           echo "::warning ::url: $url"
-          echo "::warning ::asset_url: $asset_url"
+          echo "::warning ::assets_url: $assets_url"
 
       - name: Checkout code
         uses: actions/checkout@v2
