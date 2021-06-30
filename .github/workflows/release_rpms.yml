@@ -44,7 +44,7 @@ on:
         required: false
         default: no
       target_repo:
-        description: "Repo to build (if not this one)
+        description: "Taret repo (instead of this one)"
         required: false
 
 env:
