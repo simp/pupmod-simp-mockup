@@ -48,14 +48,16 @@ jobs:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
     steps:
-      - name: Get urls on release ${{ github.event.inputs.release_tag }}
+      - name: Query info for Release ${{ github.event.inputs.release_tag }}
         id: release-api
         run: |
           set -e -u -o pipefail
           url="$(curl -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/simp/pupmod-simp-dummy/releases/tags/${{ github.event.inputs.release_tag }} \
             | jq -r .url)"
-          assets_url="$(curl -H "Accept: application/vnd.github.v3+json" \
+          url="$(curl -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/simp/pupmod-simp-dummy/releases/tags/${{ github.event.inputs.release_tag }} \
+            | jq -r .assets_url)"
           echo "::set-output name=url::{$url}"
           echo "::set-output name=assets_url::{$assets_url}"
 
