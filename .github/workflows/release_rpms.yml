@@ -56,12 +56,9 @@ jobs:
         id: release-api
         run: |
           set -e -u -o pipefail
-          url="$(curl -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/simp/pupmod-simp-dummy/releases/tags/${{ github.event.inputs.release_tag }} \
-            | jq -r .url)"
-          assets_url="$(curl -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/simp/pupmod-simp-dummy/releases/tags/${{ github.event.inputs.release_tag }} \
-            | jq -r .assets_url)"
+          api_url="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${{ github.event.inputs.release_tag }}"
+          url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .url)"
+          assets_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .assets_url)"
           echo "::set-output name=url::{$url}"
           echo "::set-output name=assets_url::{$assets_url}"
 
