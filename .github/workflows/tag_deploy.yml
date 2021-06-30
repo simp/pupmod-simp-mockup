@@ -38,28 +38,28 @@ env:
   PUPPET_VERSION: '~> 6'
 
 jobs:
-  releng-checks:
-    name: "RELENG checks"
-    if: github.repository_owner == 'simp'
-    runs-on: ubuntu-18.04
-    steps:
-      - name: "Assert '${{ github.ref }}' is a tag"
-        run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-          clean: true
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - run: bundle exec rake pkg:check_version
-      - run: bundle exec rake pkg:compare_latest_tag
-      - run: bundle exec rake pkg:create_tag_changelog
-      - run: bundle exec rake metadata_lint
-      - name: "Test that Puppet module can build"
-        run: "bundle exec pdk build --force"
-
+###  releng-checks:
+###    name: "RELENG checks"
+###    if: github.repository_owner == 'simp'
+###    runs-on: ubuntu-18.04
+###    steps:
+###      - name: "Assert '${{ github.ref }}' is a tag"
+###        run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
+###      - uses: actions/checkout@v2
+###        with:
+###          ref: ${{ github.ref }}
+###          clean: true
+###      - uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###      - run: bundle exec rake pkg:check_version
+###      - run: bundle exec rake pkg:compare_latest_tag
+###      - run: bundle exec rake pkg:create_tag_changelog
+###      - run: bundle exec rake metadata_lint
+###      - name: "Test that Puppet module can build"
+###        run: "bundle exec pdk build --force"
+###
 
   create-github-release:
     name: Deploy GitHub Release
@@ -130,31 +130,31 @@ jobs:
           asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
           asset_content_type: application/octet-stream
 
-  deploy-to-puppet-forge:
-    name: Deploy PuppetForge Release
-    needs: [ create-github-release ]
-    if: github.repository_owner == 'simp'
-    runs-on: ubuntu-18.04
-    env:
-      PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
-      FORGE_USER_AGENT: GitHubActions-ForgeReleng-Workflow/0.4.0 (Purpose/forge-ops-for-${{ github.event.repository.name }})
-      FORGE_API_URL: https://forgeapi.puppet.com/v3/releases
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-          clean: true
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.5
-          bundler-cache: true
-      - name: Build Puppet module (PDK)
-        run: bundle exec pdk build --force
-      - name: Deploy to Puppet Forge
-        run: |
-          curl -X POST --silent --show-error --fail \
-            --user-agent "$FORGE_USER_AGENT" \
-            --header "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" \
-            --form "file=@$(find $PWD/pkg -name ''*.tar.gz'')" \
-            "$FORGE_API_URL"
+###  deploy-to-puppet-forge:
+###    name: Deploy PuppetForge Release
+###    needs: [ create-github-release ]
+###    if: github.repository_owner == 'simp'
+###    runs-on: ubuntu-18.04
+###    env:
+###      PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
+###      FORGE_USER_AGENT: GitHubActions-ForgeReleng-Workflow/0.4.0 (Purpose/forge-ops-for-${{ github.event.repository.name }})
+###      FORGE_API_URL: https://forgeapi.puppet.com/v3/releases
+###    steps:
+###      - name: Checkout code
+###        uses: actions/checkout@v2
+###        with:
+###          ref: ${{ github.ref }}
+###          clean: true
+###      - uses: ruby/setup-ruby@v1
+###        with:
+###          ruby-version: 2.5
+###          bundler-cache: true
+###      - name: Build Puppet module (PDK)
+###        run: bundle exec pdk build --force
+###      - name: Deploy to Puppet Forge
+###        run: |
+###          curl -X POST --silent --show-error --fail \
+###            --user-agent "$FORGE_USER_AGENT" \
+###            --header "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" \
+###            --form "file=@$(find $PWD/pkg -name ''*.tar.gz'')" \
+###            "$FORGE_API_URL"

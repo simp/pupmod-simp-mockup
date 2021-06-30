@@ -77,7 +77,7 @@ jobs:
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
       # TODO: implement me!
-      - name: TODO: Upload RPM file(s) to GitHub Release
+      - name: 'TODO: Upload RPM file(s) to GitHub Release'
         id: upload_rpm_assets
         run: echo TODO imlement me!
         #env:
