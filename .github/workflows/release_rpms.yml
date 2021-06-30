@@ -43,12 +43,12 @@ on:
         description: "Wipe existing assets? (default: no)"
         required: false
         default: no
-      repostory:
-        description: "Repo to build (default: this one)"
+      target_repo:
+        description: "Repo to build (if not this one)
         required: false
 
 env:
-  TARGET_REPO: ${{ (github.event.inputs.repository != null && format('{0}/{1}', github.repository_owner, github.event.inputs.repository) || github.repository }}
+  TARGET_REPO: ${{ (github.event.inputs.target_repo != null && format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)) || github.repository }}
   RELEASE_TAG: ${{ github.event.inputs.release_tag }}
 
 jobs:
