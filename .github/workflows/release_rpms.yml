@@ -43,6 +43,10 @@ on:
         description: "Wipe existing assets? (default: no)"
         required: false
         default: no
+      repo:
+        description: "Repository to build"
+        required: false
+        default: ${{ github.repository }}
 
 env:
   PUPPET_VERSION: '~> 6'
