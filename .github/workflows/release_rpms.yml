@@ -37,7 +37,7 @@ on:
         required: true
       overwrite:
         description: "Overwrite existing assets?"
-        required: true
+        required: false
         default: no
 
 env:
