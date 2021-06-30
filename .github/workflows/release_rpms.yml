@@ -36,7 +36,7 @@ on:
         description: "Release tag"
         required: true
       overwrite:
-        description: "Overwrite existing assets?"
+        description: "Overwrite existing assets? (default: no)"
         required: false
         default: no
 
