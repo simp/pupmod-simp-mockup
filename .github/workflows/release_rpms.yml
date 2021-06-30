@@ -44,7 +44,7 @@ on:
         required: false
         default: no
       dry_run:
-        description: 'Test build RPMs, but don't update Release'
+        description: "Test build RPMs, but don't update Release"
         required: false
       target_repo:
         description: "Target repo (instead of this one)"
@@ -53,6 +53,7 @@ on:
 env:
   TARGET_REPO: ${{ (github.event.inputs.target_repo != null && format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)) || github.repository }}
   RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+  DRY_RUN: ${{ github.event.inputs.dry_run }}
 
 jobs:
   create-and-attach-rpms-to-github-release:
@@ -108,6 +109,10 @@ jobs:
           echo "assets url: ${{ steps.release-api.outputs.assets_url }}"
           echo TODO imlement me!
           echo "::warning ::files: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}"
+          if [ -n "$DRY_RUN" ]; then
+            echo "::warning ::Dry run enabled: SKIP updating assetse in ${TARGET_REPO} Release ${RELEASE_TAG}"
+            exit 0
+          fi
         #env:
         #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #with:
