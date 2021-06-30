@@ -62,7 +62,7 @@ jobs:
           echo "::warning ::TARGET_REPO: $TARGET_REPO"
           echo "::warning ::RELEASE_TAG: $RELEASE_TAG"
 
-          if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]
+          if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]; then
             printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
             exit 88
           fi
