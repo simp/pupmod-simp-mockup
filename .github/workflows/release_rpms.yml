@@ -44,9 +44,8 @@ on:
         required: false
         default: no
       repostory:
-        description: "Repository to build"
+        description: "Repo to build (default: this one)"
         required: false
-        default: ${{ github.repository }}
 
 env:
   TARGET_REPO: ${{ (github.event.inputs.repository != null && format('{0}/{1}', github.repository_owner, github.event.inputs.repository) || github.repository }}
