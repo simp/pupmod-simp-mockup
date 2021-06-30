@@ -49,7 +49,8 @@ on:
         default: ${{ github.repository }}
 
 env:
-  PUPPET_VERSION: '~> 6'
+  TARGET_REPO: ${{ (github.event.inputs.repository && format('{0}/{1}', github.repository_owner, github.event.inputs.repository) || github.repository }}
+  RELEASE_TAG: ${{ github.event.inputs.release_tag }}
 
 jobs:
   create-and-attach-rpms-to-github-release:
@@ -59,12 +60,15 @@ jobs:
       - name: Query info for Release ${{ github.event.inputs.release_tag }}
         id: release-api
         run: |
+          echo "::warning ::TARGET_REPO: $TARGET_REPO"
+          echo "::warning ::RELEASE_TAG: $RELEASE_TAG"
           set -e -u -o pipefail
-          api_url="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${{ github.event.inputs.release_tag }}"
+          ###api_url="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${{ github.event.inputs.release_tag }}"
+          api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
           url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .url)"
           assets_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .assets_url)"
-          echo "::set-output name=url::{$url}"
-          echo "::set-output name=assets_url::{$assets_url}"
+          echo "::set-output name=url::${url}"
+          echo "::set-output name=assets_url::${assets_url}"
 
       - name: Checkout code
         uses: actions/checkout@v2
