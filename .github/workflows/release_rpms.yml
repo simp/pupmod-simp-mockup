@@ -30,7 +30,7 @@
 name: 'RELENG: Build + attach RPMs to GitHub Release'
 
 on:
-  workflow_dispatchpush:
+  workflow_dispatch:
     inputs:
       release_tag:
         description: "Release tag"
