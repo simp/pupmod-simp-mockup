@@ -43,8 +43,11 @@ on:
         description: "Wipe existing assets? (default: no)"
         required: false
         default: no
+      dry_run:
+        description: 'Test build RPMs, but don't update Release'
+        required: false
       target_repo:
-        description: "Taret repo (instead of this one)"
+        description: "Target repo (instead of this one)"
         required: false
 
 env:
@@ -66,8 +69,8 @@ jobs:
             printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
             exit 88
           fi
-          if ! [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]$ ]]; then
-            printf '::error ::Release Tag is not SemVer: %s\n' "$RELEASE_TAG"
+          if ! [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9](-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
+            printf '::error ::Release Tag format is not SemVer or Semverish RPM: %s\n' "$RELEASE_TAG"
             exit 88
           fi
           set -e -u -o pipefail
