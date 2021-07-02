@@ -112,7 +112,7 @@ jobs:
           upload_url: ${{ steps.release-api.outputs.assets_url }}
           asset_content_type: application/octet-stream
         run: |
-          echo ::add-mask::$GITHUB_TOKEN"
+          echo "::add-mask::$GITHUB_TOKEN"
           curl_cmd=(curl -X POST --fail --silent --show-error \
             --header "Accept: application/vnd.github.v3+json" \
             --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
@@ -128,7 +128,7 @@ jobs:
           echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
 
           if [[ $DRY_RUN == 'yes' ]]; then
-            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts (for now)"
+            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
           fi
           # -------------------------------------------------------------------
 
