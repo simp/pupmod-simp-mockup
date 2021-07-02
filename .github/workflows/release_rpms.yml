@@ -44,8 +44,9 @@ on:
         required: false
         default: no
       dry_run:
-        description: "Test build RPMs, but don't update Release"
+        description: "Test build RPMs, but don't update Release (default: no)"
         required: false
+        default: no
       target_repo:
         description: "Target repo (instead of this one)"
         required: false
@@ -113,14 +114,24 @@ jobs:
         run: |
           curl_cmd=(curl -X POST --data-binary --fail --silent --show-error \
             --header "Accept: application/vnd.github.v3+json" \
-            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
             "${file}" "${upload_url}"\
           )
           files=(${rpm_file_paths})
-          echo "== files to upload (including GPG public key file) : ${#files[@]}"
+          echo "== files to upload: ${#files[@]}"
+          echo "== GPG file to upload: ${rpm_gpg_file}"
+          if [[ $DRY_RUN == 'yes' ]]; then
+            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts (for now)"
+          fi
 
+          gpg_upload_cmd="${"${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" \
+            --header application/pgp-keys \
+          }"
+          echo "-- upload cmd: $gpg_upload_cmd"
 
-          upload_reponse_body="$("${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" --header application/pgp-keys)"
+          upload_reponse_body="$("${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" \
+            --header application/pgp-keys \
+            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
+          )"
           echo "$upload_reponse_body | jq ."
 
           for file in "${files[@]}"; do
@@ -131,12 +142,14 @@ jobs:
             fi
             rpm -qip "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
             file_name="$(basename "$file")"
-            upload_reponse_body="$("${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" --header "Content-Type: ${asset_content_type}"
+            upload_reponse_body="$("${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" \
+              --header "Content-Type: ${asset_content_type}"
+              --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
+            )"
             echo "$upload_reponse_body | jq ."
           done
 
           echo "assets url: ${{ steps.release-api.outputs.assets_url }}"
-          echo "::warning :: :warning: Dry run enabled: SKIP updating assets (for now)"
 
           # https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
           #   - HTTP client must support SNI
