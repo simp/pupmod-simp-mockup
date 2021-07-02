@@ -61,7 +61,7 @@ jobs:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
     steps:
-      - name: Query info for Release ${{ github.event.inputs.release_tag }}
+      - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
         id: release-api
         run: |
           echo "::warning ::TARGET_REPO: $TARGET_REPO"
@@ -72,11 +72,10 @@ jobs:
             exit 88
           fi
           if ! [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9](-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
-            printf '::error ::Release Tag format is not SemVer or Semverish RPM: %s\n' "$RELEASE_TAG"
+        printf '::error ::Release Tag format is not SemVer or SemVer-ish RPM: %s\n' "$RELEASE_TAG"
             exit 88
           fi
           set -e -u -o pipefail
-          ###api_url="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${{ github.event.inputs.release_tag }}"
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
           url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .url)"
           assets_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .assets_url)"
@@ -119,15 +118,17 @@ jobs:
           files=(${rpm_file_paths})
           echo "== files to upload: ${#files[@]}"
           echo "== GPG file to upload: ${rpm_gpg_file}"
-          if [[ $DRY_RUN == 'yes' ]]; then
-            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts (for now)"
-          fi
 
           echo "-- curl_cmd: '${curl_cmd[@]}'"
           gpg_upload_cmd="${"${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" \
             --header application/pgp-keys \
           }"
           echo "-- upload cmd: $gpg_upload_cmd"
+
+          if [[ $DRY_RUN == 'yes' ]]; then
+            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts (for now)"
+          fi
+          # -------------------------------------------------------------------
 
           upload_reponse_body="$("${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" \
             --header application/pgp-keys \
@@ -149,12 +150,3 @@ jobs:
             )"
             echo "$upload_reponse_body | jq ."
           done
-
-          echo "assets url: ${{ steps.release-api.outputs.assets_url }}"
-
-          # https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
-          #   - HTTP client must support SNI
-          #     - curl+SNI: https://stackoverflow.com/questions/12941703/use-curl-with-sni-server-name-indication
-          #
-          curl --version # >= 7.18.1
-          openssl version # >= 0.9.8j
