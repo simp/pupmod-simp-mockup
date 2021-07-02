@@ -135,7 +135,7 @@ jobs:
           fi
           # -------------------------------------------------------------------
 
-          "${gpg_upload_cmd[@]}"
+          "${gpg_upload_cmd[@]}" | jq .
           #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
           #echo "$upload_reponse_body | jq ."
 
