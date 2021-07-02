@@ -80,7 +80,7 @@ jobs:
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
           url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .url)"
           assets_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .assets_url)"
-          upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url)"
+          upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url | sed -e 's/{?.*$//' )"
           echo "::set-output name=url::${url}"
           echo "::set-output name=assets_url::${assets_url}"
           echo "::set-output name=upload_url::${upload_url}"
