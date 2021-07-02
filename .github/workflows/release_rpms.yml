@@ -124,9 +124,11 @@ jobs:
           done
 
           echo "assets url: ${{ steps.release-api.outputs.assets_url }}"
-          echo TODO imlement me!
-          echo "::warning ::files: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}"
-          if [ -n "$DRY_RUN" ]; then
-            echo "::warning ::Dry run enabled: SKIP updating assetse in ${TARGET_REPO} Release ${RELEASE_TAG}"
-            exit 0
-          fi
+          echo "::warning :: :warning: Dry run enabled: SKIP updating assets (for now)"
+
+          # https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
+          #   - HTTP client must support SNI
+          #     - curl+SNI: https://stackoverflow.com/questions/12941703/use-curl-with-sni-server-name-indication
+          #
+          curl --version # >= 7.18.1
+          openssl version # >= 0.9.8j
