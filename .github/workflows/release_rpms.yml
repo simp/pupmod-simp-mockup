@@ -93,7 +93,7 @@ jobs:
           fetch-depth: 0
 
       - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
-        # FIXME don't stay on @main; switch to @v? before release
+        # FIXME don't stay on @main unless testing; switch to @v? before release
         uses: simp/github-action-build-and-sign-pkg-single-rpm@main
         id: build-and-sign-rpm
         with:
@@ -113,7 +113,7 @@ jobs:
           asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
           asset_content_type: application/octet-stream
         run: |
-          files=(${rpm_file_paths} "$gpg_signing_key")
+          files=(${rpm_file_paths} "$rpm_gpg_file")
           echo "== files to upload (including GPG public key file) : ${#files[@]}"
           for file in "${files[@]}"; do
             echo "-- $file"
