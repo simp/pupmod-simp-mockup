@@ -124,20 +124,11 @@ jobs:
           echo "== RPM files to upload: ${#files[@]}"
           echo "== GPG file to upload: ${rpm_gpg_file}"
 
-          echo "-- curl_cmd: '${curl_cmd[@]}'"
-          gpg_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$rpm_gpg_file")" \
-            --header application/pgp-keys --data-binary "@${rpm_gpg_file}" \
-          )
-          echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
-
           if [[ $DRY_RUN == 'yes' ]]; then
             echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
           fi
           # -------------------------------------------------------------------
 
-          "${gpg_upload_cmd[@]}" | jq .
-          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
-          #echo "$upload_reponse_body | jq ."
 
           for file in "${files[@]}"; do
             echo "-- $file"
@@ -147,10 +138,19 @@ jobs:
             fi
             rpm -qip "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
             file_name="$(basename "$file")"
-            file_upload_cmd=${}
-            upload_reponse_body="$("${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" \
-              --header "Content-Type: ${asset_content_type}"
-              --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
-            )"
-            echo "$upload_reponse_body | jq ."
+            file_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "file")&label=foo" \
+              --header "Content-Type: ${asset_content_type}" \
+              --data-binary "@${file}" \
+            )
+            "${file_upload_cmd[@]}" | jq .
           done
+
+          #echo "-- curl_cmd: '${curl_cmd[@]}'"
+          gpg_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$rpm_gpg_file")" \
+            --header application/pgp-keys --data-binary "@${rpm_gpg_file}" \
+          )
+          #echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
+          "${gpg_upload_cmd[@]}" | jq .
+          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
+          #echo "$upload_reponse_body | jq ."
+
