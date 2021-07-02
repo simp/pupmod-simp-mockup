@@ -102,10 +102,27 @@ jobs:
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
-      # TODO: implement me!
-      - name: 'TODO: Upload RPM file(s) to GitHub Release'
+      - name: Upload RPM file(s) to GitHub Release
         id: upload_rpm_assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
+          upload_url: ${{ steps.release-api.outputs.assets_url }}
+          asset_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
+          asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
+          asset_content_type: application/octet-stream
         run: |
+          files=(${rpm_file_paths} "$gpg_signing_key")
+          echo "== files to upload (including GPG public key file) : ${#files[@]}"
+          for file in "${files[@]}"; do
+            echo "-- $file"
+            if [ ! -f "$file" ]; then
+              printf '::error ::No file found at $file (got "%s")!\n' "$file"
+              exit 88
+            fi
+          done
+
           echo "assets url: ${{ steps.release-api.outputs.assets_url }}"
           echo TODO imlement me!
           echo "::warning ::files: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}"
@@ -113,11 +130,3 @@ jobs:
             echo "::warning ::Dry run enabled: SKIP updating assetse in ${TARGET_REPO} Release ${RELEASE_TAG}"
             exit 0
           fi
-        #env:
-        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #with:
-        #  upload_url: ${{ steps.release-api.outputs.assets_url }}
-        #  asset_path: ${{ steps.build-and-sign-rpm.outputs.rpm_file_path }}
-        #  asset_name: ${{ steps.build-and-sign-rpm.outputs.rpm_file_basename }}
-        #  asset_content_type: application/octet-stream
-
