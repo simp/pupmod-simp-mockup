@@ -123,6 +123,7 @@ jobs:
             echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts (for now)"
           fi
 
+          echo "-- curl_cmd: '${curl_cmd[@]}'"
           gpg_upload_cmd="${"${curl_cmd[@]}?name=$(basename "$rpm_gpg_file")" \
             --header application/pgp-keys \
           }"
