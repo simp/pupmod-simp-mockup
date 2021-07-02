@@ -112,7 +112,7 @@ jobs:
           upload_url: ${{ steps.release-api.outputs.assets_url }}
           asset_content_type: application/octet-stream
         run: |
-          [[ -n "$target_repo_token" ]] && echo "::add-mask::$target_repo_token"
+          echo ::add-mask::$GITHUB_TOKEN"
           curl_cmd=(curl -X POST --fail --silent --show-error \
             --header "Accept: application/vnd.github.v3+json" \
             --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
