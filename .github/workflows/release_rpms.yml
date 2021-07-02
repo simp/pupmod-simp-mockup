@@ -72,7 +72,7 @@ jobs:
             printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
             exit 88
           fi
-          if ! [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9](-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
+          if ! [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
             printf '::error ::Release Tag format is not SemVer or SemVer-ish RPM: %s\n' "$RELEASE_TAG"
             exit 88
           fi
