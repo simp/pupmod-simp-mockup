@@ -118,22 +118,23 @@ jobs:
             --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
           )
           files=(${rpm_file_paths})
-          echo "== files to upload: ${#files[@]}"
+          echo "== RPM files to upload: ${#files[@]}"
           echo "== GPG file to upload: ${rpm_gpg_file}"
 
           echo "-- curl_cmd: '${curl_cmd[@]}'"
           gpg_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$rpm_gpg_file")" \
             --header application/pgp-keys --data-binary "@${rpm_gpg_file}" \
           )
-          echo "-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
+          echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
 
           if [[ $DRY_RUN == 'yes' ]]; then
             echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts (for now)"
           fi
           # -------------------------------------------------------------------
 
-          upload_reponse_body="$("${gpg_upload_cmd[@]}")"
-          echo "$upload_reponse_body | jq ."
+          "${gpg_upload_cmd[@]}"
+          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
+          #echo "$upload_reponse_body | jq ."
 
           for file in "${files[@]}"; do
             echo "-- $file"
