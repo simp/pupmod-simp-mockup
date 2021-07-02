@@ -125,7 +125,7 @@ jobs:
           gpg_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$rpm_gpg_file")" \
             --header application/pgp-keys --data-binary "@${rpm_gpg_file}" \
           )
-          echo "-- $gpg_upload_cmd: '$gpg_upload_cmd'"
+          echo "-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
 
           if [[ $DRY_RUN == 'yes' ]]; then
             echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts (for now)"
