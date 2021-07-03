@@ -136,7 +136,7 @@ jobs:
               printf '::error ::No file found at $file (got "%s")!\n' "$file"
               exit 88
             fi
-            rpm -qip "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
+            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
             file_name="$(basename "$file")"
             file_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$file")&label=foo" \
               --header "Content-Type: ${asset_content_type}" \
