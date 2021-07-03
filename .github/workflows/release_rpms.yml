@@ -139,7 +139,9 @@ jobs:
             fi
             rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
             file_name="$(basename "$file")"
-            file_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$file")" \
+            file_upload_cmd=(
+              "${curl_cmd[@]}" \
+              "${upload_url}?name=${file_name}&label=${file_name}" \
               --header "Content-Type: ${asset_content_type}" \
               --data-binary "@${file}" \
             )
@@ -147,7 +149,10 @@ jobs:
           done
 
           #echo "-- curl_cmd: '${curl_cmd[@]}'"
-          gpg_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$rpm_gpg_file")" \
+          rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
+          gpg_upload_cmd=(
+             "${curl_cmd[@]}" \
+             "${upload_url}?name$=${rpm_gpg_file_name}&label=${rpm_gpg_file_name}" \
             --header application/pgp-keys --data-binary "@${rpm_gpg_file}" \
           )
           #echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
