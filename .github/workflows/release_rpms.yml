@@ -130,6 +130,7 @@ jobs:
           # -------------------------------------------------------------------
 
 
+          set -e -u -o pipefail
           for file in "${files[@]}"; do
             echo "-- $file"
             if [ ! -f "$file" ]; then
@@ -138,7 +139,7 @@ jobs:
             fi
             rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
             file_name="$(basename "$file")"
-            file_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$file")&label=foo" \
+            file_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$file")" \
               --header "Content-Type: ${asset_content_type}" \
               --data-binary "@${file}" \
             )
@@ -146,7 +147,7 @@ jobs:
           done
 
           #echo "-- curl_cmd: '${curl_cmd[@]}'"
-          gpg_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$rpm_gpg_file")&label=bar" \
+          gpg_upload_cmd=("${curl_cmd[@]}" "${upload_url}?name=$(basename "$rpm_gpg_file")" \
             --header application/pgp-keys --data-binary "@${rpm_gpg_file}" \
           )
           #echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
