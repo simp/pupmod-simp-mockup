@@ -207,11 +207,17 @@ jobs:
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
+            let upload_asset(file, content_type ){
+              console.log(`==== upload_asset ${file}, ${content_type}`)
+            }
             console.log('== start')
-            const s = process.env.rpm_file_paths
-            const splits = s.split(/[\r\n]+/)
-            console.log(s)
-            console.log(splits)
+            const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/)
+            const rpm_gpg_file = process.env.rpm_gpg_file
+            rpm_files.forEach( file => upload_asset(file, 'application/octet-stream')
+            console.log('== done')
+            console.log(`rpm_files: ${rpm_files}`)
+            console.log('== end')
+
 # TODO : for each file + GPG key
 # Setup headers for API call, see Octokit Documentation:
 # https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
