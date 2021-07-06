@@ -241,7 +241,6 @@ jobs:
               console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-              console.log(`  -- existing assets: ${JSON.stringify(existingAssets.data,null,2)}`)
 
               matchingAssets = existingAssets.data.filter(item => item.name == assetName);
               if ( matchingAssets.length > 0 ){
