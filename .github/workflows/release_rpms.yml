@@ -179,7 +179,6 @@ jobs:
           #echo "-- curl_cmd: '${curl_cmd[@]}'"
           rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
           full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
-          full_upload_url="${upload_url}?name=${file_name}"
           echo
           if [ ! -f "$rpm_gpg_file" ]; then
             printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
