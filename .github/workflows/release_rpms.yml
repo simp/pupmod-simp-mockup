@@ -223,15 +223,15 @@ jobs:
             const path = require('path')
             const fs = require('fs')
 
-            let wipeAssets = function(owner, repo, release_id ){
-              const existingAssets = github.repos.listReleaseAssets({ owner, repo, release_id })
+            let wipeAssets = async function(owner, repo, release_id ){
+              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
               console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
               console.log( `     $$ existingAssets: ${JSON.stringify(existingAssets.data,null,2)}` )
               console.log( `     %% existingAssets length: ${existingAssets.data.length}` )
               if ( existingAssets.data.length == 0 ){ return };
               existingAssets.data.forEach(async function(asset){
                 asset_id = asset.id
-                github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+                await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
               })
             }
 
