@@ -271,12 +271,12 @@ jobs:
             const clean = process.env.clean == 'yes';
             const clobber = process.env.clobber == 'yes';
 
-            if ( clean ){ wipeAssets( owner, repo, release_id ) }
+            if ( clean ){ await wipeAssets( owner, repo, release_id ) }
 
-            response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
+            response = await uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
               const name = path.basename(file)
-              if ( clobber ){ clobberAsset( name, owner, repo, release_id ) }
+              if ( clobber ){ await clobberAsset( name, owner, repo, release_id ) }
               await uploadAsset(owner, repo, release_id, file, 'application/octet-stream')
             })
             console.log('== done')
