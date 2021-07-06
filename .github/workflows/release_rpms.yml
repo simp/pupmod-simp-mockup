@@ -225,7 +225,7 @@ jobs:
 
             let wipeAssets = async function(owner, repo, release_id ){
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-              console.log( `  !! !! Wiping ALL uploaded assets for release (id: ${release_id})`)
+              console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
               existingAssets.forEach(async function(asset){
                 asset_id = asset.id
                 await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
@@ -245,7 +245,6 @@ jobs:
 
             let uploadAsset = async function (owner, repo, release_id, file, assetContentType ){
               const name = path.basename(file)
-              const clobber = process.env.clobber == 'yes';
               const data = fs.readFileSync(file)
               const contentLength = filePath => fs.statSync(filePath).size;
               const headers = {
@@ -255,7 +254,6 @@ jobs:
 
               console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
-              if ( clobber ){ clobberAsset( name, owner, repo, release_id ) }
 
               console.log(`  == Uploading asset ${name}: ${assetContentType}`)
               const uploadAssetResponse = await github.repos.uploadReleaseAsset({
@@ -270,11 +268,14 @@ jobs:
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
             const clean = process.env.clean == 'yes';
+            const clobber = process.env.clobber == 'yes';
 
             if ( clean ){ wipeAssets( owner, repo, release_id ) }
 
             response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
+              const name = path.basename(file)
+              if ( clobber ){ clobberAsset( name, owner, repo, release_id ) }
               await uploadAsset(owner, repo, release_id, file, 'application/octet-stream')
             })
             console.log('== done')
