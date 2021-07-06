@@ -234,7 +234,7 @@ jobs:
                 name: assetName,
                 file: fs.readFileSync(assetPath)
               });
-              return( uploadAsssetResponse );
+              return( uploadAssetResponse );
             }
 
             console.log('== start');
