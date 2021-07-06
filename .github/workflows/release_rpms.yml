@@ -156,34 +156,31 @@ jobs:
 
 
           set -e -u -o pipefail
-          #for file in "${files[@]}"; do
-          #  echo "-- $file"
-          #  if [ ! -f "$file" ]; then
-          #    printf '::error ::No file found at $file (got "%s")!\n' "$file"
-          #    exit 88
-          #  fi
-          #  rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
-          #  file_name="$(basename "$file")"
-          #  ###full_upload_url="${upload_url}?name=${file_name}&label=${file_name}"
-          #  full_upload_url="${upload_url}?name=${file_name}&label=${file_name}"
-          #  echo
-          #  echo "== Uploading '$file' to $full_upload_url"
-          #  file_upload_cmd=(
-          #    "${curl_cmd[@]}" "$full_upload_url" \
-          #    --header "Content-Type: ${asset_content_type}" \
-          #    --data-binary "@${file}" \
-          #  )
-          #  "${file_upload_cmd[@]}" | jq .
-          #done
+          for file in "${files[@]}"; do
+            echo "-- $file"
+            if [ ! -f "$file" ]; then
+              printf '::error ::No file found at $file (got "%s")!\n' "$file"
+              exit 88
+            fi
+            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
+            file_name="$(basename "$file")"
+            full_upload_url="${upload_url}?name=${file_name}"
+            echo
+            echo "== Uploading '$file' to $full_upload_url"
+            file_upload_cmd=(
+              "${curl_cmd[@]}" "$full_upload_url" \
+              --header "Content-Type: ${asset_content_type}" \
+              --data-binary "@${file}" \
+            )
+            "${file_upload_cmd[@]}" | jq .
+          done
 
-          #echo "-- curl_cmd: '${curl_cmd[@]}'"
           rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
           full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
           if [ ! -f "$rpm_gpg_file" ]; then
             printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
             exit 88
           fi
-          ls -l "${rpm_gpg_file}"
           echo
           echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
           asset_content_type='application/pgp-keys'
@@ -192,8 +189,7 @@ jobs:
              --header "Content-Type: ${asset_content_type}" \
              --data-binary "@${rpm_gpg_file}" \
           )
-          #echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
-          "${gpg_upload_cmd[@]}" --verbose
+          "${gpg_upload_cmd[@]}" | jq .
           #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
           #echo "$upload_reponse_body | jq ."
 
