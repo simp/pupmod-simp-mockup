@@ -139,7 +139,7 @@ jobs:
           asset_content_type: application/octet-stream
         uses: actions/github-script@v4
         with:
-          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          #github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           # See:
           #   - https://octokit.github.io/rest.js/
           #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
