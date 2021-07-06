@@ -81,10 +81,7 @@ jobs:
           set -e -u -o pipefail
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
           full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
-          ###url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .url)"
-          ###assets_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .assets_url)"
-          ######upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url | sed -e 's/{?.*$//' )"
-          ###upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url )"
+
           release_id="$(echo "$full_response" | jq .id )"
           url="$(echo "$full_response" | jq .url )"
           assets_url="$(echo "$full_response" | jq .assets_url )"
@@ -96,7 +93,7 @@ jobs:
           echo "::warning ::url: $url"
           echo "::warning ::assets_url: $assets_url"
           echo "::warning ::upload_url: $upload_url"
-          printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
+          ###printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
           printf '== full_response:\n%s\n' "$full_response"
 
       - name: Checkout code
@@ -212,6 +209,7 @@ jobs:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
           rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
           upload_url: ${{ steps.release-api.outputs.upload_url }}
+          release_id:  ${{ steps.release-api.outputs.id }}
           clobber: ${{ github.event.inputs.clobber }}
           clean: ${{ github.event.inputs.clean }}
           dry_run: ${{ github.event.inputs.dry_run }}
@@ -233,11 +231,13 @@ jobs:
               const uploadUrl = process.env.upload_url;
               const clobber = process.env.clobber;
               const assetName = path.basename(assetPath)
+              const [owner, repo] = process.env.TARGET_REPO.split('/')
               const contentLength = filePath => fs.statSync(filePath).size;
               const headers = {
                 'content-type': assetContentType,
                 'content-length': contentLength(assetPath)
               };
+              console.log(`  -- owner: ${owner}  repo: ${repo}` )
               console.log(`  == Uploading asset ${assetName}: ${assetContentType}`)
 
               // Upload a release asset
