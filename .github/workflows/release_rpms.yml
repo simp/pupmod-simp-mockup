@@ -228,9 +228,10 @@ jobs:
             console.log('== start')
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/)
             const rpm_gpg_file = process.env.rpm_gpg_file
-            uploadAssset(rpm_gpg_file, 'application/pgp-keys'
+            uploadAssset(rpm_gpg_file, 'application/pgp-keys')
             rpm_files.forEach( file => await uploadAssset(file, 'application/octet-stream') );
             console.log('== done')
+
 
 # TODO : for each file + GPG key
 # Setup headers for API call, see Octokit Documentation:
