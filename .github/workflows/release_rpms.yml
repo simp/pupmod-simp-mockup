@@ -116,7 +116,7 @@ jobs:
           rpm_file_paths="${rpm_file_paths//$'\n'/'%0A'}"
           rpm_file_paths="${rpm_file_paths//$'\r'/'%0D'}"
           echo "::set-output name=rpm_file_paths::$rpm_file_paths"
-          echo "::set-output name=rpm_gpg_file::${$PWD/RPM-GPG-KEY-SIMP-UNSTABLE-2}"
+          echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
           echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
           echo "::set-output name=rpmassets_url::${assets_url}"
           printf '::error ::MOCKING build-and-sign-rpm; results are NOT real!\n'
