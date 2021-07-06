@@ -131,67 +131,67 @@ jobs:
 ###          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
 
-      - name: Upload RPM file(s) to GitHub Release
-        id: upload_rpm_assets
-        env:
-          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
-          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
-          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
-          upload_url: ${{ steps.release-api.outputs.upload_url }}
-          asset_content_type: application/octet-stream
-        run: |
-          echo "::add-mask::$GITHUB_TOKEN"
-          curl_cmd=(curl -X POST --fail --show-error \
-            --header "Accept: application/vnd.github.v3+json" \
-            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
-          )
-          files=(${rpm_file_paths})
-          echo "== RPM files to upload: ${#files[@]}"
-          echo "== GPG file to upload: ${rpm_gpg_file}"
-
-          if [[ $DRY_RUN == 'yes' ]]; then
-            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
-          fi
-          # -------------------------------------------------------------------
-
-
-          set -e -u -o pipefail
-          for file in "${files[@]}"; do
-            echo "-- $file"
-            if [ ! -f "$file" ]; then
-              printf '::error ::No file found at $file (got "%s")!\n' "$file"
-              exit 88
-            fi
-            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
-            file_name="$(basename "$file")"
-            full_upload_url="${upload_url}?name=${file_name}"
-            echo
-            echo "== Uploading '$file' to $full_upload_url"
-            file_upload_cmd=(
-              "${curl_cmd[@]}" "$full_upload_url" \
-              --header "Content-Type: ${asset_content_type}" \
-              --data-binary "@${file}" \
-            )
-            "${file_upload_cmd[@]}" | jq .
-          done
-
-          rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
-          full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
-          if [ ! -f "$rpm_gpg_file" ]; then
-            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
-            exit 88
-          fi
-          echo
-          echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
-          asset_content_type='application/pgp-keys'
-          gpg_upload_cmd=(
-             "${curl_cmd[@]}" "$full_upload_url" \
-             --header "Content-Type: ${asset_content_type}" \
-             --data-binary "@${rpm_gpg_file}" \
-          )
-          "${gpg_upload_cmd[@]}" | jq .
-          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
-          #echo "$upload_reponse_body | jq ."
+###      - name: Upload RPM file(s) to GitHub Release
+###        id: upload_rpm_assets
+###        env:
+###          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+###          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+###          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
+###          upload_url: ${{ steps.release-api.outputs.upload_url }}
+###          asset_content_type: application/octet-stream
+###        run: |
+###          echo "::add-mask::$GITHUB_TOKEN"
+###          curl_cmd=(curl -X POST --fail --show-error \
+###            --header "Accept: application/vnd.github.v3+json" \
+###            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
+###          )
+###          files=(${rpm_file_paths})
+###          echo "== RPM files to upload: ${#files[@]}"
+###          echo "== GPG file to upload: ${rpm_gpg_file}"
+###
+###          if [[ $DRY_RUN == 'yes' ]]; then
+###            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
+###          fi
+###          # -------------------------------------------------------------------
+###
+###
+###          set -e -u -o pipefail
+###          for file in "${files[@]}"; do
+###            echo "-- $file"
+###            if [ ! -f "$file" ]; then
+###              printf '::error ::No file found at $file (got "%s")!\n' "$file"
+###              exit 88
+###            fi
+###            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
+###            file_name="$(basename "$file")"
+###            full_upload_url="${upload_url}?name=${file_name}"
+###            echo
+###            echo "== Uploading '$file' to $full_upload_url"
+###            file_upload_cmd=(
+###              "${curl_cmd[@]}" "$full_upload_url" \
+###              --header "Content-Type: ${asset_content_type}" \
+###              --data-binary "@${file}" \
+###            )
+###            "${file_upload_cmd[@]}" | jq .
+###          done
+###
+###          rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
+###          full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
+###          if [ ! -f "$rpm_gpg_file" ]; then
+###            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
+###            exit 88
+###          fi
+###          echo
+###          echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
+###          asset_content_type='application/pgp-keys'
+###          gpg_upload_cmd=(
+###             "${curl_cmd[@]}" "$full_upload_url" \
+###             --header "Content-Type: ${asset_content_type}" \
+###             --data-binary "@${rpm_gpg_file}" \
+###          )
+###          "${gpg_upload_cmd[@]}" | jq .
+###          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
+###          #echo "$upload_reponse_body | jq ."
 
       - name: 'Upload RPM file(s) to GitHub Release (github-script)'
         id: upload_rpm_assets_ghs
