@@ -238,8 +238,7 @@ jobs:
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
               const matchingAssets = existingAssets.data.filter(item => item.name == name);
               if ( matchingAssets.length > 0 ){
-                asset = matchingAssets[0]
-                asset_id = asset.id
+                asset_id = matchingAssets[0].id
                 console.log( `  !! !! Clobbering existing asset for ${name} (id: ${asset_id})`)
                 await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
               }
