@@ -228,7 +228,7 @@ jobs:
               console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
               console.log( `     $$ existingAssets: ${JSON.stringify(existingAssets.data,null,2)}` )
               console.log( `     %% existingAssets length: ${existingAssets.data.length}` )
-              if( existingAssets.data.length ){ return() };
+              if ( existingAssets.data.length == 0 ){ return };
               existingAssets.data.forEach(async function(asset){
                 asset_id = asset.id
                 await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
@@ -273,9 +273,9 @@ jobs:
             const clean = process.env.clean == 'yes';
             const clobber = process.env.clobber == 'yes';
 
-            if ( clean ){ await wipeAssets( owner, repo, release_id ) }
+            if ( clean ){ wipeAssets( owner, repo, release_id ) }
 
-            response = await uploadAsset(rpm_gpg_file, 'application/pgp-keys');
+            response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
               const name = path.basename(file)
               if ( clobber ){ await clobberAsset( name, owner, repo, release_id ) }
