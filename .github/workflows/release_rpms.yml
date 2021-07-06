@@ -241,7 +241,13 @@ jobs:
               console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-              console.log(`  -- existing assets: ${JSON.stringify(existingAssets,null,2)}`)
+              console.log(`  -- existing assets: ${JSON.stringify(existingAssets.data,null,2)}`)
+
+              matchingAsset = existingAssets.data.filter(item => item.name == assetName);
+              if matchingAssets.length > 0 {
+                console.log(`  -- matching assets: ${JSON.stringify(matchingAssets,null,2)}`)
+                console.log( `  -- !! clobber='${clobber}'` )
+              }
 
               console.log(`  == Uploading asset ${assetName}: ${assetContentType}`)
               // Upload a release asset
