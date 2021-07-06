@@ -252,17 +252,11 @@ jobs:
               console.log(`\n\n  -- uploadAsset: owner: ${owner}  repo: ${repo}  release_id: ${release_id}, file: ${file}\n` )
               const name = path.basename(file)
 
-              console.log(`  -- 1`)
               const data = fs.readFileSync(file)
-              console.log(`  -- 2`)
-              const contentLength = fs.statSync(file).size
-              console.log(`  -- 3`)
-              //const contentLength = filePath => fs.statSync(filePath).size;
               const headers = {
                 'content-type': assetContentType,
-                'content-length': contentLength
+                'content-length': fs.statSync(file).size
               };
-              console.log(`  -- 4`)
 
               console.log(`  == Uploading asset ${name}: ${assetContentType}`)
               const uploadAssetResponse = await github.repos.uploadReleaseAsset({
