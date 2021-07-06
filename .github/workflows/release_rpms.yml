@@ -206,9 +206,17 @@ jobs:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
           rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
           upload_url: ${{ steps.release-api.outputs.upload_url }}
+          clobber: ${{ github.event.inputs.clobber }}
+          clean: ${{ github.event.inputs.clean }}
+          dry_run: ${{ github.event.inputs.dry_run }}
         # See:
         #   - https://octokit.github.io/rest.js/
         #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
+        #
+        # TODO:
+        #   - [ ] Check if asset already exists
+        #   - [ ] Delete all existing assets when option exists
+        #   - [ ] Clobber all existing assets when option exists
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
@@ -217,6 +225,7 @@ jobs:
 
             let uploadAsset = async function (assetPath, assetContentType ){
               const uploadUrl = process.env.upload_url;
+              const clobber = process.env.clobber;
               const assetName = path.basename(assetPath)
               const contentLength = filePath => fs.statSync(filePath).size;
               const headers = {
