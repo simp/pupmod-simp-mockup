@@ -243,23 +243,30 @@ jobs:
               }
             }
 
-            let uploadAsset = async function (assetPath, assetContentType ){
-              const name = path.basename(assetPath)
-              const [owner, repo] = process.env.TARGET_REPO.split('/')
+            let uploadAsset = async function (owner, repo, release_id, file, assetContentType ){
+              const name = path.basename(file)
               const release_id = process.env.release_id
               const clobber = process.env.clobber == 'yes';
-              const data = fs.readFileSync(assetPath)
+              const data = fs.readFileSync(file)
+              const contentLength = filePath => fs.statSync(filePath).size;
+              const headers = {
+                'content-type': assetContentType,
+                'content-length': contentLength(file)
+              };
 
               console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
               if ( clobber ){ clobberAsset( name, owner, repo, release_id ) }
 
               console.log(`  == Uploading asset ${name}: ${assetContentType}`)
-              const uploadAssetResponse = await github.repos.uploadReleaseAsset({ owner, repo, release_id, data, name })
+              const uploadAssetResponse = await github.repos.uploadReleaseAsset({
+                owner, repo, release_id, data, name, headers,
+              })
               return( uploadAssetResponse );
             }
 
             console.log('== start');
+            const [owner, repo] = process.env.TARGET_REPO.split('/')
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
             const clean = process.env.clean == 'yes';
@@ -268,7 +275,7 @@ jobs:
 
             response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
-              await uploadAsset(file, 'application/octet-stream')
+              await uploadAsset(owner, repo, release_id, file, 'application/octet-stream')
             })
             console.log('== done')
 
