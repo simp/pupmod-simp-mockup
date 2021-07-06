@@ -102,39 +102,39 @@ jobs:
           clean: true
           fetch-depth: 0
 
-      # FIXME: remove when done with testing
-      - name: 'MOCK: build-and-sign-rpm'
-        id: build-and-sign-rpm
-        run: |
-          mkdir -p dist
-          RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
-          wget https://github.com/simp/pupmod-simp-dummy/releases/download/0.3.50/pupmod-simp-dummy-0.3.50-0.noarch.rpm -O dist/x.rpm
-          wget https://download.simp-project.com/simp-release-community.rpm -O dist/y.rpm
-          wget https://download.simp-project.com/simp/GPGKEYS/RPM-GPG-KEY-SIMP-UNSTABLE-2 -O "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc"
-          rpm_file="$(ls -1r dist/*.rpm | head -1)"
-          rpm_file_path="$(realpath "$rpm_file")"
-          rpm_file_paths="$(find "$PWD/dist" -name \*.rpm)"
-          gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
-          rpm_file_paths_count="$(echo "$rpm_file_paths" | wc -l)"
-
-          rpm_file_paths="${rpm_file_paths//'%'/'%25'}"
-          rpm_file_paths="${rpm_file_paths//$'\n'/'%0A'}"
-          rpm_file_paths="${rpm_file_paths//$'\r'/'%0D'}"
-          echo "::set-output name=rpm_file_paths::$rpm_file_paths"
-          echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
-          echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
-          echo "::set-output name=rpmassets_url::${assets_url}"
-          printf '::error ::MOCKING build-and-sign-rpm; results are NOT real!\n'
-
-###      - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
-###        # FIXME don't stay on @main unless testing; switch to @v? before release
-###        uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+###      # FIXME: remove when done with testing
+###      - name: 'MOCK: build-and-sign-rpm'
 ###        id: build-and-sign-rpm
-###        with:
-###          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
-###          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
-###          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-###          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
+###        run: |
+###          mkdir -p dist
+###          RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
+###          wget https://github.com/simp/pupmod-simp-dummy/releases/download/0.3.50/pupmod-simp-dummy-0.3.50-0.noarch.rpm -O dist/x.rpm
+###          wget https://download.simp-project.com/simp-release-community.rpm -O dist/y.rpm
+###          wget https://download.simp-project.com/simp/GPGKEYS/RPM-GPG-KEY-SIMP-UNSTABLE-2 -O "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc"
+###          rpm_file="$(ls -1r dist/*.rpm | head -1)"
+###          rpm_file_path="$(realpath "$rpm_file")"
+###          rpm_file_paths="$(find "$PWD/dist" -name \*.rpm)"
+###          gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
+###          rpm_file_paths_count="$(echo "$rpm_file_paths" | wc -l)"
+###
+###          rpm_file_paths="${rpm_file_paths//'%'/'%25'}"
+###          rpm_file_paths="${rpm_file_paths//$'\n'/'%0A'}"
+###          rpm_file_paths="${rpm_file_paths//$'\r'/'%0D'}"
+###          echo "::set-output name=rpm_file_paths::$rpm_file_paths"
+###          echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
+###          echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
+###          echo "::set-output name=rpmassets_url::${assets_url}"
+###          printf '::error ::MOCKING build-and-sign-rpm; results are NOT real!\n'
+
+      - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
+        # FIXME don't stay on @main unless testing; switch to @v? before release
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+        id: build-and-sign-rpm
+        with:
+          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
+          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
+          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
 
 ###      - name: Upload RPM file(s) to GitHub Release
@@ -223,7 +223,7 @@ jobs:
                 'content-type': assetContentType,
                 'content-length': contentLength(assetPath)
               };
-              console.log(`==== upload_asset ${assetName}: ${assetPath}, ${assetContentType}`)
+              console.log(`==== Uploading asset ${assetName}: ${assetPath}, ${assetContentType}`)
 
               // Upload a release asset
               // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
@@ -240,6 +240,7 @@ jobs:
             console.log('== start');
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
+
             response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
               await uploadAsset(file, 'application/octet-stream')
@@ -247,9 +248,6 @@ jobs:
             console.log('== done')
 
 
-# TODO : for each file + GPG key
-# Setup headers for API call, see Octokit Documentation:
-# https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
 
 ###            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
 ###              headers: {
