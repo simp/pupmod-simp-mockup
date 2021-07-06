@@ -251,6 +251,7 @@ jobs:
             }
 
             let uploadAsset = async function (owner, repo, release_id, file, assetContentType ){
+              console.log(`  -- uploadAsset: owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
               const name = path.basename(file)
               const data = fs.readFileSync(file)
               const contentLength = filePath => fs.statSync(filePath).size;
@@ -258,9 +259,6 @@ jobs:
                 'content-type': assetContentType,
                 'content-length': contentLength(file)
               };
-
-              console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
-
 
               console.log(`  == Uploading asset ${name}: ${assetContentType}`)
               const uploadAssetResponse = await github.repos.uploadReleaseAsset({
@@ -279,7 +277,7 @@ jobs:
 
             if ( clean ){ wipeAssets( owner, repo, release_id ) }
 
-            response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
+            uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
               const name = path.basename(file)
               if ( clobber ){ await clobberAsset( name, owner, repo, release_id ) }
