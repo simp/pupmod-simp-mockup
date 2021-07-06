@@ -277,7 +277,7 @@ jobs:
 
             if ( clean ){ wiped = await wipeAssets( owner, repo, release_id ) }
 
-            await rpm_files.concat(rpm_gpg_file).forEach(async function(file){
+            let uploaded_files = await rpm_files.concat(rpm_gpg_file).map(async function(file){
               const name = path.basename(file)
               var clobbered = false
               var uploaded = false
