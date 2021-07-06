@@ -250,7 +250,7 @@ jobs:
                 asset_id = asset.id
                 console.log( `  -- !! clobber='${clobber}'` )
                 if ( clobber == 'yes' ){
-                  console.log( `  !! !! Clobbering existing asset for ${assetName}`)
+                  console.log( `  !! !! Clobbering existing asset for ${assetName} (id: ${asset_id})`)
                   const response = await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
                 }
               }
@@ -259,7 +259,7 @@ jobs:
               // Upload a release asset
               // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
               // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-              const uploadAssetResponse = await github.repos.updateReleaseAsset({
+              const uploadAssetResponse = await github.repos.uploadReleaseAsset({
                 url: uploadUrl,
                 headers,
                 name: assetName,
