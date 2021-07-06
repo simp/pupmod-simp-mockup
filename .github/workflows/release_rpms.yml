@@ -130,56 +130,6 @@ jobs:
 ###          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
 ###          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
 
-      - name: Upload RPM file(s) to GitHub Release (github-script)
-        id: upload_rpm_assets_ghs
-        env:
-          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
-          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
-          upload_url: ${{ steps.release-api.outputs.upload_url }}
-          asset_content_type: application/octet-stream
-        uses: actions/github-script@v4
-        with:
-          #github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
-          # See:
-          #   - https://octokit.github.io/rest.js/
-          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
-          script: |
-            console.log(`== Start!`)
-            # TODO : for each file + GPG key
-            # Setup headers for API call, see Octokit Documentation:
-            # https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
-
-            #const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
-###            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
-###              headers: {
-###                accept: 'application/vnd.github.v3+json'
-###              },
-###              owner: context.repo.owner,
-###              repo: context.repo.repo,
-###              username: context.payload.sender.login,
-###            })
-
-###
-###            // Upload a release asset
-###            // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
-###            // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-###            const uploadAssetResponse = await github.repos.uploadReleaseAsset({
-###              url: uploadUrl,
-###              headers,
-###              name: assetName,
-###              file: fs.readFileSync(assetPath)
-###            });
-###
-###
-###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
-###            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
-###            if( has_write_access(project_permission.data.permission )){
-###              core.setOutput( 'permitted', 'true' )
-###            } else {
-###              core.setOutput( 'permitted', 'false' )
-###              console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repository}; not triggering external CI'`)
-###            }
-###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
 
       - name: Upload RPM file(s) to GitHub Release
         id: upload_rpm_assets
@@ -239,3 +189,53 @@ jobs:
           #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
           #echo "$upload_reponse_body | jq ."
 
+      - name: Upload RPM file(s) to GitHub Release (github-script)
+        id: upload_rpm_assets_ghs
+        env:
+          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
+          upload_url: ${{ steps.release-api.outputs.upload_url }}
+          asset_content_type: application/octet-stream
+        uses: actions/github-script@v4
+        with:
+          #github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          # See:
+          #   - https://octokit.github.io/rest.js/
+          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
+          script: |
+            console.log("== Start!")
+            # TODO : for each file + GPG key
+            # Setup headers for API call, see Octokit Documentation:
+            # https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
+
+            #const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
+###            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
+###              headers: {
+###                accept: 'application/vnd.github.v3+json'
+###              },
+###              owner: context.repo.owner,
+###              repo: context.repo.repo,
+###              username: context.payload.sender.login,
+###            })
+
+###
+###            // Upload a release asset
+###            // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
+###            // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
+###            const uploadAssetResponse = await github.repos.uploadReleaseAsset({
+###              url: uploadUrl,
+###              headers,
+###              name: assetName,
+###              file: fs.readFileSync(assetPath)
+###            });
+###
+###
+###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
+###            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
+###            if( has_write_access(project_permission.data.permission )){
+###              core.setOutput( 'permitted', 'true' )
+###            } else {
+###              core.setOutput( 'permitted', 'false' )
+###              console.log(`::error ::payload user '${context.payload.sender.login}' does not have CI trigger permission for '${context.repository}; not triggering external CI'`)
+###            }
+###            console.log(`== payload user '${context.payload.sender.login}' CI trigger permission for '${context.repo.owner}': ${write_access_desc(has_write_access(project_permission.data.permission))}`)
