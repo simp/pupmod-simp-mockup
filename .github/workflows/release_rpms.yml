@@ -275,7 +275,7 @@ jobs:
             const clean = process.env.clean == 'yes';
             const clobber = process.env.clobber == 'yes';
 
-            if ( clean ){ wipeAssets( owner, repo, release_id ) }
+            //if ( clean ){ wipeAssets( owner, repo, release_id ) }
 
             uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
