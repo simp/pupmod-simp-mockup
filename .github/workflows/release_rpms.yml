@@ -271,7 +271,7 @@ jobs:
             const clean = process.env.clean == 'yes';
             const clobber = process.env.clobber == 'yes';
 
-            if ( clean ){ await wipeAssets( owner, repo, release_id ) }
+            await if ( clean ){ await wipeAssets( owner, repo, release_id ) }
 
             await rpm_files.concat(rpm_gpg_file).forEach(async function(file){
               const name = path.basename(file)
