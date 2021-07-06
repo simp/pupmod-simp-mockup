@@ -245,7 +245,6 @@ jobs:
 
             let uploadAsset = async function (owner, repo, release_id, file, assetContentType ){
               const name = path.basename(file)
-              const release_id = process.env.release_id
               const clobber = process.env.clobber == 'yes';
               const data = fs.readFileSync(file)
               const contentLength = filePath => fs.statSync(filePath).size;
@@ -266,6 +265,7 @@ jobs:
             }
 
             console.log('== start');
+            const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
