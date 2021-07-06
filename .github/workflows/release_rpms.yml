@@ -259,12 +259,15 @@ jobs:
               // Upload a release asset
               // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
               // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-              const uploadAssetResponse = await github.repos.uploadReleaseAsset({
-                url: uploadUrl,
-                headers,
-                name: assetName,
-                file: fs.readFileSync(assetPath)
-              });
+              ///// const uploadAssetResponse = await github.repos.uploadReleaseAsset({
+              /////   url: uploadUrl,
+              /////   headers,
+              /////   name: assetName,
+              /////   file: fs.readFileSync(assetPath)
+              ///// });
+              data = fs.readFileSync(assetPath)
+              name = assetName;
+              const uploadAssetResponse = await github.repos.uploadReleaseAsset({ owner, repo, release_id, data, name })
               return( uploadAssetResponse );
             }
 
