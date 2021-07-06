@@ -106,7 +106,7 @@ jobs:
           wget https://download.simp-project.com/simp-release-community.rpm -O dist/y.rpm
           wget https://download.simp-project.com/simp/GPGKEYS/RPM-GPG-KEY-SIMP-UNSTABLE-2 -O "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc"
 
-          rpm_file="$(ls -1r dist/*.rpm)"
+          rpm_file="$(ls -1r dist/*.rpm | head -1)"
           rpm_file_path="$(realpath "$rpm_file")"
           rpm_file_paths="$(find "$PWD/dist" -name \*.rpm)"
           gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
