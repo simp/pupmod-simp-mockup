@@ -236,8 +236,12 @@ jobs:
             }
 
             let clobberAsset = async function(name, owner, repo, release_id ){
+              console.log(`  -- clobber asset ${name}: owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
+
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+              console.log(`  -- after listReleaseAssets`)
               const matchingAssets = existingAssets.data.filter(item => item.name == name);
+              console.log(`  -- after existingAssets`)
               if ( matchingAssets.length > 0 ){
                 asset = matchingAssets[0]
                 asset_id = asset.id
