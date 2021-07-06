@@ -163,9 +163,11 @@ jobs:
             fi
             rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
             file_name="$(basename "$file")"
+            full_upload_url="${upload_url}?name=${file_name}&label=${file_name}"
+            echo
+            echo "== Uploading '$file' to $full_upload_url"
             file_upload_cmd=(
-              "${curl_cmd[@]}" \
-              "${upload_url}?name=${file_name}&label=${file_name}" \
+              "${curl_cmd[@]}" "$full_upload_url" \
               --header "Content-Type: ${asset_content_type}" \
               --data-binary "@${file}" \
             )
