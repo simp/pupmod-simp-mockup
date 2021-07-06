@@ -212,7 +212,7 @@ jobs:
             let uploadAssset = async function (assetPath, assetContentType ){
               console.log(`==== upload_asset ${assetPath}, ${assetContentType}`)
               const uploadUrl = process.env.upload_url;
-              const assetName = io.basename(assetPath)
+              const assetName = path.basename(assetPath)
               const headers = {
                 'content-type': assetContentType,
                 'content-length': contentLength(assetPath)
