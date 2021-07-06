@@ -228,6 +228,7 @@ jobs:
               console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
               existingAssets.data.forEach(async function(asset){
                 asset_id = asset.id
+                console.log( `  !! !! !! Wiping existing asset for ${asset.name} (id: ${asset_id})`)
                 await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
               })
             }
