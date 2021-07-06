@@ -244,7 +244,9 @@ jobs:
 
               matchingAssets = existingAssets.data.filter(item => item.name == assetName);
               if ( matchingAssets.length > 0 ){
-                console.log(`  -- matching assets: ${JSON.stringify(matchingAssets,null,2)}`)
+                console.log(`  -- matched!`)
+                asset = matchingAssets[0]
+                console.log(`  -- matching assets: ${JSON.stringify(asset,null,2)}`)
                 console.log( `  -- !! clobber='${clobber}'` )
                 if ( clobber == 'yes' ){
                   console.log( `  !! !! Clobbering existing asset for ${assetName}`)
