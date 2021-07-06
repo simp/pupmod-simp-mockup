@@ -193,26 +193,28 @@ jobs:
           #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
           #echo "$upload_reponse_body | jq ."
 
-      - name: Upload RPM file(s) to GitHub Release (github-script)
+      - name: 'Upload RPM file(s) to GitHub Release (github-script)'
+        runs-on: ubuntu-latest
         id: upload_rpm_assets_ghs
+        uses: actions/github-script@v4
         env:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
           rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
           upload_url: ${{ steps.release-api.outputs.upload_url }}
           asset_content_type: application/octet-stream
-        uses: actions/github-script@v4
+        # See:
+        #   - https://octokit.github.io/rest.js/
+        #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
         with:
-          #github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
-          # See:
-          #   - https://octokit.github.io/rest.js/
-          #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
+          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
-            console.log("== Start!")
-            # TODO : for each file + GPG key
-            # Setup headers for API call, see Octokit Documentation:
-            # https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
+            console.log(context)
 
-            #const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
+# TODO : for each file + GPG key
+# Setup headers for API call, see Octokit Documentation:
+# https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
+
+#const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
 ###            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
 ###              headers: {
 ###                accept: 'application/vnd.github.v3+json'
