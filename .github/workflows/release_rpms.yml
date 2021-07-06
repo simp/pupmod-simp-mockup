@@ -247,10 +247,11 @@ jobs:
                 console.log(`  -- matched!`)
                 asset = matchingAssets[0]
                 console.log(`  -- matching assets: ${JSON.stringify(asset,null,2)}`)
+                asset_id = asset.id
                 console.log( `  -- !! clobber='${clobber}'` )
                 if ( clobber == 'yes' ){
                   console.log( `  !! !! Clobbering existing asset for ${assetName}`)
-                  await github.repos.deleteReleaseAsset({owner,repo,assets.id})
+                  const response = await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
                 }
               }
 
@@ -276,7 +277,6 @@ jobs:
               await uploadAsset(file, 'application/octet-stream')
             })
             console.log('== done')
-
 
 
 ###            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
