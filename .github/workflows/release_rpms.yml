@@ -186,9 +186,10 @@ jobs:
           ls -l "${rpm_gpg_file}"
           echo
           echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
+          asset_content_type='application/pgp-keys'
           gpg_upload_cmd=(
              "${curl_cmd[@]}" "$full_upload_url" \
-             --header application/pgp-keys \
+             --header "Content-Type: ${asset_content_type}" \
              --data-binary "@${rpm_gpg_file}" \
           )
           #echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
