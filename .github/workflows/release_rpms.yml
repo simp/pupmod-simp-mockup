@@ -215,7 +215,7 @@ jobs:
             const path = require('path')
             const fs = require('fs')
 
-            let uploadAssset = async function (assetPath, assetContentType ){
+            let uploadAsset = async function (assetPath, assetContentType ){
               const uploadUrl = process.env.upload_url;
               const assetName = path.basename(assetPath)
               const contentLength = filePath => fs.statSync(filePath).size;
@@ -240,9 +240,9 @@ jobs:
             console.log('== start');
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
-            response = uploadAssset(rpm_gpg_file, 'application/pgp-keys');
+            response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
-              await uploadAssset(file, 'application/octet-stream')
+              await uploadAsset(file, 'application/octet-stream')
             })
             console.log('== done')
 
