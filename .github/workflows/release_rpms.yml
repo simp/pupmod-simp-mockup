@@ -208,6 +208,11 @@ jobs:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
             console.log(context)
+            console.log('== start')
+            const s = "a\nb\r\c"
+            const splits = s.split(/[\r\n]+/)
+            console.log(s)
+            console.log(splits)
 
 # TODO : for each file + GPG key
 # Setup headers for API call, see Octokit Documentation:
