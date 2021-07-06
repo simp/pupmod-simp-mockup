@@ -225,7 +225,7 @@ jobs:
 
             let wipeAssets = async function(owner, repo, release_id ){
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-              console.log( `  !! !! Wiping ALL uploaded assets for ${name} (id: ${asset_id})`)
+              console.log( `  !! !! Wiping ALL uploaded assets for release (id: ${asset_id})`)
               existingAssets.forEach(async function(asset){
                 asset_id = asset.id
                 await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
@@ -239,7 +239,7 @@ jobs:
                 asset = matchingAssets[0]
                 asset_id = asset.id
                 console.log( `  !! !! Clobbering existing asset for ${name} (id: ${asset_id})`)
-                const response = await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+                await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
               }
             }
 
