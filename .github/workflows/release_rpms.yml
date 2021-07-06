@@ -34,8 +34,8 @@ on:
         description: "Clobber assets? (default: no)"
         required: false
         default: no
-      c ${existingAssets}`)lean:
-        description: "Wipe existing assets? (default: no)"
+      clean:
+        description: "Wipe existing assets first? (default: no)"
         required: false
         default: no
       dry_run:
@@ -205,7 +205,6 @@ jobs:
         env:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
           rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
-          upload_url: ${{ steps.release-api.outputs.upload_url }}
           release_id:  ${{ steps.release-api.outputs.id }}
           clobber: ${{ github.event.inputs.clobber }}
           clean: ${{ github.event.inputs.clean }}
@@ -224,8 +223,18 @@ jobs:
             const path = require('path')
             const fs = require('fs')
 
-            let clobberAsset = async function(name, owner, repo, release_id, existingAssets){
-              matchingAssets = existingAssets.data.filter(item => item.name == name);
+            let wipeAssets = async function(owner, repo, release_id ){
+              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+              console.log( `  !! !! Wiping ALL uploaded assets for ${name} (id: ${asset_id})`)
+              existingAssets.forEach(async function(asset){
+                asset_id = asset.id
+                await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+              })
+            }
+
+            let clobberAsset = async function(name, owner, repo, release_id ){
+              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+              const matchingAssets = existingAssets.data.filter(item => item.name == name);
               if ( matchingAssets.length > 0 ){
                 asset = matchingAssets[0]
                 asset_id = asset.id
@@ -239,15 +248,13 @@ jobs:
               const [owner, repo] = process.env.TARGET_REPO.split('/')
               const release_id = process.env.release_id
               const clobber = process.env.clobber == 'yes';
-              const clean = process.env.clean == 'yes';
+              const data = fs.readFileSync(assetPath)
 
               console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
-              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
 
-              if ( clobber ){ clobberAsset( name, owner, repo, release_id, existingAssets ) }
+              if ( clobber ){ clobberAsset( name, owner, repo, release_id ) }
 
               console.log(`  == Uploading asset ${name}: ${assetContentType}`)
-              data = fs.readFileSync(assetPath)
               const uploadAssetResponse = await github.repos.uploadReleaseAsset({ owner, repo, release_id, data, name })
               return( uploadAssetResponse );
             }
@@ -255,6 +262,9 @@ jobs:
             console.log('== start');
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
+            const clean = process.env.clean == 'yes';
+
+            if ( clean ){ wipeAssets( owner, repo, release_id ) }
 
             response = uploadAsset(rpm_gpg_file, 'application/pgp-keys');
             rpm_files.forEach(async function(file){
