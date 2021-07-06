@@ -223,15 +223,15 @@ jobs:
             const path = require('path')
             const fs = require('fs')
 
-            let wipeAssets = async function(owner, repo, release_id ){
-              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+            let wipeAssets = function(owner, repo, release_id ){
+              const existingAssets = github.repos.listReleaseAssets({ owner, repo, release_id })
               console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
               console.log( `     $$ existingAssets: ${JSON.stringify(existingAssets.data,null,2)}` )
               console.log( `     %% existingAssets length: ${existingAssets.data.length}` )
               if ( existingAssets.data.length == 0 ){ return };
               existingAssets.data.forEach(async function(asset){
                 asset_id = asset.id
-                await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+                github.repos.deleteReleaseAsset({ owner, repo, asset_id })
               })
             }
 
@@ -283,7 +283,6 @@ jobs:
               await uploadAsset(owner, repo, release_id, file, 'application/octet-stream')
             })
             console.log('== done')
-
 
 
 ###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
