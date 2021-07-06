@@ -249,9 +249,10 @@ jobs:
               const name = path.basename(file)
 
               const data = fs.readFileSync(file)
+              const contentLength = fs.statSync(file).size
               const headers = {
                 'content-type': assetContentType,
-                'content-length': fs.statSync(file).size
+                'content-length': contentLength
               };
 
               console.log(`  == Uploading asset ${name}: ${assetContentType}`)
