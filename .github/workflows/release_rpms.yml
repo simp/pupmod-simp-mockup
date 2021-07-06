@@ -232,14 +232,18 @@ jobs:
               const clobber = process.env.clobber;
               const assetName = path.basename(assetPath)
               const [owner, repo] = process.env.TARGET_REPO.split('/')
+              const release_id = process.env.release_id
               const contentLength = filePath => fs.statSync(filePath).size;
               const headers = {
                 'content-type': assetContentType,
                 'content-length': contentLength(assetPath)
               };
-              console.log(`  -- owner: ${owner}  repo: ${repo}` )
-              console.log(`  == Uploading asset ${assetName}: ${assetContentType}`)
+              console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
+              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+              console.log(`  -- existing assets: ${existingAssets}`)
+
+              console.log(`  == Uploading asset ${assetName}: ${assetContentType}`)
               // Upload a release asset
               // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
               // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
