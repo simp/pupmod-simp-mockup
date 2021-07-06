@@ -213,11 +213,21 @@ jobs:
                 'content-type': assetContentType,
                 'content-length': contentLength(assetPath)
               };
+
+              // Upload a release asset
+              // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
+              // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
+              const uploadAssetResponse = await github.repos.uploadReleaseAsset({
+                url: uploadUrl,
+                headers,
+                name: assetName,
+                file: fs.readFileSync(assetPath)
+              });
             }
             console.log('== start')
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/)
             const rpm_gpg_file = process.env.rpm_gpg_file
-            rpm_files.forEach( file => uploadAssset(file, 'application/octet-stream')
+            rpm_files.forEach( file => uploadAssset(file, 'application/octet-stream') )
             console.log('== done')
             console.log(`rpm_files: ${rpm_files}`)
             console.log('== end')
