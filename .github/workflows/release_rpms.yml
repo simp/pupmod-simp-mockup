@@ -207,13 +207,11 @@ jobs:
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
-            console.log(context)
             console.log('== start')
-            const s = "a\nb\r\c"
+            const s = "${{ process.env/rpm_file_paths }}"
             const splits = s.split(/[\r\n]+/)
             console.log(s)
             console.log(splits)
-
 # TODO : for each file + GPG key
 # Setup headers for API call, see Octokit Documentation:
 # https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
