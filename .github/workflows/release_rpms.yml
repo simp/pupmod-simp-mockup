@@ -206,9 +206,6 @@ jobs:
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
-            import * as fs from 'fs'
-            import * as path from 'path'
-
             let uploadAssset = async function (assetPath, assetContentType ){
               console.log(`==== upload_asset ${assetPath}, ${assetContentType}`)
               const uploadUrl = process.env.upload_url;
