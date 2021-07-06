@@ -195,7 +195,6 @@ jobs:
 
       - name: 'Upload RPM file(s) to GitHub Release (github-script)'
         id: upload_rpm_assets_ghs
-        runs-on: ubuntu-latest
         uses: actions/github-script@v4
         env:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
