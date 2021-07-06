@@ -239,9 +239,7 @@ jobs:
               console.log(`  -- clobber asset ${name}: owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-              console.log(`  -- after listReleaseAssets`)
               const matchingAssets = existingAssets.data.filter(item => item.name == name);
-              console.log(`  -- after existingAssets`)
               if ( matchingAssets.length > 0 ){
                 asset = matchingAssets[0]
                 asset_id = asset.id
@@ -251,14 +249,20 @@ jobs:
             }
 
             let uploadAsset = async function (owner, repo, release_id, file, assetContentType ){
-              console.log(`  -- uploadAsset: owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
+              console.log(`\n\n  -- uploadAsset: owner: ${owner}  repo: ${repo}  release_id: ${release_id}, file: ${file}\n` )
               const name = path.basename(file)
+
+              console.log(`  -- 1`)
               const data = fs.readFileSync(file)
-              const contentLength = filePath => fs.statSync(filePath).size;
+              console.log(`  -- 2`)
+              const contentLength = fs.statSync(file).size
+              console.log(`  -- 3`)
+              //const contentLength = filePath => fs.statSync(filePath).size;
               const headers = {
                 'content-type': assetContentType,
-                'content-length': contentLength(file)
+                'content-length': contentLength
               };
+              console.log(`  -- 4`)
 
               console.log(`  == Uploading asset ${name}: ${assetContentType}`)
               const uploadAssetResponse = await github.repos.uploadReleaseAsset({
