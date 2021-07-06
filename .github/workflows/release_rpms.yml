@@ -192,7 +192,7 @@ jobs:
              --data-binary "@${rpm_gpg_file}" \
           )
           #echo "+-- $gpg_upload_cmd: '${gpg_upload_cmd[@]}'"
-          "${gpg_upload_cmd[@]} --verbose"
+          "${gpg_upload_cmd[@]}" --verbose
           #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
           #echo "$upload_reponse_body | jq ."
 
