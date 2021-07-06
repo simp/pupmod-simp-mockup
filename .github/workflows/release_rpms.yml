@@ -223,7 +223,7 @@ jobs:
             const path = require('path')
             const fs = require('fs')
 
-            let wipeAssets = async function(owner, repo, release_id ){
+            async function wipeAssets(owner, repo, release_id ){
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
               console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
               existingAssets.data.forEach(async function(asset){
@@ -231,9 +231,10 @@ jobs:
                 console.log( `  !! !! !! Wiping existing asset for ${asset.name} (id: ${asset_id})`)
                 await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
               })
+              return(true)
             }
 
-            let clobberAsset = async function(name, owner, repo, release_id ){
+            async function clobberAsset (name, owner, repo, release_id ){
               console.log(`  -- clobber asset ${name}: owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
@@ -242,10 +243,12 @@ jobs:
                 asset_id = matchingAssets[0].id
                 console.log( `  !! !! Clobbering existing asset for ${name} (id: ${asset_id})`)
                 await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+                return(true)
               }
+              return(false)
             }
 
-            let uploadAsset = async function (owner, repo, release_id, file, assetContentType ){
+            async function uploadAsset(owner, repo, release_id, file, assetContentType ){
               console.log(`\n\n  -- uploadAsset: owner: ${owner}  repo: ${repo}  release_id: ${release_id}, file: ${file}\n` )
               const name = path.basename(file)
 
@@ -270,12 +273,14 @@ jobs:
             const rpm_gpg_file = process.env.rpm_gpg_file;
             const clean = process.env.clean == 'yes';
             const clobber = process.env.clobber == 'yes';
+            var wiped = false
 
-            await if ( clean ){ await wipeAssets( owner, repo, release_id ) }
+            if ( clean ){ wiped = await wipeAssets( owner, repo, release_id ) }
 
             await rpm_files.concat(rpm_gpg_file).forEach(async function(file){
               const name = path.basename(file)
-              if ( clobber ){ await clobberAsset( name, owner, repo, release_id ) }
+              var clobbered = false
+              if ( clobber ){ clobbered = await clobberAsset( name, owner, repo, release_id ) }
               var content_type = 'application/pgp-keys'
               if( name.match(/\.rpm$/) ){
                 content_type = 'application/octet-stream'
