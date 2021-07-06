@@ -90,11 +90,8 @@ jobs:
           echo "::set-output name=url::${url}"
           echo "::set-output name=assets_url::${assets_url}"
           echo "::set-output name=upload_url::${upload_url}"
-          echo "::warning ::url: $url"
-          echo "::warning ::assets_url: $assets_url"
-          echo "::warning ::upload_url: $upload_url"
           ###printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
-          printf '== full_response:\n%s\n' "$full_response"
+          ###printf '== release API full_response:\n%s\n' "$full_response"
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -227,46 +224,30 @@ jobs:
             const path = require('path')
             const fs = require('fs')
 
+            let clobberAsset = async function(name, owner, repo, release_id, existingAssets){
+              matchingAssets = existingAssets.data.filter(item => item.name == name);
+              if ( matchingAssets.length > 0 ){
+                asset = matchingAssets[0]
+                asset_id = asset.id
+                console.log( `  !! !! Clobbering existing asset for ${name} (id: ${asset_id})`)
+                const response = await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+              }
+            }
+
             let uploadAsset = async function (assetPath, assetContentType ){
-              const uploadUrl = process.env.upload_url;
-              const clobber = process.env.clobber;
-              const assetName = path.basename(assetPath)
+              const name = path.basename(assetPath)
               const [owner, repo] = process.env.TARGET_REPO.split('/')
               const release_id = process.env.release_id
-              const contentLength = filePath => fs.statSync(filePath).size;
-              const headers = {
-                'content-type': assetContentType,
-                'content-length': contentLength(assetPath)
-              };
-              console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
+              const clobber = process.env.clobber == 'yes';
+              const clean = process.env.clean == 'yes';
 
+              console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
 
-              matchingAssets = existingAssets.data.filter(item => item.name == assetName);
-              if ( matchingAssets.length > 0 ){
-                console.log(`  -- matched!`)
-                asset = matchingAssets[0]
-                console.log(`  -- matching assets: ${JSON.stringify(asset,null,2)}`)
-                asset_id = asset.id
-                console.log( `  -- !! clobber='${clobber}'` )
-                if ( clobber == 'yes' ){
-                  console.log( `  !! !! Clobbering existing asset for ${assetName} (id: ${asset_id})`)
-                  const response = await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
-                }
-              }
+              if ( clobber ){ clobberAsset( name, owner, repo, release_id, existingAssets ) }
 
-              console.log(`  == Uploading asset ${assetName}: ${assetContentType}`)
-              // Upload a release asset
-              // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
-              // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-              ///// const uploadAssetResponse = await github.repos.uploadReleaseAsset({
-              /////   url: uploadUrl,
-              /////   headers,
-              /////   name: assetName,
-              /////   file: fs.readFileSync(assetPath)
-              ///// });
+              console.log(`  == Uploading asset ${name}: ${assetContentType}`)
               data = fs.readFileSync(assetPath)
-              name = assetName;
               const uploadAssetResponse = await github.repos.uploadReleaseAsset({ owner, repo, release_id, data, name })
               return( uploadAssetResponse );
             }
@@ -282,27 +263,7 @@ jobs:
             console.log('== done')
 
 
-###            const project_permission = await github.request('GET /repos/{owner}/{repo}/collaborators/{username}/permission', {
-###              headers: {
-###                accept: 'application/vnd.github.v3+json'
-###              },
-###              owner: context.repo.owner,
-###              repo: context.repo.repo,
-###              username: context.payload.sender.login,
-###            })
 
-###
-###            // Upload a release asset
-###            // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
-###            // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-###            const uploadAssetResponse = await github.repos.uploadReleaseAsset({
-###              url: uploadUrl,
-###              headers,
-###              name: assetName,
-###              file: fs.readFileSync(assetPath)
-###            });
-###
-###
 ###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
 ###            const write_access_desc = perm_bool => (perm_bool ? "PERMISSION OK" : "PERMISSION DENIED" )
 ###            if( has_write_access(project_permission.data.permission )){
