@@ -206,13 +206,17 @@ jobs:
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
+            import * as fs from 'fs'
+            import * as path from 'path'
+
             let uploadAssset = async function (assetPath, assetContentType ){
               console.log(`==== upload_asset ${assetPath}, ${assetContentType}`)
+              const uploadUrl = process.env.upload_url;
+              const assetName = path.basaename(assetPath)
               const headers = {
                 'content-type': assetContentType,
                 'content-length': contentLength(assetPath)
               };
-              const uploadUrl = process.env.upload_url
 
               // Upload a release asset
               // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
@@ -223,13 +227,16 @@ jobs:
                 name: assetName,
                 file: fs.readFileSync(assetPath)
               });
+              return( uploadAsssetResponse );
             }
 
-            console.log('== start')
-            const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/)
-            const rpm_gpg_file = process.env.rpm_gpg_file
-            uploadAssset(rpm_gpg_file, 'application/pgp-keys')
-            rpm_files.forEach( file => await uploadAssset(file, 'application/octet-stream') );
+            console.log('== start');
+            const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
+            const rpm_gpg_file = process.env.rpm_gpg_file;
+            response = uploadAssset(rpm_gpg_file, 'application/pgp-keys');
+            rpm_files.forEach(async function(file){
+              await uploadAssset(file, 'application/octet-stream')
+            })
             console.log('== done')
 
 
