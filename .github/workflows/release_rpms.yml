@@ -248,7 +248,7 @@ jobs:
                 console.log( `  -- !! clobber='${clobber}'` )
                 if ( clobber == 'yes' ){
                   console.log( `  !! !! Clobbering existing asset for ${assetName}`)
-                  await github.repos.deleteReleaseAsset(owner,repo,matchingAssets.pop().id)
+                  await github.repos.deleteReleaseAsset({owner,repo,matchingAssets.pop().id})
                 }
               }
 
