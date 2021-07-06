@@ -83,11 +83,13 @@ jobs:
           full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
           url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .url)"
           assets_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .assets_url)"
-          #upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url | sed -e 's/{?.*$//' )"
+          ###upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url | sed -e 's/{?.*$//' )"
           upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url )"
           echo "::set-output name=url::${url}"
           echo "::set-output name=assets_url::${assets_url}"
           echo "::set-output name=upload_url::${upload_url}"
+          release_id="$(echo "$full_response" | jq .id )"
+          echo "::set-output name=id::${release_id}"
           echo "::warning ::url: $url"
           echo "::warning ::assets_url: $assets_url"
           echo "::warning ::upload_url: $upload_url"
@@ -146,6 +148,7 @@ jobs:
 ###          upload_url: ${{ steps.release-api.outputs.upload_url }}
 ###          asset_content_type: application/octet-stream
 ###        run: |
+###          upload_url="$((echo "$upload_url" | sed -e 's/{?.*$//' )"
 ###          echo "::add-mask::$GITHUB_TOKEN"
 ###          curl_cmd=(curl -X POST --fail --show-error \
 ###            --header "Accept: application/vnd.github.v3+json" \
