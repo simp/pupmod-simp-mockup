@@ -208,7 +208,7 @@ jobs:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
             console.log('== start')
-            const s = "${{ process.env/rpm_file_paths }}"
+            const s = process.env.rpm_file_paths
             const splits = s.split(/[\r\n]+/)
             console.log(s)
             console.log(splits)
