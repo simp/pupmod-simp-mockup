@@ -145,7 +145,6 @@ jobs:
           #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
           script: |
             console.log(`== Start!`)
-            console.log(`== rpm_file_paths="${process.env.rpm_file_paths}" `)
             # TODO : for each file + GPG key
             # Setup headers for API call, see Octokit Documentation:
             # https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
