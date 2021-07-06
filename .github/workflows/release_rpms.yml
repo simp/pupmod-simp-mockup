@@ -100,10 +100,11 @@ jobs:
       - name: 'MOCK: build-and-sign-rpm'
         id: build-and-sign-rpm
         run: |
+          mkdir -p dist
           RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
-          wget https://github.com/simp/pupmod-simp-dummy/releases/download/0.3.50/pupmod-simp-dummy-0.3.50-0.noarch.rpm -O x.rpm
-          wget https://download.simp-project.com/simp-release-community.rpm -O y.rpm
-          wget https://download.simp-project.com/simp/GPGKEYS/RPM-GPG-KEY-SIMP-UNSTABLE-2 -O "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc"
+          wget https://github.com/simp/pupmod-simp-dummy/releases/download/0.3.50/pupmod-simp-dummy-0.3.50-0.noarch.rpm -O dist/x.rpm
+          wget https://download.simp-project.com/simp-release-community.rpm -O dist/y.rpm
+          wget https://download.simp-project.com/simp/GPGKEYS/RPM-GPG-KEY-SIMP-UNSTABLE-2 -O "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc"
 
           rpm_file="$(ls -1r dist/*.rpm)"
           rpm_file_path="$(realpath "$rpm_file")"
