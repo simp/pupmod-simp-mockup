@@ -207,7 +207,7 @@ jobs:
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
-            let uploadAssset = function (assetPath, assetContentType ){
+            let uploadAssset = async function (assetPath, assetContentType ){
               console.log(`==== upload_asset ${assetPath}, ${assetContentType}`)
               const headers = {
                 'content-type': assetContentType,
@@ -227,7 +227,7 @@ jobs:
             console.log('== start')
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/)
             const rpm_gpg_file = process.env.rpm_gpg_file
-            rpm_files.forEach( file => uploadAssset(file, 'application/octet-stream') )
+            rpm_files.forEach( file => await uploadAssset(file, 'application/octet-stream') )
             console.log('== done')
             console.log(`rpm_files: ${rpm_files}`)
             console.log('== end')
