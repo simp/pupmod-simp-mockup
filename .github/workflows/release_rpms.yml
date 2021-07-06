@@ -34,7 +34,7 @@ on:
         description: "Clobber assets? (default: no)"
         required: false
         default: no
-      clean:
+      c ${existingAssets}`)lean:
         description: "Wipe existing assets? (default: no)"
         required: false
         default: no
@@ -241,7 +241,7 @@ jobs:
               console.log(`  -- owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
               const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-              console.log(`  -- existing assets: ${existingAssets}`)
+              console.log(`  -- existing assets: ${JSON.stringify(existingAssets,null,2)}`)
 
               console.log(`  == Uploading asset ${assetName}: ${assetContentType}`)
               // Upload a release asset
