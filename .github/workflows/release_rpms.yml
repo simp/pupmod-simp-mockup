@@ -64,6 +64,8 @@ jobs:
     steps:
       - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
         id: release-api
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "::warning ::TARGET_REPO: $TARGET_REPO"
           echo "::warning ::RELEASE_TAG: $RELEASE_TAG"
@@ -78,6 +80,7 @@ jobs:
           fi
           set -e -u -o pipefail
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
+          full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
           url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .url)"
           assets_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .assets_url)"
           upload_url="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq -r .upload_url | sed -e 's/{?.*$//' )"
@@ -87,6 +90,8 @@ jobs:
           echo "::warning ::url: $url"
           echo "::warning ::assets_url: $assets_url"
           echo "::warning ::upload_url: $upload_url"
+          printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
+          printf '== full_response:\n%s\n' "$full_response"
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -210,7 +215,6 @@ jobs:
             const fs = require('fs')
 
             let uploadAssset = async function (assetPath, assetContentType ){
-              console.log(`==== upload_asset ${assetPath}, ${assetContentType}`)
               const uploadUrl = process.env.upload_url;
               const assetName = path.basename(assetPath)
               const contentLength = filePath => fs.statSync(filePath).size;
@@ -218,6 +222,7 @@ jobs:
                 'content-type': assetContentType,
                 'content-length': contentLength(assetPath)
               };
+              console.log(`==== upload_asset ${assetName}: ${assetPath}, ${assetContentType}`)
 
               // Upload a release asset
               // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
