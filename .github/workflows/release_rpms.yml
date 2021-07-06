@@ -280,13 +280,14 @@ jobs:
             await rpm_files.concat(rpm_gpg_file).forEach(async function(file){
               const name = path.basename(file)
               var clobbered = false
+              var uploaded = false
               if ( clobber ){ clobbered = await clobberAsset( name, owner, repo, release_id ) }
               var content_type = 'application/pgp-keys'
               if( name.match(/\.rpm$/) ){
                 content_type = 'application/octet-stream'
               }
               console.log(`  += Uploading asset ${name}: ${file}`)
-              await uploadAsset(owner, repo, release_id, file, content_type )
+              uploaded = await uploadAsset(owner, repo, release_id, file, content_type )
             })
             console.log('== done')
 
