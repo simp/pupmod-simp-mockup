@@ -31,13 +31,13 @@ on:
         description: "Release tag"
         required: true
       clobber:
-        description: "Clobber assets?"
+        description: "Clobber identical assets?"
         required: false
         default: 'yes'
       clean:
-        description: "Wipe existing assets first?"
+        description: "Wipe all release assets first?"
         required: false
-        default: 'yes'
+        default: 'no'
       dry_run:
         description: "Dry run (Test build RPMs)"
         required: false
@@ -201,7 +201,7 @@ jobs:
 ###          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
 ###          #echo "$upload_reponse_body | jq ."
 
-      - name: "Wipe all previous assets from GitHub Release (when clean == 'yes'"
+      - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
         if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
         uses: actions/github-script@v4
         env:
@@ -287,23 +287,21 @@ jobs:
 
             let uploaded_files = rpm_files.concat(rpm_gpg_file).map(function(file){
               const name = path.basename(file)
-              var clobbered = false
-              var uploaded = false
+              var content_type = 'application/pgp-keys'
+              if( name.match(/\.rpm$/) ){
+                content_type = 'application/octet-stream'
+              }
+
               let conditionalClobber = new Promise((resolve,reject) => {
                 if ( clobber ){
                   resolve(clobberAsset( name, owner, repo, release_id ))
                   return
                 }
                 resolve( false )
-                return
               })
-              var content_type = 'application/pgp-keys'
-              if( name.match(/\.rpm$/) ){
-                content_type = 'application/octet-stream'
-              }
+
               conditionalClobber.then((clobbered)=> {
-                console.log(`  += Uploading asset ${name}: ${file}`)
-                uploaded = uploadAsset(owner, repo, release_id, file, content_type ).then(result => result )
-              })
+                uploadAsset(owner, repo, release_id, file, content_type )
+              }).then(result => result )
             })
             console.log('== done')
