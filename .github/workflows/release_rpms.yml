@@ -275,19 +275,19 @@ jobs:
             const clobber = process.env.clobber == 'yes';
             var wiped = false
 
-            if ( clean ){ wiped = await wipeAssets( owner, repo, release_id ) }
+            if ( clean ){ await wipeAssets( owner, repo, release_id ).then(result => result) }
 
-            let uploaded_files = await rpm_files.concat(rpm_gpg_file).map(async function(file){
+            let uploaded_files = rpm_files.concat(rpm_gpg_file).map(async function(file){
               const name = path.basename(file)
               var clobbered = false
               var uploaded = false
-              if ( clobber ){ clobbered = await clobberAsset( name, owner, repo, release_id ) }
+              if ( clobber ){ clobbered = await clobberAsset( name, owner, repo, release_id ).then(result => result) }
               var content_type = 'application/pgp-keys'
               if( name.match(/\.rpm$/) ){
                 content_type = 'application/octet-stream'
               }
               console.log(`  += Uploading asset ${name}: ${file}`)
-              uploaded = await uploadAsset(owner, repo, release_id, file, content_type )
+              uploaded = uploadAsset(owner, repo, release_id, file, content_type ).then(result =>
             })
             console.log('== done')
 
