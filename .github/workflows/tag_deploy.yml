@@ -126,7 +126,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+            console.log(await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
               owner: owner,
               repo: repo,
               workflow_id: 'release_rpms.yml',
@@ -134,7 +134,7 @@ jobs:
               inputs: {
                 release_tag: process.env.TARGET_TAG
               }
-            })
+            }))
 
 ###  deploy-to-puppet-forge:
 ###    name: Deploy PuppetForge Release
