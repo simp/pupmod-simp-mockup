@@ -107,7 +107,7 @@ jobs:
           prerelease: false
 
   build-and-attach-rpms:
-    name: Build & Attach Signed RPMs to GitHub Release
+    name: Trigger RPM release
     needs: [ create-github-release ]
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
@@ -120,7 +120,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+            await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
               owner: owner,
               repo: repo,
               workflow_id: 'release_rpms.yml',
