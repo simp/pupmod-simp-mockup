@@ -277,11 +277,11 @@ jobs:
 
             if ( clean ){ wipeAssets( owner, repo, release_id ).then(result => result) }
 
-            let uploaded_files = rpm_files.concat(rpm_gpg_file).map(async function(file){
+            let uploaded_files = rpm_files.concat(rpm_gpg_file).map(function(file){
               const name = path.basename(file)
               var clobbered = false
               var uploaded = false
-              if ( clobber ){ clobbered = await clobberAsset( name, owner, repo, release_id ).then(result => result) }
+              if ( clobber ){ clobberAsset( name, owner, repo, release_id ).then(result => result) }
               var content_type = 'application/pgp-keys'
               if( name.match(/\.rpm$/) ){
                 content_type = 'application/octet-stream'
