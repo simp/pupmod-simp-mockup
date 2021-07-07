@@ -123,7 +123,7 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           TARGET_TAG: ${{ steps.tag-check.outputs.tag }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__REPO_SCOPE }}
           script: |
             const [owner, repo] = process.env.TARGET_REPO.split('/')
             await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
@@ -134,7 +134,7 @@ jobs:
               inputs: {
                 release_tag: process.env.TARGET_TAG
               }
-            }).then( result => console.log(`== Submitted workflow dispatch:\n\n${result}\n`)
+            }).then( result => console.log(`== Submitted workflow dispatch:\n\n${result}\n`))
 
 ###  deploy-to-puppet-forge:
 ###    name: Deploy PuppetForge Release
