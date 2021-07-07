@@ -113,6 +113,8 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       TARGET_REPO: ${{ github.repository }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }},
+      TARGET_TAG: ${{ steps.tag-check.outputs.tag }}
     steps:
       - name: Trigger RPM release workflow
         uses: actions/github-script@v4
@@ -124,9 +126,9 @@ jobs:
               owner: owner,
               repo: repo,
               workflow_id: 'release_rpms.yml',
-              ref: ${{ github.event.repository.default_branch }},
+              ref: process.env.DEFAULT_BRANCH,
               inputs: {
-                release_tag: ${{ steps.tag-check.outputs.tag }}
+                release_tag: process.env.TARGET_TAG
               }
             })
 
