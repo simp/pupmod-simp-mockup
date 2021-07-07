@@ -201,6 +201,24 @@ jobs:
 ###          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
 ###          #echo "$upload_reponse_body | jq ."
 
+      - name: "Wipe all previous assets from GitHub Release (when clean == 'yes'"
+        if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
+        uses: actions/github-script@v4
+        env:
+          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          release_id:  ${{ steps.release-api.outputs.id }}
+          script: |
+            const release_id = process.env.release_id
+            const [owner, repo] = process.env.TARGET_REPO.split('/')
+            const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+
+            console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
+            existingAssets.data.forEach(async function(asset){
+              asset_id = asset.id
+              console.log( `  !! !! !! Wiping existing asset for ${asset.name} (id: ${asset_id})`)
+              await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+            })
+
       - name: 'Upload RPM file(s) to GitHub Release (github-script)'
         id: upload_rpm_assets_ghs
         uses: actions/github-script@v4
@@ -225,17 +243,6 @@ jobs:
           script: |
             const path = require('path')
             const fs = require('fs')
-
-            async function wipeAssets(owner, repo, release_id ){
-              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-              console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
-              existingAssets.data.forEach(async function(asset){
-                asset_id = asset.id
-                console.log( `  !! !! !! Wiping existing asset for ${asset.name} (id: ${asset_id})`)
-                await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
-              })
-              return(true)
-            }
 
             async function clobberAsset (name, owner, repo, release_id ){
               console.log(`  -- clobber asset ${name}: owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
@@ -272,11 +279,6 @@ jobs:
             console.log('== start');
             const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            const clean = process.env.clean == 'yes';
-            var wiped = false
-
-            if ( clean ){ wiped = wipeAssets( owner, repo, release_id ).then(result => result) }
-
             const clobber = process.env.clobber == 'yes';
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
