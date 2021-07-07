@@ -304,6 +304,6 @@ jobs:
               conditionalClobber.then((clobbered)=> {
                 console.log(`  += Uploading asset ${name}: ${file}`)
                 uploaded = uploadAsset(owner, repo, release_id, file, content_type ).then(result => result )
-              }
+              })
             })
-            console.log(`== done (wiped: ${wiped})`)
+            console.log('== done')
