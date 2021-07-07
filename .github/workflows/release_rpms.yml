@@ -295,7 +295,7 @@ jobs:
                 }
                 resolve( false )
                 return
-              }
+              })
               var content_type = 'application/pgp-keys'
               if( name.match(/\.rpm$/) ){
                 content_type = 'application/octet-stream'
