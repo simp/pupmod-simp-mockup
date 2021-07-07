@@ -31,15 +31,15 @@ on:
         description: "Release tag"
         required: true
       clobber:
-        description: "Clobber assets? (default: no)"
+        description: "Clobber assets? (default: yes)"
         required: false
-        default: no
+        default: yes
       clean:
-        description: "Wipe existing assets first? (default: no)"
+        description: "Wipe existing assets first? (default: yes)"
         required: false
-        default: no
+        default: yes
       dry_run:
-        description: "Test build RPMs, but don't update Release (default: no)"
+        description: "Dry run (Test build RPMs) (default: no)"
         required: false
         default: no
       target_repo:
@@ -222,6 +222,7 @@ jobs:
 
       - name: 'Upload RPM file(s) to GitHub Release (github-script)'
         id: upload_rpm_assets_ghs
+        if: ${{ github.event.inputs.dry_run != 'yes' }}
         uses: actions/github-script@v4
         env:
           rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
