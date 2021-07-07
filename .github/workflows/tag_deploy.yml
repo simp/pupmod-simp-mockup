@@ -129,7 +129,7 @@ jobs:
             await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
               owner: owner,
               repo: repo,
-              workflow_id: 'release_rpms',
+              workflow_id: 'release_rpms.yml',
               ref: process.env.DEFAULT_BRANCH,
               inputs: {
                 release_tag: process.env.TARGET_TAG
