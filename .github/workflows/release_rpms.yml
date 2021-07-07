@@ -33,15 +33,15 @@ on:
       clobber:
         description: "Clobber assets? (default: yes)"
         required: false
-        default: yes
+        default: 'yes'
       clean:
         description: "Wipe existing assets first? (default: yes)"
         required: false
-        default: yes
+        default: 'yes'
       dry_run:
         description: "Dry run (Test build RPMs) (default: no)"
         required: false
-        default: no
+        default: 'no'
       target_repo:
         description: "Target repo (instead of this one)"
         required: false
@@ -289,7 +289,7 @@ jobs:
               const name = path.basename(file)
               var clobbered = false
               var uploaded = false
-              let conditionalClobber = new Promise((res,rej) => {
+              let conditionalClobber = new Promise((resolve,reject) => {
                 if ( clobber ){
                   resolve(clobberAsset( name, owner, repo, release_id ))
                   return
