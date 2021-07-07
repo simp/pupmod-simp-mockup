@@ -275,7 +275,7 @@ jobs:
             const clobber = process.env.clobber == 'yes';
             var wiped = false
 
-            if ( clean ){ await wipeAssets( owner, repo, release_id ).then(result => result) }
+            if ( clean ){ wipeAssets( owner, repo, release_id ).then(result => result) }
 
             let uploaded_files = rpm_files.concat(rpm_gpg_file).map(async function(file){
               const name = path.basename(file)
@@ -287,9 +287,10 @@ jobs:
                 content_type = 'application/octet-stream'
               }
               console.log(`  += Uploading asset ${name}: ${file}`)
-              uploaded = uploadAsset(owner, repo, release_id, file, content_type ).then(result =>
+              uploaded = uploadAsset(owner, repo, release_id, file, content_type ).then(result => result )
             })
             console.log('== done')
+
 
 
 ###            const has_write_access = perm_lvl => (perm_lvl == "admin" || perm_lvl == "write" )
