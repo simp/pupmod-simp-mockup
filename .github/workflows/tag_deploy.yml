@@ -134,7 +134,7 @@ jobs:
               inputs: {
                 release_tag: process.env.TARGET_TAG
               }
-            })
+            }).then( result => console.log(`== Submitted workflow dispatch:\n\n${result}\n`)
 
 ###  deploy-to-puppet-forge:
 ###    name: Deploy PuppetForge Release
