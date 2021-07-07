@@ -124,7 +124,7 @@ jobs:
               owner: owner,
               repo: repo,
               workflow_id: 'release_rpms.yml',
-              ref: ${{ github.event.repository.default_branch }}
+              ref: ${{ github.event.repository.default_branch }},
               inputs: {
                 release_tag: ${{ steps.tag-check.outputs.tag }}
               }
