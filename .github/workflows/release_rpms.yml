@@ -102,7 +102,7 @@ jobs:
             function id_from_release(data){
               res_json = JSON.stringify(data,null,2)
               console.log( `>> Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${res_json}`)
-              release_id = data.id
+              return(data.id)
             }
 
             await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(result => {
