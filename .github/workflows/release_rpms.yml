@@ -68,9 +68,14 @@ jobs:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
     steps:
+      - name: "Ensure token mask"
+        uses: actions/github-script@v4
+        env:
+          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+        with:
+          script: "core.setSecret( process.env.GITHUB_TOKEN )"
       - name: "Validate inputs"
         env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
           GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
         run: |
           echo "::add-mask::$GITHUB_TOKEN"
