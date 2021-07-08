@@ -95,8 +95,8 @@ jobs:
             const autocreate_release = (process.env.AUTOCREATE_RELEASE == 'yes')
             var release_id
             owner_data = { owner: owner, repo: repo }
-            release_data = Object.assign({tag: {process.env.RELEASE_TAG}, owner_data )
-            create_release_data = Object.assign({tag_name: {process.env.RELEASE_TAG}, owner_data )
+            release_data = Object.assign({tag: process.env.RELEASE_TAG}, owner_data )
+            create_release_data = Object.assign({tag_name: process.env.RELEASE_TAG}, owner_data )
 
 
             function id_from_release(data){
