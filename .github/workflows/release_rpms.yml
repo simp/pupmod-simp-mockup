@@ -116,7 +116,6 @@ jobs:
               err => {
                 if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
                   core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
-                  var tag_exists = false
                   github.request( 'GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
                     result => {
                       console.log( `========== matching tag ref result for ${tag}:`)
@@ -126,18 +125,20 @@ jobs:
                         throw `Can't find tag ${tag} in repo ${owner}/${repo}`
                       }
                     }
-                  ).catch(e=>{ throw e }).then result => {
-                    github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
-                      result=>{
-                        console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-                        release_id = id_from_release(result.data),
-                      },
-                      post_err =>{
-                        core.error('Error auto-creating release')
-                        throw post_err
-                      }
-                    )
-                  }
+                  ).catch(e=>{ throw e }).then(
+                    result => {
+                      github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
+                        result=>{
+                          console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+                          release_id = id_from_release(result.data),
+                        },
+                        post_err =>{
+                          core.error('Error auto-creating release')
+                          throw post_err
+                        }
+                      )
+                    }
+                  )
                 } else {
                   core.error(`Error: ${err.name}\n${err_json}`)
                   throw err
