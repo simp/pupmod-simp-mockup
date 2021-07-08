@@ -119,6 +119,7 @@ jobs:
                   result => {
                     console.log( `========== matching tag ref result for ${tag}:`)
                     console.log( JSON.stringify(result,null,2) )
+                    console.log( `result.data.length = |${result.data.length}|` )
                     if (result.data.length > 0){ tag_exists = true }
                   }, t_err => { throw t_err }
                 )
