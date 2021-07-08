@@ -56,7 +56,7 @@ on:
       target_repo:
         description: "Target repo"
         required: false
-        default: ${{ github.repository }}
+        default: '${{ github.repository }}'
       # WARNING: To avoid exposing secrets in the log, only use this token with
       #          action/script's `github-token` parameter, NEVER in `env:` vars
       target_repo_token:
