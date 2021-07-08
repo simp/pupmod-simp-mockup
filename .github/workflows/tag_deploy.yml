@@ -136,7 +136,7 @@ jobs:
               }
             }).then( (result) => {
               console.log( `== Submitted workflow dispatch: status ${result.status}` )
-            )
+            })
 
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
