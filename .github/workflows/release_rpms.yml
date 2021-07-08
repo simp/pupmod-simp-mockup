@@ -82,7 +82,7 @@ jobs:
           fi
 
       - name: "Auto-create release if missing for tag (when 'autocreate_release' = yes)"
-        if: ${{ github.event.inputs.autocreate_release == 'yes' }}
+        #if: ${{ github.event.inputs.autocreate_release == 'yes' }}
         uses: actions/github-script@v4
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
