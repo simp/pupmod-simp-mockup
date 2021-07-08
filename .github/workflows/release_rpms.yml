@@ -67,9 +67,11 @@ on:
         default: 'no'
 
 env:
-  TARGET_REPO: <
+  TARGET_REPO: >
     ${{
-      (github.event.inputs.target_repo != null && (
+      (
+        github.event.inputs.target_repo != null && (
+          
           format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)
         )
       ) || github.repository
