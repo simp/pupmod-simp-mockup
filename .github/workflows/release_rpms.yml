@@ -83,7 +83,10 @@ jobs:
             exit 88
           fi
 
-      - name: "Auto-create release if missing for tag (when 'autocreate_release' = yes)"
+      - name: >
+          Query info for ${{ env.TARGET_REPO }}
+          release ${{ github.event.inputs.release_tag }}
+          (autocreate_release = '${{ github.event.inputs.autocreate_release }}')
         id: release-api
         env:
           AUTOCREATE_RELEASE: ${{ github.event.inputs.autocreate_release }}
@@ -92,26 +95,27 @@ jobs:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
             const [owner, repo] = process.env.TARGET_REPO.split('/')
+            const tag = process.env.RELEASE_TAG
             const autocreate_release = (process.env.AUTOCREATE_RELEASE == 'yes')
             var release_id
             owner_data = { owner: owner, repo: repo }
-            release_data = Object.assign({tag: process.env.RELEASE_TAG}, owner_data )
-            create_release_data = Object.assign({tag_name: process.env.RELEASE_TAG}, owner_data )
+            release_data = Object.assign({tag: tag}, owner_data )
+            create_release_data = Object.assign({tag_name: tag}, owner_data )
 
 
             function id_from_release(data){
               var res_json = `:\n\n${JSON.stringify(data,null,2)}`
               res_json = ''
-              console.log( `>> Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}${res_json}`)
+              console.log( `>> Release for ${owner}/${repo}, tag ${tag}${res_json}`)
               return(data.id)
             }
 
-            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(result => {
-                release_id = id_from_release(result.data)
-              }, err => {
+            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
+              result => { release_id = id_from_release(result.data) },
+              err => {
                 const err_json = JSON.stringify(err,null,2)
                 if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
-                  core.warning(`HTTP error: 404, TODO: auto-creating release:\n${err_json}`)
+                  core.warning(`Can't find release for tag ${tag}, auto-creating release`)
                   github.request(
                     'POST /repos/{owner}/{repo}/releases',
                     create_release_data
@@ -124,12 +128,11 @@ jobs:
                 } else {
                   core.error(`Error: ${err.name}\n${err_json}`)
                   throw err
-                }
-             })
+            }})
             if (!release_id){
-              throw `Could not get release for ${process.env.RELEASE_TAG} for repo ${owner}:${repo}`
+              throw `Could not get release for ${tag} for repo ${owner}:${repo}`
             }
-            console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}, id: ${release_id}` )
+            console.log( `== Release for ${owner}/${repo}, tag ${tag}, id: ${release_id}` )
             core.setOutput('id', release_id)
 
 ###      - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
