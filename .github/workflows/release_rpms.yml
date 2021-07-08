@@ -114,26 +114,25 @@ jobs:
             await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
               err => {
-                var tag_exists = false
-                github.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
-                  result => {
-                    console.log( `========== matching tag ref result for ${tag}:`)
-                    console.log( JSON.stringify(result,null,2) )
-                    console.log( `result.data.length = |${result.data.length}|` )
-                    if (result.data.length == 0){
-                      throw `Can't find tag ${tag} in repo ${owner}/${repo}`
-                    }
-                  }
-                ).catch(e=>{ throw e })
-
-                const err_json = JSON.stringify(err,null,2)
                 if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
                   core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
+                  var tag_exists = false
+                  github.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
+                    result => {
+                      console.log( `========== matching tag ref result for ${tag}:`)
+                      console.log( JSON.stringify(result,null,2) )
+                      console.log( `result.data.length = |${result.data.length}|` )
+                      if (result.data.length == 0){
+                        throw `Can't find tag ${tag} in repo ${owner}/${repo}`
+                      }
+                    }
+                  ).catch(e=>{ throw e }).then( result => {
                   github.request(
                     'POST /repos/{owner}/{repo}/releases',
                     create_release_data
                   ).then(
-                    result=>{ release_id = id_from_release(result.data) },
+                    result=>{
+                    },
                     post_err =>{
                       core.error('Error auto-creating release')
                       throw post_err
@@ -141,7 +140,7 @@ jobs:
                 } else {
                   core.error(`Error: ${err.name}\n${err_json}`)
                   throw err
-            }})
+            })}})
             if (!release_id){
               throw `Could not get release for ${tag} for repo ${owner}:${repo}`
             }
