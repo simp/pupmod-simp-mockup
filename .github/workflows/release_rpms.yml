@@ -100,7 +100,7 @@ jobs:
             var release_id
             const owner_data = { owner: owner, repo: repo }
             const release_data = Object.assign({tag: tag}, owner_data )
-            const create_release_data = Object.assign({tag_name: tag, target_commitish: tag}, owner_data )
+            const create_release_data = Object.assign({tag_name: tag, owner_data )
             const tag_data = Object.assign({ref: `tags/${tag}`}, owner_data )
 
 
