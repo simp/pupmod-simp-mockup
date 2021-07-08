@@ -68,8 +68,7 @@ jobs:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
     steps:
-      - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
-        id: release-api
+      - name: "Validate inputs"
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
@@ -81,6 +80,12 @@ jobs:
             printf '::error ::Release Tag format is not SemVer or SemVer-ish RPM: %s\n' "$RELEASE_TAG"
             exit 88
           fi
+
+      - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
+        id: release-api
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
           set -e -u -o pipefail
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
           full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
@@ -91,14 +96,10 @@ jobs:
             exit 77
           fi
 
-          release_id="$(echo "$full_response" | jq .id )"
-          url="$(echo "$full_response" | jq .url )"
-          assets_url="$(echo "$full_response" | jq .assets_url )"
-          upload_url="$(echo "$full_response" | jq .upload_url )"
-          echo "::set-output name=id::${release_id}"
-          echo "::set-output name=url::${url}"
-          echo "::set-output name=assets_url::${assets_url}"
-          echo "::set-output name=upload_url::${upload_url}"
+          echo "::set-output name=id::$(echo "$full_response" | jq --raw-output .id )" # release_id
+          echo "::set-output name=url::$(echo "$full_response" | jq --raw-output .url )"
+          echo "::set-output name=assets_url::$(echo "$full_response" | jq --raw-output .assets_url )"
+          echo "::set-output name=upload_url::$(echo "$full_response" | jq --raw-output .upload_url )"
           ###printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
           printf '== release API full_response:\n%s\n' "$full_response"
 
