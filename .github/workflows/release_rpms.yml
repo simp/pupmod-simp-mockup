@@ -87,7 +87,7 @@ jobs:
       - name: "Validate inputs"
         run: |
           if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]; then
-            printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
+            printf "::error ::Target repository name has invalid format: '%s'\n" "$TARGET_REPO"
             exit 88
           fi
 
