@@ -108,106 +108,106 @@ jobs:
           clean: true
           fetch-depth: 0
 
-###      # FIXME: remove when done with testing
-###      - name: 'MOCK: build-and-sign-rpm'
-###        id: build-and-sign-rpm
-###        run: |
-###          mkdir -p dist
-###          RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
-###          wget https://github.com/simp/pupmod-simp-dummy/releases/download/0.3.50/pupmod-simp-dummy-0.3.50-0.noarch.rpm \
-###            -O dist/x.rpm
-###          wget https://download.simp-project.com/simp-release-community.rpm -O dist/y.rpm
-###          wget https://download.simp-project.com/simp/GPGKEYS/RPM-GPG-KEY-SIMP-UNSTABLE-2 \
-###            -O "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc"
-###          rpm_file="$(ls -1r dist/*.rpm | head -1)"
-###          rpm_file_path="$(realpath "$rpm_file")"
-###          rpm_file_paths="$(find "$PWD/dist" -name \*.rpm)"
-###          gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
-###          rpm_file_paths_count="$(echo "$rpm_file_paths" | wc -l)"
-###
-###          rpm_file_paths="${rpm_file_paths//'%'/'%25'}"
-###          rpm_file_paths="${rpm_file_paths//$'\n'/'%0A'}"
-###          rpm_file_paths="${rpm_file_paths//$'\r'/'%0D'}"
-###          echo "::set-output name=rpm_file_paths::$rpm_file_paths"
-###          echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
-###          echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
-###          echo "::set-output name=rpmassets_url::${assets_url}"
-###          printf '::error ::MOCKING build-and-sign-rpm; results are NOT real!\n'
-
-      - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
-        # FIXME don't stay on @main unless testing; switch to @v? before release
-        uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+      # FIXME: remove when done with testing
+      - name: 'MOCK: build-and-sign-rpm'
         id: build-and-sign-rpm
-        with:
-          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
-          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
-          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
-          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
-          simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
+        run: |
+          mkdir -p dist
+          RPM_GPG_KEY_EXPORT_NAME="${RPM_GPG_KEY_EXPORT_NAME:-RPM-GPG-KEY-SIMP-UNSTABLE-2}"
+          wget https://github.com/simp/pupmod-simp-dummy/releases/download/0.3.50/pupmod-simp-dummy-0.3.50-0.noarch.rpm \
+            -O dist/x.rpm
+          wget https://download.simp-project.com/simp-release-community.rpm -O dist/y.rpm
+          wget https://download.simp-project.com/simp/GPGKEYS/RPM-GPG-KEY-SIMP-UNSTABLE-2 \
+            -O "dist/${RPM_GPG_KEY_EXPORT_NAME}.pub.asc"
+          rpm_file="$(ls -1r dist/*.rpm | head -1)"
+          rpm_file_path="$(realpath "$rpm_file")"
+          rpm_file_paths="$(find "$PWD/dist" -name \*.rpm)"
+          gpg_file="$(find "dist" -name "${RPM_GPG_KEY_EXPORT_NAME}.pub.asc" | head -1)"
+          rpm_file_paths_count="$(echo "$rpm_file_paths" | wc -l)"
+
+          rpm_file_paths="${rpm_file_paths//'%'/'%25'}"
+          rpm_file_paths="${rpm_file_paths//$'\n'/'%0A'}"
+          rpm_file_paths="${rpm_file_paths//$'\r'/'%0D'}"
+          echo "::set-output name=rpm_file_paths::$rpm_file_paths"
+          echo "::set-output name=rpm_gpg_file::$(realpath "$gpg_file")"
+          echo "::set-output name=rpm_dist_dir::$(dirname "$rpm_file_path")"
+          echo "::set-output name=rpmassets_url::${assets_url}"
+          printf '::error ::MOCKING build-and-sign-rpm; results are NOT real!\n'
+###
+###      - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
+###        # FIXME don't stay on @main unless testing; switch to @v? before release
+###        uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+###        id: build-and-sign-rpm
+###        with:
+###          gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
+###          gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
+###          gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
+###          simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
+###          simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
+###
+###
+      - name: Upload RPM file(s) to GitHub Release
+        id: upload_rpm_assets
+        env:
+          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
+          upload_url: ${{ steps.release-api.outputs.upload_url }}
+          asset_content_type: application/octet-stream
+        run: |
+          upload_url="$((echo "$upload_url" | sed -e 's/{?.*$//' )"
+          echo "::add-mask::$GITHUB_TOKEN"
+          curl_cmd=(curl -X POST --fail --show-error \
+            --header "Accept: application/vnd.github.v3+json" \
+            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
+          )
+          files=(${rpm_file_paths})
+          echo "== RPM files to upload: ${#files[@]}"
+          echo "== GPG file to upload: ${rpm_gpg_file}"
+
+          if [[ $DRY_RUN == 'yes' ]]; then
+            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
+          fi
+          # -------------------------------------------------------------------
 
 
-###      - name: Upload RPM file(s) to GitHub Release
-###        id: upload_rpm_assets
-###        env:
-###          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
-###          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
-###          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
-###          upload_url: ${{ steps.release-api.outputs.upload_url }}
-###          asset_content_type: application/octet-stream
-###        run: |
-###          upload_url="$((echo "$upload_url" | sed -e 's/{?.*$//' )"
-###          echo "::add-mask::$GITHUB_TOKEN"
-###          curl_cmd=(curl -X POST --fail --show-error \
-###            --header "Accept: application/vnd.github.v3+json" \
-###            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
-###          )
-###          files=(${rpm_file_paths})
-###          echo "== RPM files to upload: ${#files[@]}"
-###          echo "== GPG file to upload: ${rpm_gpg_file}"
-###
-###          if [[ $DRY_RUN == 'yes' ]]; then
-###            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
-###          fi
-###          # -------------------------------------------------------------------
-###
-###
-###          set -e -u -o pipefail
-###          for file in "${files[@]}"; do
-###            echo "-- $file"
-###            if [ ! -f "$file" ]; then
-###              printf '::error ::No file found at $file (got "%s")!\n' "$file"
-###              exit 88
-###            fi
-###            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
-###            file_name="$(basename "$file")"
-###            full_upload_url="${upload_url}?name=${file_name}"
-###            echo
-###            echo "== Uploading '$file' to $full_upload_url"
-###            file_upload_cmd=(
-###              "${curl_cmd[@]}" "$full_upload_url" \
-###              --header "Content-Type: ${asset_content_type}" \
-###              --data-binary "@${file}" \
-###            )
-###            "${file_upload_cmd[@]}" | jq .
-###          done
-###
-###          rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
-###          full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
-###          if [ ! -f "$rpm_gpg_file" ]; then
-###            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
-###            exit 88
-###          fi
-###          echo
-###          echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
-###          asset_content_type='application/pgp-keys'
-###          gpg_upload_cmd=(
-###             "${curl_cmd[@]}" "$full_upload_url" \
-###             --header "Content-Type: ${asset_content_type}" \
-###             --data-binary "@${rpm_gpg_file}" \
-###          )
-###          "${gpg_upload_cmd[@]}" | jq .
-###          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
-###          #echo "$upload_reponse_body | jq ."
+          set -e -u -o pipefail
+          for file in "${files[@]}"; do
+            echo "-- $file"
+            if [ ! -f "$file" ]; then
+              printf '::error ::No file found at $file (got "%s")!\n' "$file"
+              exit 88
+            fi
+            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
+            file_name="$(basename "$file")"
+            full_upload_url="${upload_url}?name=${file_name}"
+            echo
+            echo "== Uploading '$file' to $full_upload_url"
+            file_upload_cmd=(
+              "${curl_cmd[@]}" "$full_upload_url" \
+              --header "Content-Type: ${asset_content_type}" \
+              --data-binary "@${file}" \
+            )
+            "${file_upload_cmd[@]}" | jq .
+          done
+
+          rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
+          full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
+          if [ ! -f "$rpm_gpg_file" ]; then
+            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
+            exit 88
+          fi
+          echo
+          echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
+          asset_content_type='application/pgp-keys'
+          gpg_upload_cmd=(
+             "${curl_cmd[@]}" "$full_upload_url" \
+             --header "Content-Type: ${asset_content_type}" \
+             --data-binary "@${rpm_gpg_file}" \
+          )
+          "${gpg_upload_cmd[@]}" | jq .
+          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
+          #echo "$upload_reponse_body | jq ."
 
       - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
         if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
