@@ -88,7 +88,7 @@ jobs:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            const release_for_tag = github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+            const release_for_tag = await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
               owner: owner,
               repo: repo,
               tag: process.env.RELEASE_TAG
