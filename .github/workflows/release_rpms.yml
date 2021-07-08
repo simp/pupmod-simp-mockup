@@ -93,6 +93,7 @@ jobs:
               repo: repo,
               tag: process.env.RELEASE_TAG
             }).then(result => {
+                console.log( `>> Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${JSON.stringify(result.data,null,2)}`)
                 result.data
               }, err => {
                 const err_json = JSON.stringify(err,null,2)
