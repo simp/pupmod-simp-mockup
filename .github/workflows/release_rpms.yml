@@ -118,7 +118,7 @@ jobs:
                 github.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
                   result => { if (result.length > 0){ tag_exists = true }}
                 )
-                if (!tag_exists ){ throw `Can't find release for tag ${tag} and no tag exists`) }
+                if (!tag_exists ){ throw `Can't find release for tag ${tag} and no tag exists` }
 
                 const err_json = JSON.stringify(err,null,2)
                 if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
