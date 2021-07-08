@@ -125,9 +125,9 @@ jobs:
                   throw err
                 }
              })
-            // if release exists = release_for_tag.data
-            // if release !exist = release_for_tag.data
-
+            if (!release_id){
+              throw `Could not get release for ${process.env.RELEASE_TAG} for repo ${owner}:${repo}`
+            }
             console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}, id: ${release_id}` )
             core.setOutput('id', release_id)
 
