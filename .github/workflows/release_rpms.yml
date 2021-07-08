@@ -95,7 +95,7 @@ jobs:
               tag: process.env.RELEASE_TAG
             })
 
-            console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${release_for_tag}`)
+            console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${JSON.stringify(release_for_tag,null,2)}`)
 
       - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
         id: release-api
