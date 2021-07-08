@@ -98,9 +98,10 @@ jobs:
             const tag = process.env.RELEASE_TAG
             const autocreate_release = (process.env.AUTOCREATE_RELEASE == 'yes')
             var release_id
-            owner_data = { owner: owner, repo: repo }
-            release_data = Object.assign({tag: tag}, owner_data )
-            create_release_data = Object.assign({tag_name: tag, target_commitish: tag}, owner_data )
+            const owner_data = { owner: owner, repo: repo }
+            const release_data = Object.assign({tag: tag}, owner_data )
+            const create_release_data = Object.assign({tag_name: tag, target_commitish: tag}, owner_data )
+            const tag_data = Object.assign({ref: `tags/${tag}`}, owner_data )
 
 
             function id_from_release(data){
@@ -113,16 +114,22 @@ jobs:
             await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
               err => {
+                var tag_exists = false
+                await github.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
+                  result => { if (result.length > 0){ tag_exists = true }}
+                )
+                if (!tag_exists ){ throw `Can't find release for tag ${tag} and no tag exists`) }
+
                 const err_json = JSON.stringify(err,null,2)
                 if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
-                  core.warning(`Can't find release for tag ${tag}, auto-creating release`)
+                  core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
                   github.request(
                     'POST /repos/{owner}/{repo}/releases',
                     create_release_data
                   ).then(
                     result=>{ release_id = id_from_release(result.data) },
                     post_err =>{
-                      core.error(`Error auto-creating release: ${post_err.name}`)
+                      core.error('Error auto-creating release')
                       throw post_err
                   })
                 } else {
