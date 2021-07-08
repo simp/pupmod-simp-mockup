@@ -68,18 +68,46 @@ jobs:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
     steps:
+      - name: "Ensure token mask"
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          script: |
+            core.setSecret( '${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}' )
       - name: "Validate inputs"
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
+          echo "::add-mask::$GITHUB_TOKEN"
+
           if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]; then
             printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
             exit 88
           fi
+
           if ! [[ "$RELEASE_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
             printf '::error ::Release Tag format is not SemVer or SemVer-ish RPM: %s\n' "$RELEASE_TAG"
             exit 88
           fi
+
+      - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
+        if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
+        uses: actions/github-script@v4
+        env:
+          release_id:  ${{ steps.release-api.outputs.id }}
+        with:
+          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          script: |
+            const release_id = process.env.release_id
+            const [owner, repo] = process.env.TARGET_REPO.split('/')
+            const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+
+            console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
+            existingAssets.data.forEach(async function(asset){
+              asset_id = asset.id
+              console.log( `  !! !! !! Wiping existing asset for ${asset.name} (id: ${asset_id})`)
+              await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+            })
 
       - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
         id: release-api
@@ -101,7 +129,7 @@ jobs:
           echo "::set-output name=assets_url::$(echo "$full_response" | jq --raw-output .assets_url )"
           echo "::set-output name=upload_url::$(echo "$full_response" | jq --raw-output .upload_url )"
           ###printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
-          printf '== release API full_response:\n%s\n' "$full_response"
+          ###printf '== release API full_response:\n%s\n' "$full_response"
 
 
       - name: Checkout code
