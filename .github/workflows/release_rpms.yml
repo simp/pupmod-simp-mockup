@@ -54,8 +54,9 @@ on:
         required: false
         default: 'centos8'
       target_repo:
-        description: "Target repo (instead of this one)"
+        description: "Target repo"
         required: false
+        default: ${{ github.repository }}
       # WARNING: To avoid exposing secrets in the log, only use this token with
       #          action/script's `github-token` parameter, NEVER in `env:` vars
       target_repo_token:
@@ -68,10 +69,11 @@ on:
 
 env:
   TARGET_REPO: >-
-    ${{
-      (
+    ${{(
         github.event.inputs.target_repo != null && (
-          format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)
+          contains(github.event.inputs.target_repo, '/')
+            && github.event.inputs.target_repo
+            || format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)
         )
       ) || github.repository
     }}
