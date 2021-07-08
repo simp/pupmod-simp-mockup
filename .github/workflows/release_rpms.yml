@@ -100,7 +100,7 @@ jobs:
             var release_id
             owner_data = { owner: owner, repo: repo }
             release_data = Object.assign({tag: tag}, owner_data )
-            create_release_data = Object.assign({tag_name: tag}, owner_data )
+            create_release_data = Object.assign({tag_name: tag, target_commitish: tag}, owner_data )
 
 
             function id_from_release(data){
