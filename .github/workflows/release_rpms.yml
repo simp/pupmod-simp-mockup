@@ -1,4 +1,6 @@
 # Manual action to build, sign, and attach a release's RPMs
+#
+# This is a workflow_dispatch action, which can be used 
 # ------------------------------------------------------------------------------
 #
 #             NOTICE: **This file is maintained with puppetsync**
@@ -13,7 +15,6 @@
 #
 #   GitHub Secret variable               Notes
 #   -------------------------------      ---------------------------------------
-#   PUPPETFORGE_API_TOKEN
 #   SIMP_CORE_REF_FOR_BUILDING_RPMS      simp-core ref (tag) to use to build
 #                                        RPMs with `rake pkg:single`
 #   SIMP_DEV_GPG_SIGNING_KEY             GPG signing key's secret key
@@ -66,17 +67,12 @@ jobs:
   create-and-attach-rpms-to-github-release:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
-    env:
-      target_repo_token: ${{ github.events.inputs.target_repo_token }}
     steps:
       - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
         id: release-api
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
-          echo "::warning ::TARGET_REPO: $TARGET_REPO"
-          echo "::warning ::RELEASE_TAG: $RELEASE_TAG"
-
           if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]; then
             printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
             exit 88
@@ -90,6 +86,7 @@ jobs:
           full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
 
           release_id="$(echo "$full_response" | jq .id )"
+          release_id="$(echo "$full_response" | jq .id )"
           url="$(echo "$full_response" | jq .url )"
           assets_url="$(echo "$full_response" | jq .assets_url )"
           upload_url="$(echo "$full_response" | jq .upload_url )"
@@ -99,6 +96,7 @@ jobs:
           echo "::set-output name=upload_url::${upload_url}"
           ###printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
           printf '== release API full_response:\n%s\n' "$full_response"
+
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -146,68 +144,69 @@ jobs:
 ###          simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
 ###
 ###
-      - name: Upload RPM file(s) to GitHub Release
-        id: upload_rpm_assets
-        env:
-          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
-          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
-          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
-          upload_url: ${{ steps.release-api.outputs.upload_url }}
-          asset_content_type: application/octet-stream
-        run: |
-          upload_url="$((echo "$upload_url" | sed -e 's/{?.*$//' )"
-          echo "::add-mask::$GITHUB_TOKEN"
-          curl_cmd=(curl -X POST --fail --show-error \
-            --header "Accept: application/vnd.github.v3+json" \
-            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
-          )
-          files=(${rpm_file_paths})
-          echo "== RPM files to upload: ${#files[@]}"
-          echo "== GPG file to upload: ${rpm_gpg_file}"
 
-          if [[ $DRY_RUN == 'yes' ]]; then
-            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
-          fi
-          # -------------------------------------------------------------------
-
-
-          set -e -u -o pipefail
-          for file in "${files[@]}"; do
-            echo "-- $file"
-            if [ ! -f "$file" ]; then
-              printf '::error ::No file found at $file (got "%s")!\n' "$file"
-              exit 88
-            fi
-            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
-            file_name="$(basename "$file")"
-            full_upload_url="${upload_url}?name=${file_name}"
-            echo
-            echo "== Uploading '$file' to $full_upload_url"
-            file_upload_cmd=(
-              "${curl_cmd[@]}" "$full_upload_url" \
-              --header "Content-Type: ${asset_content_type}" \
-              --data-binary "@${file}" \
-            )
-            "${file_upload_cmd[@]}" | jq .
-          done
-
-          rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
-          full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
-          if [ ! -f "$rpm_gpg_file" ]; then
-            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
-            exit 88
-          fi
-          echo
-          echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
-          asset_content_type='application/pgp-keys'
-          gpg_upload_cmd=(
-             "${curl_cmd[@]}" "$full_upload_url" \
-             --header "Content-Type: ${asset_content_type}" \
-             --data-binary "@${rpm_gpg_file}" \
-          )
-          "${gpg_upload_cmd[@]}" | jq .
-          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
-          #echo "$upload_reponse_body | jq ."
+###      - name: Upload RPM file(s) to GitHub Release
+###        id: upload_rpm_assets
+###        env:
+###          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+###          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
+###          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
+###          upload_url: ${{ steps.release-api.outputs.upload_url }}
+###          asset_content_type: application/octet-stream
+###        run: |
+###          upload_url="$((echo "$upload_url" | sed -e 's/{?.*$//' )"
+###          echo "::add-mask::$GITHUB_TOKEN"
+###          curl_cmd=(curl -X POST --fail --show-error \
+###            --header "Accept: application/vnd.github.v3+json" \
+###            --header "Authorization: token ${GITHUB_TOKEN:-default_content_to_cause_error}" \
+###          )
+###          files=(${rpm_file_paths})
+###          echo "== RPM files to upload: ${#files[@]}"
+###          echo "== GPG file to upload: ${rpm_gpg_file}"
+###
+###          if [[ $DRY_RUN == 'yes' ]]; then
+###            echo "::warning :: :warning: Dry run enabled: SKIP uploading artifacts"
+###          fi
+###          # -------------------------------------------------------------------
+###
+###
+###          set -e -u -o pipefail
+###          for file in "${files[@]}"; do
+###            echo "-- $file"
+###            if [ ! -f "$file" ]; then
+###              printf '::error ::No file found at $file (got "%s")!\n' "$file"
+###              exit 88
+###            fi
+###            rpm -q --qf '%{NEVRA}' -p "$file" || { echo '::error ::Error reading RPM info from $file'; exit 88; }
+###            file_name="$(basename "$file")"
+###            full_upload_url="${upload_url}?name=${file_name}"
+###            echo
+###            echo "== Uploading '$file' to $full_upload_url"
+###            file_upload_cmd=(
+###              "${curl_cmd[@]}" "$full_upload_url" \
+###              --header "Content-Type: ${asset_content_type}" \
+###              --data-binary "@${file}" \
+###            )
+###            "${file_upload_cmd[@]}" | jq .
+###          done
+###
+###          rpm_gpg_file_name="$(basename "$rpm_gpg_file")"
+###          full_upload_url="${upload_url}?name=${rpm_gpg_file_name}"
+###          if [ ! -f "$rpm_gpg_file" ]; then
+###            printf '::error ::No file found at $rpm_gpg_file (got "%s")!\n' "$rpm_gpg_file"
+###            exit 88
+###          fi
+###          echo
+###          echo "== Uploading '$rpm_gpg_file' to $full_upload_url == GPG =="
+###          asset_content_type='application/pgp-keys'
+###          gpg_upload_cmd=(
+###             "${curl_cmd[@]}" "$full_upload_url" \
+###             --header "Content-Type: ${asset_content_type}" \
+###             --data-binary "@${rpm_gpg_file}" \
+###          )
+###          "${gpg_upload_cmd[@]}" | jq .
+###          #upload_reponse_body="$("${gpg_upload_cmd[@]}")"
+###          #echo "$upload_reponse_body | jq ."
 
       - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
         if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
