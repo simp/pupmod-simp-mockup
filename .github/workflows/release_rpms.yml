@@ -49,7 +49,6 @@ on:
       target_repo:
         description: "Target repo (instead of this one)"
         required: false
-      # FIXME:
       target_repo_token:
         description: "API token for uploading to target repo"
         required: false
