@@ -82,23 +82,29 @@ jobs:
           fi
 
       - name: "Auto-create release if missing for tag (when 'autocreate_release' = yes)"
-        #if: ${{ github.event.inputs.autocreate_release == 'yes' }}
+        id: release-api
+        env:
+          AUTOCREATE_RELEASE: ${{ github.event.inputs.autocreate_release }}
         uses: actions/github-script@v4
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            const release_for_tag = await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+            const autocreate_release = (process.env.AUTOCREATE_RELEASE == 'yes')
+            var release_id
+
+            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
               owner: owner,
               repo: repo,
               tag: process.env.RELEASE_TAG
             }).then(result => {
-                console.log( `>> Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${JSON.stringify(result.data,null,2)}`)
-                result.data
+                res_json = JSON.stringify(result.data,null,2)
+                console.log( `>> Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${res_json}`)
+                release_id = result.data.id
               }, err => {
                 const err_json = JSON.stringify(err,null,2)
-                if ( err.name == 'HttpError' && err.status == 404 ){
-                  core.warning(`HTTP error: 404:\n${err_json}`)
+                if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
+                  core.warning(`HTTP error: 404, TODO: auto-creating release:\n${err_json}`)
                 } else {
                   core.error(`Error: ${err.name}\n${err_json}`)
                   throw err
@@ -107,26 +113,27 @@ jobs:
             // if release exists = release_for_tag.data
             // if release !exist = release_for_tag.data
 
-            console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${JSON.stringify(release_for_tag,null,2)}`)
+            console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}, id: ${release_id}` )
+            core.setOutput('id', release_id)
 
-      - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
-        id: release-api
-        run: |
-          set -e -u -o pipefail
-          api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
-          full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
-          ###printf '== release API full_response:\n%s\n' "$full_response"
-
-          if echo "$full_response" | jq --exit-status .message &> /dev/null; then
-            printf '::error ::Could not look up release %s for repo %s: %s\n' \
-             "$RELEASE_TAG" "$TARGET_REPO" "$(echo "$full_response" | jq .message)"
-            exit 77
-          fi
-
-          echo "::set-output name=id::$(echo "$full_response" | jq --raw-output .id )" # release_id
-          echo "::set-output name=url::$(echo "$full_response" | jq --raw-output .url )"
-          echo "::set-output name=assets_url::$(echo "$full_response" | jq --raw-output .assets_url )"
-          echo "::set-output name=upload_url::$(echo "$full_response" | jq --raw-output .upload_url )"
+###      - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
+###        id: release-api
+###        run: |
+###          set -e -u -o pipefail
+###          api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
+###          full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
+###          ###printf '== release API full_response:\n%s\n' "$full_response"
+###
+###          if echo "$full_response" | jq --exit-status .message &> /dev/null; then
+###            printf '::error ::Could not look up release %s for repo %s: %s\n' \
+###             "$RELEASE_TAG" "$TARGET_REPO" "$(echo "$full_response" | jq .message)"
+###            exit 77
+###          fi
+###
+###          echo "::set-output name=id::$(echo "$full_response" | jq --raw-output .id )" # release_id
+###          echo "::set-output name=url::$(echo "$full_response" | jq --raw-output .url )"
+###          echo "::set-output name=assets_url::$(echo "$full_response" | jq --raw-output .assets_url )"
+###          echo "::set-output name=upload_url::$(echo "$full_response" | jq --raw-output .upload_url )"
 
 
       - name: Checkout code
