@@ -1,6 +1,4 @@
 # Manual action to build, sign, and attach a release's RPMs
-#
-# This is a workflow_dispatch action, which can be used
 # ------------------------------------------------------------------------------
 #
 #             NOTICE: **This file is maintained with puppetsync**
@@ -10,7 +8,6 @@
 # The next baseline sync will overwrite any local changes to this file!
 #
 # ==============================================================================
-#
 # This pipeline uses the following GitHub Action Secrets:
 #
 #   GitHub Secret variable               Notes
@@ -22,6 +19,13 @@
 #   SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE  Passphrase to use GPG signing key
 #
 # ------------------------------------------------------------------------------
+#
+# * This is a workflow_dispatch action, which can be triggered manually or from
+#   other workflows/API.
+#
+# * If triggered by another workflow, it will be necessary to provide a GitHub
+#   access token via the the `target_repo_token` parameter
+#
 ---
 name: 'RELENG: Build + attach RPMs to GitHub Release'
 
@@ -52,7 +56,8 @@ on:
       target_repo:
         description: "Target repo (instead of this one)"
         required: false
-      # WARNING: Only use this token with action/script, never in `env:` vars
+      # WARNING: To avoid exposing secrets in the log, only use this token with
+      #          action/script's `github-token` parameter, NEVER in `env:` vars
       target_repo_token:
         description: "API token for uploading to target repo"
         required: false
@@ -62,7 +67,13 @@ on:
         default: 'no'
 
 env:
-  TARGET_REPO: ${{ (github.event.inputs.target_repo != null && format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)) || github.repository }}
+  TARGET_REPO: <
+    ${{
+      (github.event.inputs.target_repo != null && (
+          format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)
+        )
+      ) || github.repository
+    }}
   RELEASE_TAG: ${{ github.event.inputs.release_tag }}
   DRY_RUN: ${{ github.event.inputs.dry_run }}
 
@@ -108,10 +119,14 @@ jobs:
               return(data.id)
             }
 
+            function should_autocreate_release(err){
+              return( err.name == 'HttpError' && err.status == 404 && autocreate_release )
+            }
+
             await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
               err => {
-                if (!( err.name == 'HttpError' && err.status == 404 && autocreate_release )){
+                if (!should_autocreate_release(err)) {
                   core.error(`Error: ${err.name}\n${err_json}`)
                   throw err
                 }
@@ -137,7 +152,6 @@ jobs:
             if (!release_id){
               throw `Could not get release for ${tag} for repo ${owner}:${repo}`
             }
-            console.log( `== Release for ${owner}/${repo}, tag ${tag}, id: ${release_id}` )
             core.setOutput('id', release_id)
 
       - name: Checkout code
@@ -148,7 +162,7 @@ jobs:
           clean: true
           fetch-depth: 0
 
-###      # FIXME: remove when done with testing
+###      # This block can mock during testing
 ###      - name: 'MOCK: build-and-sign-rpm'
 ###        id: build-and-sign-rpm
 ###        run: |
@@ -185,7 +199,6 @@ jobs:
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
           simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
 
-
       - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
         if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
         uses: actions/github-script@v4
@@ -216,15 +229,6 @@ jobs:
           clobber: ${{ github.event.inputs.clobber }}
           clean: ${{ github.event.inputs.clean }}
           dry_run: ${{ github.event.inputs.dry_run }}
-        # See:
-        #   - https://octokit.github.io/rest.js/
-        #   - https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#get-repository-permissions-for-a-user
-        #
-        # TODO:
-        #   - [x] Check if asset already exists
-        #   - [x] Delete all existing assets when option exists
-        #   - [x] Clobber all existing assets when option exists
-        #   - [.] WTF async roflololololol
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
