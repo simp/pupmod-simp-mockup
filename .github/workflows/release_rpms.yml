@@ -1,6 +1,6 @@
 # Manual action to build, sign, and attach a release's RPMs
 #
-# This is a workflow_dispatch action, which can be used 
+# This is a workflow_dispatch action, which can be used
 # ------------------------------------------------------------------------------
 #
 #             NOTICE: **This file is maintained with puppetsync**
@@ -68,10 +68,6 @@ jobs:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
     steps:
-      - name: "Ensure token mask"
-        uses: actions/github-script@v4
-        with:
-          script: "core.setSecret( '${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}' )"
       - name: "Validate inputs"
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
