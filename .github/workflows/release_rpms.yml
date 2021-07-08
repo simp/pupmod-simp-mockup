@@ -116,8 +116,7 @@ jobs:
                     release_id = id_from_release(result.data)
                   },
                   post_err =>{
-                    const post_err_json = JSON.stringify(post_err,null,2)
-                    core.error(`Error auto-creating release: ${post_err.name}\n${post_err_json}`)
+                    core.error(`Error auto-creating release: ${post_err.name}`)
                     throw post_err
                   })
                 } else {
