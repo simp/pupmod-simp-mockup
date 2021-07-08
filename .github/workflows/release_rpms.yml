@@ -112,7 +112,7 @@ jobs:
                 const err_json = JSON.stringify(err,null,2)
                 if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
                   core.warning(`HTTP error: 404, TODO: auto-creating release:\n${err_json}`)
-                  await github.request('POST /repos/{owner}/{repo}/releases', release_data ).then(result=>{
+                  github.request('POST /repos/{owner}/{repo}/releases', release_data ).then(result=>{
                     release_id = id_from_release(result.data)
                   },
                   post_err =>{
