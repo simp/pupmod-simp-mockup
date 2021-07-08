@@ -132,7 +132,7 @@ jobs:
                     github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
                       result=>{
                         console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-                        release_id = id_from_release(result.data),
+                        release_id = id_from_release(result.data)
                       },
                       post_err =>{
                         core.error('Error auto-creating release')
