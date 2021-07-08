@@ -81,33 +81,30 @@ jobs:
             exit 88
           fi
 
-      - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
-        if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
+      - name: "Auto-create release if missing for tag (when 'autocreate_release' = yes)"
+        if: ${{ github.event.inputs.autocreate_release == 'yes' }}
         uses: actions/github-script@v4
-        env:
-          release_id:  ${{ steps.release-api.outputs.id }}
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
             const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
             const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
-
-            console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
-            existingAssets.data.forEach(async function(asset){
-              asset_id = asset.id
-              console.log( `  !! !! !! Wiping existing asset for ${asset.name} (id: ${asset_id})`)
-              await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+            const release_for_tag = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+              owner: owner,
+              repo: repo,
+              tag: process.env.RELEASE_TAG
             })
+
+            console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${release_for_tag}`)
 
       - name: Query info for ${{ env.TARGET_REPO }} release ${{ github.event.inputs.release_tag }}
         id: release-api
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           set -e -u -o pipefail
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
           full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
+          ###printf '== release API full_response:\n%s\n' "$full_response"
 
           if echo "$full_response" | jq --exit-status .message &> /dev/null; then
             printf '::error ::Could not look up release %s for repo %s: %s\n' \
@@ -119,8 +116,6 @@ jobs:
           echo "::set-output name=url::$(echo "$full_response" | jq --raw-output .url )"
           echo "::set-output name=assets_url::$(echo "$full_response" | jq --raw-output .assets_url )"
           echo "::set-output name=upload_url::$(echo "$full_response" | jq --raw-output .upload_url )"
-          ###printf '== GITHUB_CONTEXT:\n%s\n' "$GITHUB_CONTEXT"
-          ###printf '== release API full_response:\n%s\n' "$full_response"
 
 
       - name: Checkout code
