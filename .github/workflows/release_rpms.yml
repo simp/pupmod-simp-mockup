@@ -68,11 +68,17 @@ jobs:
     name: Build and attach RPMs to Release
     runs-on: ubuntu-20.04
     steps:
+      - name: "Ensure token mask"
+        uses: actions/github-script@v4
+        with:
+          script: "core.setSecret( '${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}' )"
       - name: "Validate inputs"
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
           GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
         run: |
+          echo "::add-mask::$GITHUB_TOKEN"
+
           if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]; then
             printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
             exit 88
