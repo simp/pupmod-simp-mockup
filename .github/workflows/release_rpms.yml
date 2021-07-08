@@ -119,8 +119,8 @@ jobs:
                   result => {
                     console.log( `========== matching tag ref result for ${tag}:`)
                     console.log( JSON.stringify(result,null,2) )
-                    if (result.length > 0){ tag_exists = true }
-                  }
+                    if (result.data.length > 0){ tag_exists = true }
+                  },{ t_err => { throw t_err } }
                 )
                 if (!tag_exists ){ throw `Can't find release for tag ${tag} and no tag exists` }
 
