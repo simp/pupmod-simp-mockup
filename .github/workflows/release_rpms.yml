@@ -50,7 +50,7 @@ on:
       target_repo:
         description: "Target repo (instead of this one)"
         required: false
-      target_repo_token:
+      TARGET_REPO_TOKEN:
         description: "API token for uploading to target repo"
         required: false
       dry_run:
@@ -71,12 +71,12 @@ jobs:
       - name: "Ensure token mask"
         uses: actions/github-script@v4
         env:
-          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.event.inputs.TARGET_REPO_TOKEN || secrets.GITHUB_TOKEN }}
         with:
           script: "core.setSecret( process.env.GITHUB_TOKEN )"
       - name: "Validate inputs"
         env:
-          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.event.inputs.TARGET_REPO_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           echo "::add-mask::$GITHUB_TOKEN"
 
@@ -96,7 +96,7 @@ jobs:
         env:
           release_id:  ${{ steps.release-api.outputs.id }}
         with:
-          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          github-token: ${{ github.event.inputs.TARGET_REPO_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
@@ -182,7 +182,7 @@ jobs:
 ###      - name: Upload RPM file(s) to GitHub Release
 ###        id: upload_rpm_assets
 ###        env:
-###          GITHUB_TOKEN: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+###          GITHUB_TOKEN: ${{ github.event.inputs.TARGET_REPO_TOKEN || secrets.GITHUB_TOKEN }}
 ###          rpm_file_paths: ${{ steps.build-and-sign-rpm.outputs.rpm_file_paths }}
 ###          rpm_gpg_file: ${{ steps.build-and-sign-rpm.outputs.rpm_gpg_file }}
 ###          upload_url: ${{ steps.release-api.outputs.upload_url }}
@@ -248,7 +248,7 @@ jobs:
         env:
           release_id:  ${{ steps.release-api.outputs.id }}
         with:
-          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          github-token: ${{ github.event.inputs.TARGET_REPO_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
@@ -282,7 +282,7 @@ jobs:
         #   - [x] Clobber all existing assets when option exists
         #   - [.] WTF async roflololololol
         with:
-          github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
+          github-token: ${{ github.event.inputs.TARGET_REPO_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const path = require('path')
             const fs = require('fs')
