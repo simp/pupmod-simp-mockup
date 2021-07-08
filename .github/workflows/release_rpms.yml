@@ -85,7 +85,12 @@ jobs:
           api_url="${GITHUB_API_URL}/repos/${TARGET_REPO}/releases/tags/${RELEASE_TAG}"
           full_response="$(curl -H "Accept: application/vnd.github.v3+json" "$api_url" | jq .)"
 
-          release_id="$(echo "$full_response" | jq .id )"
+          if echo "$full_response" | jq --exit-status .message &> /dev/null; then
+            printf '::error ::Could not look up release %s for repo %s: %s\n' \
+             "$RELEASE_TAG" "$TARGET_REPO" "$(echo "$full_response" | jq .message)"
+            exit 77
+          fi
+
           release_id="$(echo "$full_response" | jq .id )"
           url="$(echo "$full_response" | jq .url )"
           assets_url="$(echo "$full_response" | jq .assets_url )"
