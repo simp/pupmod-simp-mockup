@@ -92,19 +92,31 @@ jobs:
             const [owner, repo] = process.env.TARGET_REPO.split('/')
             const autocreate_release = (process.env.AUTOCREATE_RELEASE == 'yes')
             var release_id
-
-            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+            release_data = {
               owner: owner,
               repo: repo,
               tag: process.env.RELEASE_TAG
-            }).then(result => {
-                res_json = JSON.stringify(result.data,null,2)
-                console.log( `>> Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${res_json}`)
-                release_id = result.data.id
+            }
+
+            function id_from_release(data){
+              res_json = JSON.stringify(data,null,2)
+              console.log( `>> Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${res_json}`)
+              release_id = data.id
+            }
+
+            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(result => {
+                release_id = id_from_release(result.data)
               }, err => {
                 const err_json = JSON.stringify(err,null,2)
                 if ( err.name == 'HttpError' && err.status == 404 && autocreate_release ){
                   core.warning(`HTTP error: 404, TODO: auto-creating release:\n${err_json}`)
+                  await github.request('POST /repos/{owner}/{repo}/releases', release_data ).then(result=>{
+                  },
+                  post_err =>{
+                    const post_err_json = JSON.stringify(post_err,null,2)
+                    core.error(`Error auto-creating release: ${post_err.name}\n${post_err_json}`)
+                    throw post_err
+                  })
                 } else {
                   core.error(`Error: ${err.name}\n${err_json}`)
                   throw err
