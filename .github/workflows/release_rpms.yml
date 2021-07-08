@@ -115,7 +115,7 @@ jobs:
               result => { release_id = id_from_release(result.data) },
               err => {
                 var tag_exists = false
-                await github.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
+                github.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
                   result => { if (result.length > 0){ tag_exists = true }}
                 )
                 if (!tag_exists ){ throw `Can't find release for tag ${tag} and no tag exists`) }
