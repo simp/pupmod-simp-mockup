@@ -120,8 +120,8 @@ jobs:
                     console.log( `========== matching tag ref result for ${tag}:`)
                     console.log( JSON.stringify(result,null,2) )
                     console.log( `result.data.length = |${result.data.length}|` )
-                    console.log( `> tag_exists = |${tag_exists}|` )
                     if (result.data.length > 0){ tag_exists = true }
+                    console.log( `> tag_exists = |${tag_exists}|` )
                   }, t_err => { throw t_err }
                 )
                 console.log( `< tag_exists = |${tag_exists}|` )
