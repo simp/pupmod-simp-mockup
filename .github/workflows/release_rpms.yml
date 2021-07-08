@@ -87,25 +87,24 @@ jobs:
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
           script: |
-            const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
             const release_for_tag = github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
               owner: owner,
               repo: repo,
               tag: process.env.RELEASE_TAG
             }).then(result => {
-              result.data
-            }).catch(err){
-              const err_json = JSON.stringify(err,null,2)
-              if ( err.name == 'HttpError' && err.status == 404 ){
-                core.warning(`HTTP error: 404:\n${err_json}`)
-              } else {
-                core.error(`Error: ${err.name}\n${err_json}`)
-                throw err
-              }
-            }
-            # if release exists = release_for_tag.data
-            # if release !exist = release_for_tag.data
+                result.data
+              }, err => {
+                const err_json = JSON.stringify(err,null,2)
+                if ( err.name == 'HttpError' && err.status == 404 ){
+                  core.warning(`HTTP error: 404:\n${err_json}`)
+                } else {
+                  core.error(`Error: ${err.name}\n${err_json}`)
+                  throw err
+                }
+             })
+            // if release exists = release_for_tag.data
+            // if release !exist = release_for_tag.data
 
             console.log( `== Release for ${owner}/${repo}, tag ${process.env.RELEASE_TAG}:\n\n${JSON.stringify(release_for_tag,null,2)}`)
 
