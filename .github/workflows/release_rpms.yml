@@ -116,7 +116,11 @@ jobs:
               err => {
                 var tag_exists = false
                 github.request('GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
-                  result => { if (result.length > 0){ tag_exists = true }}
+                  result => {
+                    console.log( `========== matching tag ref result for ${tag}:`)
+                    console.log( JSON.stringify(result,null,2) )
+                    if (result.length > 0){ tag_exists = true }
+                  }
                 )
                 if (!tag_exists ){ throw `Can't find release for tag ${tag} and no tag exists` }
 
