@@ -116,11 +116,11 @@ jobs:
               return( err.name == 'HttpError' && err.status == 404 && autocreate_release )
             }
 
-            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
+            github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
               err => {
                 if (!should_autocreate_release(err)) {
-                  core.error(`Error: ${err.name}\n${err_json}`)
+                  core.error(`Error finding release for tag ${tag}: ${err.name}`)
                   throw err
                 }
                 core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
