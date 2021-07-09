@@ -138,14 +138,16 @@ jobs:
                       }
                     )
                   }
-                ).catch( e => { throw e } )
+                )
+              }
+            ).catch( e => { throw e } ).then(
+              result => {
+                if (!release_id){
+                  throw `Could not get release for ${tag} for repo ${owner}:${repo}`
+                }
+                core.setOutput('id', release_id)
               }
             )
-
-            if (!release_id){
-              throw `Could not get release for ${tag} for repo ${owner}:${repo}`
-            }
-            core.setOutput('id', release_id)
 
       - name: Checkout code
         uses: actions/checkout@v2
