@@ -112,34 +112,54 @@ jobs:
               return(data.id)
             }
 
-            function should_autocreate_release(err){
-              return( err.name == 'HttpError' && err.status == 404 && autocreate_release )
+            function throw_error_unless_should_autocreate_release(err){
+              if (!( err.name == 'HttpError' && err.status == 404 && autocreate_release )){
+                core.error(`Error finding release for tag ${tag}: ${err.name}`)
+                throw err
+              }
+            }
+
+            function autocreate_release_if_appropriate(err){
+              throw_error_unless_should_autocreate_release(err)
+              core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
+              var release_id
+              console.log("---- 1")
+
+              // Create the release, then
+              github.request( 'GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
+                result => {
+                  console.log("---- 2.1")
+                  if (result.data.length == 0) { throw `Can't find tag ${tag} in repo ${owner}/${repo}` }
+                  console.log("---- 2.2")
+                }
+              ).then(
+                result => {
+                  console.log("---- 3o.1")
+                  github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
+                    result=>{
+                      console.log("---- 3r.1")
+                      release_id = id_from_release(result.data)
+                      console.log("---- 3r.2")
+                    },
+                    post_err =>{
+                      console.log("---- 3e.1")
+                      core.error('Error auto-creating release')
+                      console.log("---- 3e.2")
+                      throw post_err
+                    }
+                  )
+                  console.log("---- 3o.2")
+                }
+              ).finally(()=>{
+                console.log("---- 4f.1")
+                return(release_id)
+              })
+              console.log("---- 5.end (1.2)")
             }
 
             github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
-              err => {
-                if (!should_autocreate_release(err)) {
-                  core.error(`Error finding release for tag ${tag}: ${err.name}`)
-                  throw err
-                }
-                core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
-                github.request( 'GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
-                  result => {
-                    if (result.data.length == 0) { throw `Can't find tag ${tag} in repo ${owner}/${repo}` }
-                  }
-                ).then(
-                  result => {
-                    github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
-                      result=>{ release_id = id_from_release(result.data) },
-                      post_err =>{
-                        core.error('Error auto-creating release')
-                        throw post_err
-                      }
-                    )
-                  }
-                )
-              }
+              err => { release_id = autocreate_release_if_appropriate(err) }
             ).catch( e => { throw e } ).then(
               result => {
                 if (!release_id){
