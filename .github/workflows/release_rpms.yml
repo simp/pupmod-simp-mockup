@@ -161,7 +161,7 @@ jobs:
 
             github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
-              err => { release_id = autocreate_release_if_appropriate(err) }
+              err => { release_id = await autocreate_release_if_appropriate(err) }
             ).catch( e => { throw e } ).then(
               result => {
                 if (!release_id){
