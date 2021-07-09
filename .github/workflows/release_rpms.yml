@@ -120,10 +120,9 @@ jobs:
               }
             }
 
-            function autocreate_release_if_appropriate(err){
+            async function autocreate_release_if_appropriate(err){
               throw_error_unless_should_autocreate_release(err)
               core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
-              var release_id
               console.log("---- 1")
 
               // Create the release, then
@@ -153,7 +152,7 @@ jobs:
                   console.log( `---- 3r.2 release_id=${release_id}` )
                 }
               ).finally(()=>{
-                console.log("---- 4f.1 release_id=${release_id}")
+                console.log(`---- 4f.1 release_id=${release_id}`)
                 return(release_id)
               })
               console.log("---- 5.end (1.2)")
