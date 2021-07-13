@@ -42,13 +42,13 @@ on:
       clean:
         description: "Wipe all release assets first?"
         required: false
-        default: 'no'
+        default: 'yes'
       autocreate_release:
         # A GitHub release is needed to upload artifacts to, and some repos
         # (e.g., forked mirrors) only have tags.
         description: "Create release if missing? (tag must exist)"
         required: false
-        default: 'yes'
+        default: 'no'
       build_container_os:
         description: "Build container OS"
         required: true
