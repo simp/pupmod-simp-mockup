@@ -125,13 +125,13 @@ jobs:
               core.warning(`Can't find release for tag ${tag} and tag exists, auto-creating release`)
 
               // Must already have a tag
-              github.request( 'GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
+              await github.request( 'GET /repos/{owner}/{repo}/git/matching-refs/{ref}', tag_data ).then (
                 result => {
                   if (result.data.length == 0) { throw `Can't find tag ${tag} in repo ${owner}/${repo}` }
                 }
               ).then(
                 result => {
-                  github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
+                  await github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
                     result => {
                       release_id = id_from_release(result.data)
                     },
@@ -146,7 +146,7 @@ jobs:
               })
             }
 
-            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
+            github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
               err => { release_id = autocreate_release_if_appropriate(err) }
             ).then(
