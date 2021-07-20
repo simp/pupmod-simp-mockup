@@ -48,7 +48,7 @@ on:
         # (e.g., forked mirrors) only have tags.
         description: "Create release if missing? (tag must exist)"
         required: false
-        default: 'no'
+        default: 'yes'
       build_container_os:
         description: "Build container OS"
         required: true
