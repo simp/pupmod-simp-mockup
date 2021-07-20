@@ -154,7 +154,9 @@ jobs:
                 if (!release_id){
                   throw `Could not get release for ${tag} for repo ${owner}:${repo}`
                 }
+                console.log( `**** release_id: ${release_id}` )
                 core.setOutput('id', release_id)
+                console.log( `**** set release-api.id to: ${release_id}` )
               }
             )
 
