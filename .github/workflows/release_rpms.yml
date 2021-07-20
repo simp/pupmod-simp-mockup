@@ -42,7 +42,7 @@ on:
       clean:
         description: "Wipe all release assets first?"
         required: false
-        default: 'yes'
+        default: 'no'
       autocreate_release:
         # A GitHub release is needed to upload artifacts to, and some repos
         # (e.g., forked mirrors) only have tags.
