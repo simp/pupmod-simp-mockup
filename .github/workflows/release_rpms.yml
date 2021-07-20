@@ -146,9 +146,9 @@ jobs:
               })
             }
 
-            github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
+            await github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
-              err => { release_id = await autocreate_release_if_appropriate(err) }
+              err => { release_id = autocreate_release_if_appropriate(err) }
             ).then(
               result => {
                 if (!release_id){
@@ -160,6 +160,9 @@ jobs:
               },
               err => { throw(err) }
             )
+            console.log( `++++ FINIS 1` )
+            console.log( `++++ FINIS 2` )
+            console.log( `++++ FINIS 3` )
 
       - name: Checkout code
         uses: actions/checkout@v2
