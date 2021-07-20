@@ -132,16 +132,16 @@ jobs:
               ).then(
                 result => {
                   github.request( 'POST /repos/{owner}/{repo}/releases', create_release_data).then(
-                    result=>{
+                    result => {
                       release_id = id_from_release(result.data)
                     },
-                    post_err =>{
+                    post_err => {
                       core.error('Error auto-creating release')
                       throw post_err
                     }
                   )
                 }
-              ).finally(()=>{
+              ).finally(() => {
                 return(release_id)
               })
             }
@@ -149,7 +149,7 @@ jobs:
             github.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', release_data ).then(
               result => { release_id = id_from_release(result.data) },
               err => { release_id = autocreate_release_if_appropriate(err) }
-            ).catch( e => { throw e } ).then(
+            ).then(
               result => {
                 if (!release_id){
                   throw `Could not get release for ${tag} for repo ${owner}:${repo}`
@@ -157,7 +157,8 @@ jobs:
                 console.log( `**** release_id: ${release_id}` )
                 core.setOutput('id', release_id)
                 console.log( `**** set release-api.id to: ${release_id}` )
-              }
+              },
+              err => { throw(err) }
             )
 
       - name: Checkout code
