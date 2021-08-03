@@ -1,15 +1,15 @@
 {
-  "name": "simp-dummy",
-  "version": "0.3.81",
+  "name": "simp-mockup",
+  "version": "0.3.83",
   "author": "SIMP",
-  "summary": "A mock module used to test SIMP CI, RELENG, and the SIMP puppet module skeleton",
+  "summary": "A mockup Puppet module used to test SIMP CI, RELENG, and the SIMP puppet module skeleton",
   "license": "Apache-2.0",
-  "source": "https://github.com/simp/pupmod-simp-dummy",
+  "source": "https://github.com/simp/pupmod-simp-mockup",
   "project_page": "https://www.simp-project.com/",
   "issues_url": "https://simp-project.atlassian.net/",
   "tags": [
     "simp",
-    "dummy"
+    "mockup"
   ],
   "dependencies": [
     {
