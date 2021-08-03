@@ -169,7 +169,7 @@ jobs:
           fetch-depth: 0
 
       - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
-        uses: simp/github-action-build-and-sign-pkg-single-rpm@main # FIXME use v2 for production workflows
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@test/prebuild_commands # FIXME use v2 for production workflows
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
