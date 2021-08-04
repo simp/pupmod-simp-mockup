@@ -93,6 +93,9 @@ jobs:
               echo "::set-output name=prerelease::true"
               annotation_title="Pre-release of ${tag}"
             fi
+          else
+            printf '::error ::Release Tag format is not SemVer, X.Y.Z-R, X.Y.Z-<prerelease>: "%s"\n' "$RELEASE_TAG"
+            exit 88
           fi
 
           # Prepare annotation body as a file for the next step
