@@ -36,7 +36,7 @@ on:
       # NOTE: These filter patterns aren't actually regexes:
       #   https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       - '[0-9]+\.[0-9]+\.[0-9]+'
-      - '[0-9]+\.[0-9]+\.[0-9]+-[pabr].+[0-9]+'
+      - '[0-9]+\.[0-9]+\.[0-9]+\-[pabr][a-z]+[0-9]+'
 
 env:
   PUPPET_VERSION: '~> 6'
