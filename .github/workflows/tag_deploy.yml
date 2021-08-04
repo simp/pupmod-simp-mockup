@@ -116,7 +116,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: ${{ steps.tag-check.outputs.annotation_title }}
           body_path: /tmp/annotation.body
-          prerelease: ${{ steps.tag-check.outputs.prerelease == 'true') }}
+          prerelease: ${{ steps.tag-check.outputs.prerelease == 'true' }}
           draft: false
 
   build-and-attach-rpms:
@@ -173,7 +173,7 @@ jobs:
       - name: Build Puppet module (PDK)
         run: bundle exec pdk build --force
       - name: Deploy to Puppet Forge (skipped when prerelease)
-        if: ${{ steps.tag-check.outputs.prerelease != 'true') }}
+        if: ${{ steps.tag-check.outputs.prerelease != 'true' }}
         run: |
           curl -X POST --silent --show-error --fail \
             --user-agent "$FORGE_USER_AGENT" \
