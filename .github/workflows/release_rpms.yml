@@ -187,14 +187,14 @@ jobs:
 
       - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
         ## uses: simp/github-action-build-and-sign-pkg-single-rpm@test/prebuild_commands # FIXME use v2 for production workflows
-        uses: simp/github-action-build-and-sign-pkg-single-rpm@main # FIXME use v2 for production workflows
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@v2 # FIXME use v2 for production workflows
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
           gpg_signing_key_id: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_ID }}
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
-          simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:20210730' # FIXME
+          simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
 
       - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
         if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
