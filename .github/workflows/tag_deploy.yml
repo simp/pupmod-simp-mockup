@@ -126,6 +126,8 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       TARGET_REPO: ${{ github.repository }}
+    outputs:
+      prerelease: ${{ steps.tag-check.outputs.prerelease == 'true' }}
     steps:
       - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
@@ -173,7 +175,7 @@ jobs:
       - name: Build Puppet module (PDK)
         run: bundle exec pdk build --force
       - name: Deploy to Puppet Forge (skipped when prerelease)
-        if: ${{ steps.tag-check.outputs.prerelease != 'true' }}
+        if: ${{ jobs.build-and-attach-rpms.outputs.prerelease }}
         run: |
           curl -X POST --silent --show-error --fail \
             --user-agent "$FORGE_USER_AGENT" \
