@@ -85,6 +85,15 @@ jobs:
           echo "::set-output name=tag::${tag}"
           echo "::set-output name=annotation_title::${annotation_title}"
 
+          if [[ "$tag" =~ ^(simp-|v)?[0-9]+\.[0-9]+\.[0-9]+(-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
+            if [ -n "${BASH_REMATCH[2]}" ]; then
+              echo "::set-output name=prerelease::true"
+            fi
+          else
+            printf '::error ::Target repository name has invalid format: %s\n' "$tag"
+            exit 88
+          fi
+
           # Prepare annotation body as a file for the next step
           #
           # * The GitHub Release render the text in this file as markdown
@@ -104,8 +113,8 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: ${{ steps.tag-check.outputs.annotation_title }}
           body_path: /tmp/annotation.body
+          prerelease: ${{ steps.tag-check.outputs.prerelease == 'true') }}
           draft: false
-          prerelease: false
 
   build-and-attach-rpms:
     name: Trigger RPM release
@@ -160,7 +169,8 @@ jobs:
           bundler-cache: true
       - name: Build Puppet module (PDK)
         run: bundle exec pdk build --force
-      - name: Deploy to Puppet Forge
+      - name: Deploy to Puppet Forge (skipped when prerelease)
+        if: ${{ steps.tag-check.outputs.prerelease != 'true') }}
         run: |
           curl -X POST --silent --show-error --fail \
             --user-agent "$FORGE_USER_AGENT" \
