@@ -33,7 +33,7 @@ name: 'Tag: Release to GitHub & Puppet Forge'
 on:
   push:
     tags:
-      - '[0-9]+\.[0-9]+\.[0-9]+'
+      - '[0-9]+\.[0-9]+\.[0-9]+(-(pre|alpha|beta|rc)(\d+)?)?'
 
 env:
   PUPPET_VERSION: '~> 6'
