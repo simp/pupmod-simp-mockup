@@ -76,8 +76,13 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: "Validate inputs"
+        id: validate-inputs
         run: |
-          if ! [[ "$TARGET_REPO" =~ ^[a-z0-9][a-z0-9-]+/[a-z0-9][a-z0-9_-]+$ ]]; then
+          if [[ "$RELEASE_TAG" =~ ^(simp-|v)?[0-9]+\.[0-9]+\.[0-9]+(-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
+            if [ -n "${BASH_REMATCH[2]}" ]; then
+              echo "::set-output name=prebuild_suffix::${BASH_REMATCH[2]#-}"
+            fi
+          else
             printf '::error ::Target repository name has invalid format: %s\n' "$TARGET_REPO"
             exit 88
           fi
@@ -87,6 +92,7 @@ jobs:
             exit 88
           fi
 
+
       - name: >
           Query info for ${{ env.TARGET_REPO }}
           release ${{ github.event.inputs.release_tag }}
@@ -94,6 +100,7 @@ jobs:
         id: release-api
         env:
           AUTOCREATE_RELEASE: ${{ github.event.inputs.autocreate_release }}
+          PREBUILD_TAG: ${{ steps.validate-inputs.outputs.prebuild_suffix }}
         uses: actions/github-script@v4
         with:
           github-token: ${{ github.event.inputs.target_repo_token || secrets.GITHUB_TOKEN }}
@@ -103,7 +110,8 @@ jobs:
             const autocreate_release = (process.env.AUTOCREATE_RELEASE == 'yes')
             const owner_data = { owner: owner, repo: repo }
             const release_data = Object.assign( {tag: tag}, owner_data )
-            const create_release_data = Object.assign( {tag_name: tag}, owner_data )
+            const prerelease = process.env.PREBUILD_TAG ? true : false
+            const create_release_data = Object.assign( {tag_name: tag, prerelease: prerelease}, owner_data )
             const tag_data = Object.assign( {ref: `tags/${tag}`}, owner_data )
 
             function id_from_release(data) {
@@ -168,16 +176,14 @@ jobs:
           clean: true
           fetch-depth: 0
 
-      - name: 'Prepare RPM release modifier, if necessary'
+      - name: 'Prepare RPM release modifier (if necessary)'
+        if: steps.validate-inputs.outputs.prebuild_suffix
+        env:
+          PREBUILD_TAG: ${{ steps.validate-inputs.outputs.prebuild_suffix }}
         run: |
-          if [[ "$RELEASE_TAG" =~ ^(simp-|v)?[0-9]+\.[0-9]+\.[0-9]+(-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
-            if [ -n "${BASH_REMATCH[2]}" ]; then
-              printf '::warning ::Release Tag "%s" contains SemVer-<suffix>, treating as pre-release\n' "$RELEASE_TAG"
-              mkdir -p build/rpm_metadata
-              echo "0${BASH_REMATCH[2]}" | tr - '~' > build/rpm_metadata/release
-              printf '::warning ::Added file build/rpm_metadata/release Release Tag with content "%s"\n' "$(cat build/rpm_metadata/release)"
-            fi
-          fi
+          mkdir -p build/rpm_metadata
+          echo "0~${PREBUILD_TAG}" > build/rpm_metadata/release
+          printf '::warning ::Added file build/rpm_metadata/release Release Tag with content "%s"\n' "$(cat build/rpm_metadata/release)"
 
       - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
         ## uses: simp/github-action-build-and-sign-pkg-single-rpm@test/prebuild_commands # FIXME use v2 for production workflows
