@@ -13,7 +13,8 @@
 #   GitHub Secret variable               Notes
 #   -------------------------------      ---------------------------------------
 #   SIMP_CORE_REF_FOR_BUILDING_RPMS      simp-core ref (tag) to use to build
-#                                        RPMs with `rake pkg:single`
+#                                        RPMs with `rake pkg:single` against
+#                                        `build/rpms/dependencies.yaml`
 #   SIMP_DEV_GPG_SIGNING_KEY             GPG signing key's secret key
 #   SIMP_DEV_GPG_SIGNING_KEY_ID          User ID (name) of signing key
 #   SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE  Passphrase to use GPG signing key
@@ -180,19 +181,25 @@ jobs:
           clean: true
           fetch-depth: 0
 
-      - name: 'Prepare RPM release modifier (if necessary)'
+      - name: 'Customize RPM Release tag via build/rpm_metadata/release (pre-release only)'
         if: steps.validate-inputs.outputs.prebuild_suffix
         env:
           PREBUILD_TAG: ${{ steps.validate-inputs.outputs.prebuild_suffix }}
           PREBUILD_NUMBER: ${{ steps.validate-inputs.outputs.prebuild_number }}
+        # Note: To accomodate the capabilities of EL7's version of RPM, the
+        # release number is formatted according to the Fedora Packaging
+        # Guidelines' "Traditional versioning" conventions:
+        #
+        #   - https://fedoraproject.org/en-US/packaging-guidelines/Versioning/
+        #   - https://fedoraproject.org/wiki/Package_Versioning_Examples
+        #
         run: |
           mkdir -p build/rpm_metadata
           echo "0.${PREBUILD_NUMBER:-$GITHUB_RUN_NUMBER}.${PREBUILD_TAG}" > build/rpm_metadata/release
           printf '::warning ::Added file build/rpm_metadata/release Release Tag with content "%s"\n' "$(cat build/rpm_metadata/release)"
 
       - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
-        uses: simp/github-action-build-and-sign-pkg-single-rpm@test/prebuild_commands # FIXME use v2 for production workflows
-        ## uses: simp/github-action-build-and-sign-pkg-single-rpm@main # FIXME use v2 for production workflows
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@v2
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
