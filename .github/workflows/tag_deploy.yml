@@ -3,7 +3,7 @@
 #
 #             NOTICE: **This file is maintained with puppetsync**
 #
-# This file is updated automatically as part of a puppet module baseline.
+# This file is updated automatically as part of a standardized asset baseline.
 #
 # The next baseline sync will overwrite any local changes to this file!
 #
@@ -24,7 +24,7 @@
 #
 # NOTES:
 #
-# * The CHANGLOG text is altered to remove RPM-style date headers, which don't
+# * The CHANGELOG text is altered to remove RPM-style date headers, which don't
 #   render well as markdown on the GitHub release pages
 #
 ---
