@@ -66,6 +66,10 @@ on:
         description: "Dry run (Test-build RPMs)"
         required: false
         default: 'no'
+      verbose:
+        description: 'Verbose RPM builds when "yes"'
+        required: false
+        default: yes
 
 env:
   TARGET_REPO: ${{ (github.event.inputs.target_repo != null && format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)) || github.repository }}
@@ -199,7 +203,7 @@ jobs:
           printf '::warning ::Added file build/rpm_metadata/release Release Tag with content "%s"\n' "$(cat build/rpm_metadata/release)"
 
       - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
-        uses: simp/github-action-build-and-sign-pkg-single-rpm@v2
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@test/verbose
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
@@ -207,6 +211,7 @@ jobs:
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
           simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
+          verbose: "${{ github.event.inputs.build_container_os }}"
 
       - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
         if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
