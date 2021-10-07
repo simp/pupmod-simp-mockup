@@ -104,7 +104,8 @@ jobs:
 
       - name: >
           Query info for ${{ env.TARGET_REPO }}
-          release ${{ github.event.inputs.release_tag }}
+          release ${{ github.event.inputs.release_tag }} ${{ steps.validate-inputs.outputs.prebuild_suffix }}
+          build os ${{ github.event.inputs.build_container_os }}
           (autocreate_release = '${{ github.event.inputs.autocreate_release }}')
         id: release-api
         env:
@@ -202,7 +203,7 @@ jobs:
           echo "0.${PREBUILD_NUMBER:-$GITHUB_RUN_NUMBER}.${PREBUILD_TAG}" > build/rpm_metadata/release
           printf '::warning ::Added file build/rpm_metadata/release Release Tag with content "%s"\n' "$(cat build/rpm_metadata/release)"
 
-      - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release'
+      - name: 'Build & Sign RPMs for ${{ github.event.inputs.release_tag }} Release (${{ github.event.inputs.build_container_os }})'
         uses: simp/github-action-build-and-sign-pkg-single-rpm@test/verbose
         id: build-and-sign-rpm
         with:
