@@ -78,7 +78,8 @@ env:
 jobs:
   create-and-attach-rpms-to-github-release:
     name: >
-      Build and attach RPMs to Release\: ${{ env.TARGET_REPO }}
+      Build and attach RPMs to Release:
+      ${{ (github.event.inputs.target_repo != null && format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)) || github.repository }}
       ${{ github.event.inputs.release_tag }}
       (build os ${{ github.event.inputs.build_container_os }})
     runs-on: ubuntu-20.04
