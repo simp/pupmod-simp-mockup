@@ -63,7 +63,8 @@ on:
         description: "API token for uploading to target repo"
         required: false
       path_to_build:
-        description: "Optional relative path for RPMs intended to build from subdirectories"
+        # Example: simp-core builds pupmod from . and simp* from src/assets/simp
+        description: "Subpath to alternative RPM project"
         required: false
       dry_run:
         description: "Dry run (Test-build RPMs)"
@@ -95,7 +96,7 @@ jobs:
             exit 88
           fi
 
-          if [[ "$RELEASE_TAG" =~ ^(simp-|v)?([0-9]+\.[0-9]+\.[0-9]+)(-(rc|alpha|beta|pre)?([0-9]+)?)?$ ]]; then
+          if [[ "$RELEASE_TAG" =~ ^(simp-|v)?([0-9]+\.[0-9]+\.[0-9]+)(-(rc|RC|[Aa]lpha|[Bb]eta|pre|post)?([0-9]+)?)?$ ]]; then
             if [ -n "${BASH_REMATCH[5]}" ]; then
               echo "::set-output name=prebuild_number::${BASH_REMATCH[5]#-}"
             fi
