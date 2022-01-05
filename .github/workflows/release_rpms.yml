@@ -62,6 +62,10 @@ on:
       target_repo_token:
         description: "API token for uploading to target repo"
         required: false
+      path_to_build:
+        description: "Optional relative path for RPMs intended to build from subdirectories"
+        required: false
+        default: '${{ github.workspace }}'
       dry_run:
         description: "Dry run (Test-build RPMs)"
         required: false
