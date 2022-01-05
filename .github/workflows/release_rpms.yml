@@ -65,7 +65,6 @@ on:
       path_to_build:
         description: "Optional relative path for RPMs intended to build from subdirectories"
         required: false
-        default: '${{ github.workspace }}'
       dry_run:
         description: "Dry run (Test-build RPMs)"
         required: false
@@ -232,7 +231,8 @@ jobs:
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
           simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
-          verbose: "${{ github.event.inputs.verbose }}"
+          path_to_build: "${{ (github.even.inputs.path_to_build != null && format('{0}/{1}', github.workspace, github.even.inputs.path_to_build)) || github.workspace }}"
+          verbose: ${{ github.event.inputs.verbose }}
 
       - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
         if: ${{ github.event.inputs.clean == 'yes' && github.event.inputs.dry_run != 'yes' }}
