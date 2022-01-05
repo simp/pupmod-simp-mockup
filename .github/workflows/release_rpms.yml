@@ -254,7 +254,7 @@ jobs:
               await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
             })
 
-      - name: 'Upload RPM file(s) to GitHub Release (github-script)'
+      - name: "Upload RPM file(s) to GitHub Release (dry_run != 'yes')"
         if: ${{ github.event.inputs.dry_run != 'yes' }}
         uses: actions/github-script@v4
         env:
