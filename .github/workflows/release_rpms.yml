@@ -231,7 +231,7 @@ jobs:
           gpg_signing_key_passphrase: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY_PASSPHRASE }}
           simp_core_ref_for_building_rpms: ${{ secrets.SIMP_CORE_REF_FOR_BUILDING_RPMS }}
           simp_builder_docker_image: 'docker.io/simpproject/simp_build_${{ github.event.inputs.build_container_os }}:latest'
-          path_to_build: "${{ (github.even.inputs.path_to_build != null && format('{0}/{1}', github.workspace, github.even.inputs.path_to_build)) || github.workspace }}"
+          path_to_build: "${{ (github.event.inputs.path_to_build != null && format('{0}/{1}', github.workspace, github.event.inputs.path_to_build)) || github.workspace }}"
           verbose: ${{ github.event.inputs.verbose }}
 
       - name: "Wipe all previous assets from GitHub Release (when clean == 'yes')"
