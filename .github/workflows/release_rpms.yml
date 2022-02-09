@@ -210,7 +210,7 @@ jobs:
         #
         run: |
           mkdir -p build/rpm_metadata
-          # Of course simp-doc does it differently (:facepalm:)
+          # simp-doc uses a unique data format in /release (:facepalm:)
           if [[ "$TARGET_REPO" =~ ^simp\/simp-doc$ ]]; then
             echo "version: $BUILD_SEMVER" > build/rpm_metadata/release
             echo "release: 0.${PREBUILD_NUMBER:-$GITHUB_RUN_NUMBER}.${PREBUILD_TAG}" >> build/rpm_metadata/release
@@ -305,8 +305,7 @@ jobs:
             console.log('== start');
             const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            const clobber = process.env.clobber == 'yes'
-            console.log(`-- clobber = ${clobber} (process.env.clobber: ${process.env.clobber})`);
+            const clobber = process.env.clobber == 'yes';
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
 
