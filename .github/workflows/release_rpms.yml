@@ -210,7 +210,7 @@ jobs:
         #
         run: |
           mkdir -p build/rpm_metadata
-          # simp-doc uses a unique data format in /release (:facepalm:)
+          # Of course simp-doc does it differently (:facepalm:)
           if [[ "$TARGET_REPO" =~ ^simp\/simp-doc$ ]]; then
             echo "version: $BUILD_SEMVER" > build/rpm_metadata/release
             echo "release: 0.${PREBUILD_NUMBER:-$GITHUB_RUN_NUMBER}.${PREBUILD_TAG}" >> build/rpm_metadata/release
@@ -308,38 +308,24 @@ jobs:
             const clobber = process.env.clobber == 'yes';
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
-            let delay_factor = 1000;
 
-            // split into chunks to delay async
-            const chunk_size = 8;
-            const rpm_files_chunks = Array.from({ length: Math.ceil(rpm_files.length / chunk_size) }, (v, i) =>
-              rpm_files.slice(i * chunk_size, i * chunk_size + chunk_size)
-            )
+            let uploaded_files = rpm_files.concat(rpm_gpg_file).map(function(file){
+              const name = path.basename(file)
+              var content_type = 'application/pgp-keys'
+              if( name.match(/\.rpm$/) ){
+                content_type = 'application/octet-stream'
+              }
 
-            rpm_files_chunks.forEach((rpm_files_chunk) => {
-              let uploaded_files_chunk = rpm_files_chunk.concat(rpm_gpg_file).map(function(file){
-                const name = path.basename(file)
-                var content_type = 'application/pgp-keys'
-                if( name.match(/\.rpm$/) ){
-                  content_type = 'application/octet-stream'
+              let conditionalClobber = new Promise((resolve,reject) => {
+                if ( clobber ){
+                  resolve(clobberAsset( name, owner, repo, release_id ))
+                  return
                 }
-
-                let conditionalClobber = new Promise((resolve,reject) => {
-                  if ( clobber ){
-                    resolve(clobberAsset( name, owner, repo, release_id ))
-                    return
-                  }
-                  resolve( false )
-                })
-
-                conditionalClobber.then((clobbered)=> {
-                  uploadAsset(owner, repo, release_id, file, content_type )
-                }).then(result => result )
+                resolve( false )
               })
 
-              if ( rpm_files_chunks.length > chunk_size ) {
-                setTimeout(() => {  console.log(`Delaying next chunk for ${delay_factor} ms...`); }, delay_factor);
-              }
+              conditionalClobber.then((clobbered)=> {
+                uploadAsset(owner, repo, release_id, file, content_type )
+              }).then(result => result )
             })
-
             console.log('== done')
