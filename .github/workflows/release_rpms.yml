@@ -337,7 +337,9 @@ jobs:
                 }).then(result => result )
               })
 
-              await new Promise(resolve => setTimeout(resolve, delay_factor));
+              if rpm_files_chunks.length > chunk_size {
+                setTimeout(() => {  console.log(`Delaying next chunk for ${delay_factor} ms...`); }, delay_factor);
+              }
             }
 
             console.log('== done')
