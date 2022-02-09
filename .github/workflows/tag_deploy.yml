@@ -149,8 +149,8 @@ jobs:
               ref: process.env.DEFAULT_BRANCH,
               inputs: {
                 release_tag: process.env.TARGET_TAG,
-                clean: 'false',
-                clobber: 'true',
+                clean: 'no',
+                clobber: 'yes',
                 build_container_os: 'centos7'
               }
             }).then((result) => {
@@ -172,8 +172,8 @@ jobs:
               ref: process.env.DEFAULT_BRANCH,
               inputs: {
                 release_tag: process.env.TARGET_TAG,
-                clean: 'false',
-                clobber: 'true',
+                clean: 'no',
+                clobber: 'yes',
                 build_container_os: 'centos8'
               }
             }).then((result) => {

@@ -305,7 +305,7 @@ jobs:
             console.log('== start');
             const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            const clobber = process.env.clobber == 'yes';
+            const clobber = process.env.clobber == 'yes'
             console.log(`-- clobber = ${clobber} (process.env.clobber: ${process.env.clobber})`);
             const rpm_files = process.env.rpm_file_paths.split(/[\r\n]+/);
             const rpm_gpg_file = process.env.rpm_gpg_file;
