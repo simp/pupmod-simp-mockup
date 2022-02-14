@@ -224,7 +224,7 @@ jobs:
           Build & Sign RPMs for
           ${{ github.event.inputs.release_tag }}
           Release (${{ github.event.inputs.build_container_os }})
-        uses: simp/github-action-build-and-sign-pkg-single-rpm@main
+        uses: simp/github-action-build-and-sign-pkg-single-rpm@v2
         id: build-and-sign-rpm
         with:
           gpg_signing_key: ${{ secrets.SIMP_DEV_GPG_SIGNING_KEY }}
