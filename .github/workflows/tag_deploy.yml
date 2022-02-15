@@ -186,7 +186,7 @@ jobs:
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
     needs: [ create-github-release ]
-    if: (github.repository_owner == 'simp') && (needs.create-github-release.prerelease != 'yes')
+    if: (github.repository_owner == 'simp') && (needs.create-github-release.outputs.prerelease != 'yes')
     runs-on: ubuntu-latest
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
@@ -195,7 +195,7 @@ jobs:
     steps:
       - name: DEBUG FIXME 
         run: |
-          echo "DEBUG prerelease: '${{needs.create-github-release.prerelease}}'"
+          echo "DEBUG prerelease: '${{needs.create-github-release.outputs.prerelease}}'"
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -209,6 +209,7 @@ jobs:
         run: bundle exec pdk build --force
       - name: Deploy to Puppet Forge (skipped when prerelease)
         run: |
+          exit 0 # FIXME: remove
           curl -X POST --silent --show-error --fail \
             --user-agent "$FORGE_USER_AGENT" \
             --header "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" \
