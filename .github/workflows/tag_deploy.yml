@@ -87,7 +87,6 @@ jobs:
           annotation="$(git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1)"
           annotation_title="$(echo "$annotation" | head -1)"
 
-          echo "::set-output name=tag::${tag}"
 
           if [[ "$tag" =~ ^(simp-|v)?[0-9]+\.[0-9]+\.[0-9]+(-(rc|alpha|beta|pre|post)?([0-9]+)?)?$ ]]; then
             if [ -n "${BASH_REMATCH[2]}" ]; then
@@ -98,10 +97,10 @@ jobs:
             printf '::error ::Release Tag format is not SemVer, X.Y.Z-R, X.Y.Z-<prerelease>: "%s"\n' "$RELEASE_TAG"
             exit 88
           fi
-          echo "DEBUG: prerelease: '$prerelease'"
 
-          echo "::set-output name=annotation_title::${annotation_title}"
+          echo "::set-output name=tag::${tag}"
           echo "::set-output name=prerelease::${prerelease}"
+          echo "::set-output name=annotation_title::${annotation_title}"
 
           # Prepare annotation body as a file for the next step
           #
@@ -193,9 +192,6 @@ jobs:
       FORGE_USER_AGENT: GitHubActions-ForgeReleng-Workflow/0.4.0 (Purpose/forge-ops-for-${{ github.event.repository.name }})
       FORGE_API_URL: https://forgeapi.puppet.com/v3/releases
     steps:
-      - name: DEBUG FIXME 
-        run: |
-          echo "DEBUG prerelease: '${{needs.create-github-release.outputs.prerelease}}'"
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -209,7 +205,6 @@ jobs:
         run: bundle exec pdk build --force
       - name: Deploy to Puppet Forge (skipped when prerelease)
         run: |
-          exit 0 # FIXME: remove
           curl -X POST --silent --show-error --fail \
             --user-agent "$FORGE_USER_AGENT" \
             --header "Authorization: Bearer ${PUPPETFORGE_API_TOKEN}" \
