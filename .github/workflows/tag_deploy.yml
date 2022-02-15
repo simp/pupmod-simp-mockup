@@ -45,7 +45,7 @@ jobs:
   releng-checks:
     name: "RELENG checks"
     if: github.repository_owner == 'simp'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: "Assert '${{ github.ref }}' is a tag"
         run: '[[ "$GITHUB_REF" =~ ^refs/tags/ ]] || { echo "::error ::GITHUB_REF is not a tag: ${GITHUB_REF}"; exit 1 ; }'
@@ -69,7 +69,7 @@ jobs:
     name: Deploy GitHub Release
     needs: [ releng-checks ]
     if: github.repository_owner == 'simp'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     outputs:
       prerelease: ${{ steps.tag-check.outputs.prerelease }}
     steps:
@@ -91,10 +91,8 @@ jobs:
 
           if [[ "$tag" =~ ^(simp-|v)?[0-9]+\.[0-9]+\.[0-9]+(-(rc|alpha|beta|pre|post)?([0-9]+)?)?$ ]]; then
             if [ -n "${BASH_REMATCH[2]}" ]; then
-              echo "::set-output name=prerelease::yes"
+              prerelease=yes
               annotation_title="Pre-release of ${tag}"
-            else
-              echo "::set-output name=prerelease::no"
             fi
           else
             printf '::error ::Release Tag format is not SemVer, X.Y.Z-R, X.Y.Z-<prerelease>: "%s"\n' "$RELEASE_TAG"
@@ -103,6 +101,7 @@ jobs:
           echo "DEBUG: prerelease: '$prerelease'"
 
           echo "::set-output name=annotation_title::${annotation_title}"
+          echo "::set-output name=prerelease::${prerelease}"
 
           # Prepare annotation body as a file for the next step
           #
@@ -130,7 +129,7 @@ jobs:
     name: Trigger RPM release
     needs: [ create-github-release ]
     if: github.repository_owner == 'simp'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     env:
       TARGET_REPO: ${{ github.repository }}
     steps:
@@ -187,13 +186,16 @@ jobs:
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
     needs: [ create-github-release ]
-    if: ${{ (github.repository_owner == 'simp') && (needs.create-github-release.prerelease != 'yes') }}
-    runs-on: ubuntu-18.04
+    if: (github.repository_owner == 'simp') && (needs.create-github-release.prerelease != 'yes')
+    runs-on: ubuntu-latest
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
       FORGE_USER_AGENT: GitHubActions-ForgeReleng-Workflow/0.4.0 (Purpose/forge-ops-for-${{ github.event.repository.name }})
       FORGE_API_URL: https://forgeapi.puppet.com/v3/releases
     steps:
+      - name: DEBUG FIXME 
+        run: |
+          echo "DEBUG prerelease: '${{needs.create-github-release.prerelease}}'
       - name: Checkout code
         uses: actions/checkout@v2
         with:
