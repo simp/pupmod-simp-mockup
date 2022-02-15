@@ -158,7 +158,7 @@ jobs:
                 release_tag: process.env.TARGET_TAG,
                 clean: 'no',
                 clobber: 'yes',
-                build_container_os: ${{ matrix.os }}
+                build_container_os: '${{ matrix.os }}'
               }
             }).then((result) => {
               console.log( `== Submitted workflow dispatch to build RPMs from ${{ matrix.os }}: status ${result.status}` )
