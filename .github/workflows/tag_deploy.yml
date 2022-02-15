@@ -195,7 +195,7 @@ jobs:
     steps:
       - name: DEBUG FIXME 
         run: |
-          echo "DEBUG prerelease: '${{needs.create-github-release.prerelease}}'
+          echo "DEBUG prerelease: '${{needs.create-github-release.prerelease}}'"
       - name: Checkout code
         uses: actions/checkout@v2
         with:
