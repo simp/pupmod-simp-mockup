@@ -70,6 +70,8 @@ jobs:
     needs: [ releng-checks ]
     if: github.repository_owner == 'simp'
     runs-on: ubuntu-18.04
+    outputs:
+      prerelease: ${{ steps.tag-check.outputs.prerelease }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -131,8 +133,6 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       TARGET_REPO: ${{ github.repository }}
-    outputs:
-      prerelease: ${{ steps.tag-check.outputs.prerelease }}
     steps:
       - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
@@ -187,7 +187,7 @@ jobs:
   deploy-to-puppet-forge:
     name: Deploy PuppetForge Release
     needs: [ create-github-release ]
-    if: ${{ (github.repository_owner == 'simp') && (needs.build-and-attach-rpms.outputs.prerelease != 'yes') }}
+    if: ${{ (github.repository_owner == 'simp') && (needs.create-github-release.prerelease != 'yes') }}
     runs-on: ubuntu-18.04
     env:
       PUPPETFORGE_API_TOKEN: ${{ secrets.PUPPETFORGE_API_TOKEN }}
