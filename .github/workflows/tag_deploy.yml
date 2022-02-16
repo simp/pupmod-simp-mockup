@@ -121,7 +121,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: ${{ steps.tag-check.outputs.annotation_title }}
           body_path: /tmp/annotation.body
-          prerelease: ${{ steps.tag-check.outputs.prerelease }}
+          prerelease: ${{ steps.tag-check.outputs.prerelease  == 'yes'}}
           draft: false
 
   build-and-attach-rpms:
