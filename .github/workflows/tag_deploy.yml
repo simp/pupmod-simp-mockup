@@ -28,7 +28,7 @@
 #   render well as markdown on the GitHub release pages
 #
 ---
-name: 'Tag: Release to GitHub & Puppet Forge'
+name: 'Tag: Release to GitHub w/RPMs + Puppet Forge'
 
 on:
   push:
