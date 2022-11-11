@@ -98,14 +98,14 @@ jobs:
             exit 88
           fi
 
-          echo "::set-output name=tag::${tag}"
-          echo "::set-output name=prerelease::${prerelease}"
-          echo "::set-output name=annotation_title::${annotation_title}"
+          echo "{tag}={${tag}}" >> $GITHUB_OUTPUT
+          echo "{prerelease}={${prerelease}}" >> $GITHUB_OUTPUT
+          echo "{annotation_title}={${annotation_title}}" >> $GITHUB_OUTPUT
 
           # Prepare annotation body as a file for the next step
           #
-          # * The GitHub Release render the text in this file as markdown
-          # * The file is needed because :set-output only supports single lines
+          # * The GitHub Release renders the text in this file as markdown
+          # * The file is needed because GITHUB_OUTPUT only supports single lines
           # * The `perl -pe` removes RPM-style date headers from the CHANGELOG,
           #   because they don't render well as markdown on the Release page
           #
@@ -139,7 +139,7 @@ jobs:
     steps:
       - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
-        run: echo "::set-output name=tag::${GITHUB_REF/refs\/tags\//}"
+        run: echo "{tag}={${GITHUB_REF/refs\/tags\//}}" >> $GITHUB_OUTPUT
       - name: Trigger RPM release workflow (${{ matrix.os }})
         uses: actions/github-script@v4
         env:
