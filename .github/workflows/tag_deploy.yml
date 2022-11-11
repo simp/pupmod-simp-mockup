@@ -102,6 +102,10 @@ jobs:
           echo "{prerelease}={$prerelease}" >> "$GITHUB_OUTPUT"
           echo "{annotation_title}={$annotation_title}" >> "$GITHUB_OUTPUT"
 
+          echo "{tag}={$tag}"
+          echo "{prerelease}={$prerelease}"
+          echo "{annotation_title}={$annotation_title}"
+
           # Prepare annotation body as a file for the next step
           #
           # * The GitHub Release renders the text in this file as markdown
