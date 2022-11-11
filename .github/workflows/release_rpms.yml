@@ -267,13 +267,13 @@ jobs:
           script: |
             const release_id = process.env.release_id
             const [owner, repo] = process.env.TARGET_REPO.split('/')
-            const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+            const existingAssets = await github.rest.repos.listReleaseAssets({ owner, repo, release_id })
 
             console.log( `  !! !! Wiping ALL uploaded assets for ${owner}/${repo} release (id: ${release_id})`)
             existingAssets.data.forEach(async function(asset){
               asset_id = asset.id
               console.log( `  !! !! !! Wiping existing asset for ${asset.name} (id: ${asset_id})`)
-              await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+              await github.rest.repos.deleteReleaseAsset({ owner, repo, asset_id })
             })
 
       - name: "Upload RPM file(s) to GitHub Release (dry_run != 'yes')"
@@ -295,12 +295,12 @@ jobs:
             async function clobberAsset (name, owner, repo, release_id ){
               console.log( `  -- clobber asset ${name}: owner: ${owner}  repo: ${repo}  release_id: ${release_id}` )
 
-              const existingAssets = await github.repos.listReleaseAssets({ owner, repo, release_id })
+              const existingAssets = await github.rest.repos.listReleaseAssets({ owner, repo, release_id })
               const matchingAssets = existingAssets.data.filter(item => item.name == name);
               if ( matchingAssets.length > 0 ){
                 asset_id = matchingAssets[0].id
                 console.log( `  !! !! Clobbering existing asset for ${name} (id: ${asset_id})`)
-                await github.repos.deleteReleaseAsset({ owner, repo, asset_id })
+                await github.rest.repos.deleteReleaseAsset({ owner, repo, asset_id })
                 return(true)
               }
               return(false)
@@ -318,7 +318,7 @@ jobs:
               };
 
               console.log( `  == Uploading asset ${name}: ${assetContentType}` )
-              const uploadAssetResponse = await github.repos.uploadReleaseAsset({
+              const uploadAssetResponse = await github.rest.repos.uploadReleaseAsset({
                 owner, repo, release_id, data, name, headers,
               })
               return( uploadAssetResponse );
