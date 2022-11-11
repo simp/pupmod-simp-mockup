@@ -72,6 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       prerelease: ${{ steps.tag-check.outputs.prerelease }}
+      tag-ref: ${{ steps.tag-check.outputs.tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -140,11 +141,9 @@ jobs:
       - name: Get tag & annotation info (${{github.ref}})
         id: tag-check
         run: |
-          echo "{tag}={${GITHUB_REF/refs\/tags\//}}" >> "$GITHUB_OUTPUT"
-          printf "tag 1: '%s'\n" "$tag"
           tag="${GITHUB_REF/refs\/tags\//}"
-          echo "{tag}={$tag}" >> "$GITHUB_OUTPUT"
-          printf "tag 2: '%s'\n" "$tag"
+          echo "{tag}={$tag}" | tee -a "$GITHUB_OUTPUT"
+          printf "tag: '%s'\n" "$tag"
       - name: Trigger RPM release workflow (${{ matrix.os }})
         uses: actions/github-script@v6
         env:
@@ -153,7 +152,7 @@ jobs:
         with:
           github-token: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__REPO_SCOPE }}
           script: |
-            console.log( `== Submitted workflow dispatch to build RPMs from ${{ matrix.os }}: status ${result.status}` )
+            console.log( `== Using tag: '${{ process.env.TARGET_TAG }}'` )
             const [owner, repo] = process.env.TARGET_REPO.split('/')
             await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
               owner: owner,
