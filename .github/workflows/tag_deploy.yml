@@ -152,7 +152,7 @@ jobs:
         with:
           github-token: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__REPO_SCOPE }}
           script: |
-            console.log( `== Using tag: '${{ process.env.TARGET_TAG }}'` )
+            console.log( `== Using tag: '${ process.env.TARGET_TAG }'` )
             const [owner, repo] = process.env.TARGET_REPO.split('/')
             await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
               owner: owner,
