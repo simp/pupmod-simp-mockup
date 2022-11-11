@@ -143,9 +143,7 @@ jobs:
         id: tag-check
         run: |
           tag="${GITHUB_REF/refs\/tags\//}"
-          printf "tag: '%s'\n" "$tag"
           echo "tag=$tag" >> $GITHUB_OUTPUT
-          #echo "TARGET_TAG=$tag" >> $GITHUB_ENV
       - name: Trigger RPM release workflow (${{ matrix.os }})
         uses: actions/github-script@v6
         env:
