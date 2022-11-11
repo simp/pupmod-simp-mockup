@@ -170,7 +170,7 @@ jobs:
             })
 
   deploy-to-puppet-forge:
-    name: Deploy PuppetForge Release (FIXME: DO NOT RUN IF PRERELEASE)
+    name: 'Deploy PuppetForge Release (FIXME: DO NOT RUN IF PRERELEASE)'
     needs: [ create-github-release ]
     if: (github.repository_owner == 'simp') && (needs.create-github-release.outputs.prerelease != 'yes')
     runs-on: ubuntu-latest
