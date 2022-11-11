@@ -99,9 +99,9 @@ jobs:
             exit 88
           fi
 
-          echo "{tag}={$tag}" | tee -a "$GITHUB_OUTPUT"
-          echo "{prerelease}={$prerelease}" | tee -a "$GITHUB_OUTPUT"
-          echo "{annotation_title}={$annotation_title}" | tee -a "$GITHUB_OUTPUT"
+          echo "tag=$tag" | tee -a "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" | tee -a "$GITHUB_OUTPUT"
+          echo "annotation_title=$annotation_title" | tee -a "$GITHUB_OUTPUT"
 
           # Prepare annotation body as a file for the next step
           #
@@ -143,7 +143,7 @@ jobs:
         run: |
           tag="${GITHUB_REF/refs\/tags\//}"
           printf "tagref: '%s'\n" "$tag"
-          echo "{tagref}={$tag}" | tee -a "$GITHUB_OUTPUT"
+          echo "tag=$tag" | tee -a "$GITHUB_OUTPUT"
       - name: Trigger RPM release workflow (${{ matrix.os }})
         uses: actions/github-script@v6
         env:
