@@ -27,6 +27,7 @@
 # * If triggered by another workflow, it will be necessary to provide a GitHub
 #   access token via the the `target_repo_token` parameter
 #
+#
 ---
 name: 'RELENG: Build + attach RPMs to GitHub Release'
 
@@ -74,6 +75,11 @@ on:
         description: 'Verbose RPM builds when "yes"'
         required: false
         default: 'no'
+      rebuild_number:
+        description: 'If this is an RPM rebuild, put the number of the rebuild here'
+        required: false
+        default: ''
+
 
 env:
   TARGET_REPO: ${{ (github.event.inputs.target_repo != null && format('{0}/{1}', github.repository_owner, github.event.inputs.target_repo)) || github.repository }}
@@ -108,7 +114,7 @@ jobs:
             fi
           else
             printf '::error ::Release Tag format is not SemVer, X.Y.Z-R, X.Y.Z-<prerelease>: "%s"\n' "$RELEASE_TAG"
-            echo exit 88
+            exit 88
           fi
 
       - name: >
@@ -210,7 +216,7 @@ jobs:
         #
         run: |
           mkdir -p build/rpm_metadata
-          # simp-doc uses a unique data format in /release (:facepalm:)
+          # Special case for simp-doc's unique data format in /release
           if [[ "$TARGET_REPO" =~ ^simp\/simp-doc$ ]]; then
             echo "version: $BUILD_SEMVER" > build/rpm_metadata/release
             echo "release: 0.${PREBUILD_NUMBER:-$GITHUB_RUN_NUMBER}.${PREBUILD_TAG}" >> build/rpm_metadata/release
@@ -219,6 +225,22 @@ jobs:
             echo "0.${PREBUILD_NUMBER:-$GITHUB_RUN_NUMBER}.${PREBUILD_TAG}" > build/rpm_metadata/release
             printf '::warning ::Added file build/rpm_metadata/release with content "%s"\n' "$(cat build/rpm_metadata/release)"
           fi
+
+      - name: 'Customize RPM Release tag via build/rpm_metadata/release (RPM rebuild)'
+        if: ${{ github.event.inputs.rebuild_number != '' }}
+        env:
+          BUILD_SEMVER: ${{ steps.validate-inputs.outputs.build_semver }}
+          REBUILD_NUMBER: ${{ github.event.inputs.rebuild_number != '' }}
+        run: |
+          mkdir -p build/rpm_metadata
+          # simp-doc uses a unique data format in /release
+          if [[ "$TARGET_REPO" =~ ^simp\/simp-doc$ ]]; then
+            echo "version: $BUILD_SEMVER" > build/rpm_metadata/release
+            echo "release: $REBUILD_NUMBER" > build/rpm_metadata/release
+          else
+            echo "$REBUILD_NUMBER" > build/rpm_metadata/release
+          fi
+          printf "%{{ '::warning ::Added file build/rpm_metadata/release with content "%s"\n' "$(cat build/rpm_metadata/release)"
 
       - name: >
           Build & Sign RPMs for
