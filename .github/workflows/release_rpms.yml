@@ -240,7 +240,7 @@ jobs:
           else
             echo "$REBUILD_NUMBER" > build/rpm_metadata/release
           fi
-          printf "%{{ '::warning ::Added file build/rpm_metadata/release with content "%s"\n' "$(cat build/rpm_metadata/release)"
+          printf '::warning ::Added file build/rpm_metadata/release with content "%s"\n' "$(cat build/rpm_metadata/release)"
 
       - name: >
           Build & Sign RPMs for
