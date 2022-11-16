@@ -230,7 +230,7 @@ jobs:
         if: ${{ github.event.inputs.rebuild_number != '' }}
         env:
           BUILD_SEMVER: ${{ steps.validate-inputs.outputs.build_semver }}
-          REBUILD_NUMBER: ${{ github.event.inputs.rebuild_number != '' }}
+          REBUILD_NUMBER: ${{ github.event.inputs.rebuild_number }}
         run: |
           mkdir -p build/rpm_metadata
           # simp-doc uses a unique data format in /release
