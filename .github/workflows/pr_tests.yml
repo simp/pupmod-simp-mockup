@@ -34,7 +34,7 @@ env:
 jobs:
   puppet-syntax:
     name: 'Puppet Syntax'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
@@ -46,7 +46,7 @@ jobs:
 
   puppet-style:
     name: 'Puppet Style'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: "Install Ruby ${{matrix.puppet.ruby_version}}"
@@ -60,7 +60,7 @@ jobs:
   ruby-style:
     if: false # TODO Modules will need: rubocop in Gemfile, .rubocop.yml
     name: 'Ruby Style (experimental)'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v2
@@ -75,7 +75,7 @@ jobs:
 
   file-checks:
     name: 'File checks'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: 'Install Ruby 2.5'
@@ -88,7 +88,7 @@ jobs:
 
   releng-checks:
     name: 'RELENG checks'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: 'Install Ruby ${{matrix.puppet.ruby_version}}'
@@ -107,7 +107,7 @@ jobs:
   spec-tests:
     name: 'Puppet Spec'
     needs: [puppet-syntax]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         puppet:
