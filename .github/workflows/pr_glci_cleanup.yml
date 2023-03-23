@@ -7,7 +7,7 @@
 #
 #             NOTICE: **This file is maintained with puppetsync**
 #
-# This file is updated automatically as part of a puppet module baseline.
+# This file is updated automatically as part of a standardized asset baseline.
 #
 # The next baseline sync will overwrite any local changes to this file!
 #
@@ -40,9 +40,9 @@ jobs:
     # `on` section is inadventently modified without considering the security
     # implications.
     if: github.event_name == 'pull_request_target' && github.event.action == 'closed'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -93,7 +93,7 @@ jobs:
 ###  examine_contexts:
 ###    name: 'Examine Context contents'
 ###    if: always()
-###    runs-on: ubuntu-latest.04
+###    runs-on: ubuntu-latest
 ###    steps:
 ###      - name: Dump contexts
 ###        env:
