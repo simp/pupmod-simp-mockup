@@ -113,7 +113,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1 > /tmp/.commit-msg.txt
+          echo "${{ steps.tag-check.outputs.annotation }}" | tee -a /tmp/.commit-msg.txt
           args=(--file /tmp/.commit-msg.txt  --commitish ${{ github.ref }})
           [[ ${{ steps.tag-check.outputs.prerelease }} == 'yes']] && args+=(--prerelease)
 
