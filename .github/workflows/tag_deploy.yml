@@ -117,6 +117,14 @@ jobs:
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        runs-on: ubuntu-latest
+        run: |
+          tag="${{ steps.tag-check.tag }}"
+          git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1 > /tmp/.commit-msg.txt
+          args=(--file /tmp/.commit-msg.txt  --commitish ${{ github.ref }})
+          [[ ${{ steps.tag-check.outputs.prerelease }} == 'yes']] && args+=(--prerelease)
+
+          hub release create "${args[@]}"  "$tag"
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ steps.tag-check.outputs.annotation_title }}
