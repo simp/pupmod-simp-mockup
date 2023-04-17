@@ -55,7 +55,7 @@ jobs:
           clean: true
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.5
+          ruby-version: 2.7
           bundler-cache: true
       - run: bundle exec rake pkg:check_version
       - run: bundle exec rake pkg:compare_latest_tag
@@ -117,12 +117,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${{ steps.tag-check.tag }}"
           git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1 > /tmp/.commit-msg.txt
           args=(--file /tmp/.commit-msg.txt  --commitish ${{ github.ref }})
           [[ ${{ steps.tag-check.outputs.prerelease }} == 'yes']] && args+=(--prerelease)
 
-          hub release create "${args[@]}"  "$tag"
+          hub release create "${args[@]}"  "$TAG_NAME"
           #with:
           #  tag_name: ${{ github.ref }}
           #  release_name: ${{ steps.tag-check.outputs.annotation_title }}
@@ -190,7 +189,7 @@ jobs:
           clean: true
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.5
+          ruby-version: 2.7
           bundler-cache: true
       - name: Build Puppet module (PDK)
         run: bundle exec pdk build --force
