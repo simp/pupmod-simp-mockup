@@ -116,7 +116,6 @@ jobs:
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        runs-on: ubuntu-latest
         run: |
           tag="${{ steps.tag-check.tag }}"
           git for-each-ref "$GITHUB_REF" --format='%(contents)' --count=1 > /tmp/.commit-msg.txt
@@ -124,12 +123,12 @@ jobs:
           [[ ${{ steps.tag-check.outputs.prerelease }} == 'yes']] && args+=(--prerelease)
 
           hub release create "${args[@]}"  "$tag"
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ steps.tag-check.outputs.annotation_title }}
-          body_path: /tmp/annotation.body
-          prerelease: ${{ steps.tag-check.outputs.prerelease  == 'yes'}}
-          draft: false
+          #with:
+          #  tag_name: ${{ github.ref }}
+          #  release_name: ${{ steps.tag-check.outputs.annotation_title }}
+          #  body_path: /tmp/annotation.body
+          #  prerelease: ${{ steps.tag-check.outputs.prerelease  == 'yes'}}
+          #  draft: false
 
   build-and-attach-rpms:
     name: Trigger RPM release
