@@ -113,7 +113,6 @@ jobs:
             perl -pe 'BEGIN{undef $/;} s/\n\* (Mon|Tue|Wed|Thu|Fri|Sat|Sun) .*?\n//smg;' > /tmp/annotation.body
 
       - name: Create Release
-        uses: actions/create-release@v1
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
