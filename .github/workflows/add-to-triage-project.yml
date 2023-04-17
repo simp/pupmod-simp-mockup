@@ -14,4 +14,4 @@ jobs:
       - uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/simp/projects/11
-          github-token: ${{ secrets.SIMP_AUTO_GITHUB_TOKEN__REPO_SCOPE }}
+          github-token: ${{ secrets.AUTO_TRIAGE_TOKEN }}
