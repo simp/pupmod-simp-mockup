@@ -103,7 +103,7 @@ jobs:
           # * The GitHub Release renders the text in this file as markdown
           # * The `perl -pe` removes RPM-style date headers from the CHANGELOG,
           #   because they don't render well as markdown on the Release page
-          echo "EOF$$" >> "$GITHUB_OUTPUT"
+          echo "annotation<<EOF$$" >> "$GITHUB_OUTPUT"
           echo "$annotation" |  tail -n +2 | \
             perl -pe 'BEGIN{undef $/;} s/\n\* (Mon|Tue|Wed|Thu|Fri|Sat|Sun) .*?\n//smg;' >> "$GITHUB_OUTPUT"
           echo "EOF$$" >> "$GITHUB_OUTPUT"
