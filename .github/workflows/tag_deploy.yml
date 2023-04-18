@@ -112,8 +112,9 @@ jobs:
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_MESSAGE: ${{ steps.tag-check.outputs.annotation }}
         run: |
-          echo "${{ steps.tag-check.outputs.annotation }}" | tee -a /tmp/.commit-msg.txt
+          echo "${COMMIT_MESSAGE}" > /tmp/.commit-msg.txt
           args=(--file /tmp/.commit-msg.txt  --commitish ${{ github.ref }})
           [[ ${{ steps.tag-check.outputs.prerelease }} == 'yes']] && args+=(--prerelease)
 
