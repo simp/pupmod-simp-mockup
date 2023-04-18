@@ -113,10 +113,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMMIT_MESSAGE: ${{ steps.tag-check.outputs.annotation }}
+          COMMIT_REF: ${{ github.ref }}
         run: |
           echo "${COMMIT_MESSAGE}" > /tmp/.commit-msg.txt
-          args=(--file /tmp/.commit-msg.txt  --commitish ${{ github.ref }})
-          [[ ${{ steps.tag-check.outputs.prerelease }} == 'yes']] && args+=(--prerelease)
+          args=(--file /tmp/.commit-msg.txt  --commitish "$COMMIT_REF")
+          [[ ${{ steps.tag-check.outputs.prerelease }} == yes ]] && args+=(--prerelease)
 
           hub release create "${args[@]}"  "$TAG_NAME"
           #with:
