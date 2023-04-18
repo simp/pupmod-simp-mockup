@@ -72,6 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       prerelease: ${{ steps.tag-check.outputs.prerelease }}
+      tag: ${{ steps.tag-check.outputs.tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
