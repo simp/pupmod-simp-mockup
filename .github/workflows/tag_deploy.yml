@@ -100,7 +100,6 @@ jobs:
           echo "prerelease=$prerelease" | tee -a "$GITHUB_OUTPUT"
           echo "TARGET_TAG=$tag" | tee -a "$GITHUB_ENV"
 
-          # * The GitHub Release renders the text in this file as markdown
           # * The `perl -pe` removes RPM-style date headers from the CHANGELOG,
           #   because they don't render well as markdown on the Release page
           echo "annotation<<EOF$$" >> "$GITHUB_OUTPUT"
@@ -119,7 +118,8 @@ jobs:
           args=(--file /tmp/.commit-msg.txt  --commitish "$COMMIT_REF")
           [[ ${{ steps.tag-check.outputs.prerelease }} == yes ]] && args+=(--prerelease)
 
-          hub release create "${args[@]}"  "$TAG_NAME"
+          echo hub release create ${args[@]}  "$TAG_NAME"
+          hub release create ${args[@]}  "$TAG_NAME"
           #with:
           #  tag_name: ${{ github.ref }}
           #  release_name: ${{ steps.tag-check.outputs.annotation_title }}
