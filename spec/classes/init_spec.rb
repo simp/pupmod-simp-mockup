@@ -30,7 +30,7 @@ describe 'dummy' do
         context 'dummy class with firewall enabled' do
           let(:params) do
             {
-              firewall: true
+              firewall: true,
             }
           end
 
@@ -46,7 +46,7 @@ describe 'dummy' do
         context 'dummy class with selinux enabled' do
           let(:params) do
             {
-              selinux: true
+              selinux: true,
             }
           end
 
@@ -59,7 +59,7 @@ describe 'dummy' do
         context 'dummy class with auditing enabled' do
           let(:params) do
             {
-              auditing: true
+              auditing: true,
             }
           end
 
@@ -72,7 +72,7 @@ describe 'dummy' do
         context 'dummy class with logging enabled' do
           let(:params) do
             {
-              logging: true
+              logging: true,
             }
           end
 
@@ -90,11 +90,11 @@ describe 'dummy' do
       let(:facts) do
         {
           osfamily: 'Solaris',
-       operatingsystem: 'Nexenta',
-       os: {
-         family: 'Solaris',
-         name: 'Nexenta',
-       }
+          operatingsystem: 'Nexenta',
+          os: {
+            family: 'Solaris',
+            name: 'Nexenta',
+          },
         }
       end
 
