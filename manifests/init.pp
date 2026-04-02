@@ -27,9 +27,6 @@
 # @param selinux
 #   If true, manage selinux to permit dummy
 #
-# @param tcpwrappers
-#   If true, manage TCP wrappers configuration for dummy
-#
 # @param foo
 #   A new API thingamie
 #
@@ -46,7 +43,6 @@ class dummy (
   Variant[Boolean,Enum['firewalld']] $firewall    = simplib::lookup('simp_options::firewall', { 'default_value'    => false }),
   Boolean                            $logging     = simplib::lookup('simp_options::syslog', { 'default_value'      => false }),
   Boolean                            $selinux     = simplib::lookup('simp_options::selinux', { 'default_value'     => false }),
-  Boolean                            $tcpwrappers = simplib::lookup('simp_options::tcpwrappers', { 'default_value' => false }),
   Boolean                            $foo         = true,
   Boolean                            $bar         = true,
 ) {
@@ -91,9 +87,4 @@ class dummy (
     -> Class[ 'dummy::service' ]
   }
 
-  if $tcpwrappers {
-    include 'dummy::config::tcpwrappers'
-    Class[ 'dummy::config::tcpwrappers' ]
-    -> Class[ 'dummy::service' ]
-  }
 }
