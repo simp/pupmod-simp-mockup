@@ -135,8 +135,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - centos7
-          - centos8
+          - el8
+          - el9
+          - el10
     steps:
       - name: Trigger RPM release workflow (${{ matrix.os }})
         uses: actions/github-script@v9
