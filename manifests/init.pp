@@ -9,6 +9,12 @@
 # @param package_name
 #   The name of the dummy package
 #
+# @param package_ensure
+#   The ensure status of the dummy package
+#
+# @param tcp_listen_port
+#   The TCP port on which the dummy service listens
+#
 # @param trusted_nets
 #   A whitelist of subnets (in CIDR notation) permitted access
 #
@@ -33,6 +39,9 @@
 # @param foo
 #   A new API thingamie
 #
+# @param bar
+#   Another new API thingamie
+#
 # @author SIMP
 #
 class dummy (
@@ -40,7 +49,7 @@ class dummy (
   String                             $package_name       = 'dummy',
   String[1]                          $package_ensure     = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' }),
   Simplib::Port                      $tcp_listen_port    = 9999,
-  Simplib::Netlist                   $trusted_nets       = simplib::lookup('simp_options::trusted_nets', {'default_value' => ['127.0.0.1/32'] }),
+  Simplib::Netlist                   $trusted_nets       = simplib::lookup('simp_options::trusted_nets', { 'default_value' => ['127.0.0.1/32'] }),
   Variant[Boolean,Enum['simp']]      $pki         = simplib::lookup('simp_options::pki', { 'default_value'         => false }),
   Boolean                            $auditing    = simplib::lookup('simp_options::auditd', { 'default_value'      => false }),
   Variant[Boolean,Enum['firewalld']] $firewall    = simplib::lookup('simp_options::firewall', { 'default_value'    => false }),
@@ -50,50 +59,49 @@ class dummy (
   Boolean                            $foo         = true,
   Boolean                            $bar         = true,
 ) {
-
   simplib::assert_metadata($module_name)
 
   include 'dummy::install'
   include 'dummy::config'
   include 'dummy::service'
 
-  Class[ 'dummy::install' ]
-  -> Class[ 'dummy::config' ]
-  ~> Class[ 'dummy::service' ]
+  Class['dummy::install']
+  -> Class['dummy::config']
+  ~> Class['dummy::service']
 
   if $pki {
     include 'dummy::config::pki'
-    Class[ 'dummy::config::pki' ]
-    -> Class[ 'dummy::service' ]
+    Class['dummy::config::pki']
+    -> Class['dummy::service']
   }
 
   if $auditing {
     include 'dummy::config::auditing'
-    Class[ 'dummy::config::auditing' ]
-    -> Class[ 'dummy::service' ]
+    Class['dummy::config::auditing']
+    -> Class['dummy::service']
   }
 
   if $firewall {
     include 'dummy::config::firewall'
-    Class[ 'dummy::config::firewall' ]
-    -> Class[ 'dummy::service' ]
+    Class['dummy::config::firewall']
+    -> Class['dummy::service']
   }
 
   if $logging {
     include 'dummy::config::logging'
-    Class[ 'dummy::config::logging' ]
-    -> Class[ 'dummy::service' ]
+    Class['dummy::config::logging']
+    -> Class['dummy::service']
   }
 
   if $selinux {
     include 'dummy::config::selinux'
-    Class[ 'dummy::config::selinux' ]
-    -> Class[ 'dummy::service' ]
+    Class['dummy::config::selinux']
+    -> Class['dummy::service']
   }
 
   if $tcpwrappers {
     include 'dummy::config::tcpwrappers'
-    Class[ 'dummy::config::tcpwrappers' ]
-    -> Class[ 'dummy::service' ]
+    Class['dummy::config::tcpwrappers']
+    -> Class['dummy::service']
   }
 }

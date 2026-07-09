@@ -1,3 +1,6 @@
+* Thu Jul 09 2026 Steven Pritchard <steve@sicura.us> - 0.5.4
+- Documented parameters, added data types, and resolved puppet-lint offenses
+
 * Wed Jan 05 2022 First Last <email@domain.com> - 0.5.3
 - A thing that changed
 - Another thing that changed

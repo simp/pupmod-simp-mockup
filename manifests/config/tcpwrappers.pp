@@ -6,8 +6,6 @@ class dummy::config::tcpwrappers {
   # FIXME: ensure your module's tcpwrappers settings are defined here.
   $msg = "FIXME: define the ${module_name} module's tcpwrappers settings."
 
-  notify{ 'FIXME: tcpwrappers': message => $msg } # FIXME: remove this, add logic
+  notify { 'FIXME: tcpwrappers': message => $msg } # FIXME: remove this, add logic
   err( $msg )                                     # FIXME: remove this, add logic
-
 }
-
