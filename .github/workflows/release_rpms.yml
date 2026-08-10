@@ -75,10 +75,10 @@ on:
         description: "Dry run (Test-build RPMs)"
         required: false
         default: 'no'
-      verbose:
-        description: 'Verbose RPM builds when "yes"'
-        required: false
-        default: 'no'
+      #verbose:
+      #  description: 'Verbose RPM builds when "yes"'
+      #  required: false
+      #  default: 'no'
       rebuild_number:
         description: 'If this is an RPM rebuild, put the number of the rebuild here'
         required: false
