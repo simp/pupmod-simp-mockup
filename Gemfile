@@ -24,6 +24,11 @@ group :test do
   gem 'hiera-puppet-helper'
   gem 'pathspec', '~> 0.2' if Gem::Requirement.create('< 2.6').satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
   gem 'openvox', openvox_version
+  # Pin openfact to facterdb's newest shipped fact set: with a newer
+  # openfact, simp-rspec-puppet-facts' fact-fallback path leaks memory
+  # catastrophically (OOM-kills CI runners and dev machines) even on this
+  # trivial module's spec suite
+  gem 'openfact', ENV.fetch('OPENFACT_VERSION', '~> 5.6.0')
   gem 'openvox-strings'
   gem 'rake'
   gem 'rspec'
