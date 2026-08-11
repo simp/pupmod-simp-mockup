@@ -8,21 +8,11 @@
 #
 # ==============================================================================
 #
-# The testing matrix considers ruby/puppet versions supported by SIMP and PE:
-# ------------------------------------------------------------------------------
-# Release       Puppet   Ruby    EOL
-# PE 2019.8     6.22     2.5     2022-12 (LTS)
-# PE 2021.Y     7.x      2.7     Quarterly updates
-#
-# https://puppet.com/docs/pe/latest/component_versions_in_recent_pe_releases.html
-# https://puppet.com/misc/puppet-enterprise-lifecycle
-# ==============================================================================
-#
 # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
 #
-
+---
 name: PR Tests
-on:
+'on':
   pull_request:
     types: [opened, reopened, synchronize]
 
@@ -32,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: "Install Ruby 2.7"
+      - name: "Install Ruby 3.2"
         uses: ruby/setup-ruby@v1  # ruby/setup-ruby@ec106b438a1ff6ff109590de34ddc62c540232e0
         with:
           ruby-version: 3.2.11
@@ -44,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: "Install Ruby 2.7"
+      - name: "Install Ruby 3.2"
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.11
@@ -58,7 +48,7 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5
-      - name: "Install Ruby 2.7"
+      - name: "Install Ruby 3.4"
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.11
@@ -72,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: 'Install Ruby 2.7'
+      - name: 'Install Ruby 3.4'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.11
@@ -80,12 +70,25 @@ jobs:
       - run: bundle exec rake check:dot_underscore
       - run: bundle exec rake check:test_file
 
+  reference:
+    name: 'REFERENCE.md freshness'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: 'Install Ruby 3.4'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.9
+          bundler-cache: true
+      - name: 'Check REFERENCE.md freshness'
+        run: bundle exec rake validate:strings
+
   releng-checks:
     name: 'RELENG checks'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: 'Install Ruby 2.7'
+      - name: 'Install Ruby 3.4'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.11
@@ -130,14 +133,6 @@ jobs:
           ruby-version: ${{matrix.puppet.ruby_version}}
           bundler-cache: true
       - run: 'command -v rpm || if command -v apt-get; then sudo apt-get update; sudo apt-get install -y rpm; fi ||:'
-      - run: 'bundle exec rake spec'
+      - run: 'bundle exec rake parallel_spec'
         continue-on-error: ${{matrix.puppet.experimental}}
 
-#  dump_contexts:
-#    name: 'Examine Context contents'
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Dump contexts
-#        env:
-#          GITHUB_CONTEXT: ${{ toJson(github) }}
-#        run: echo "$GITHUB_CONTEXT"
