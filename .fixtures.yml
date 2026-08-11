@@ -1,17 +1,9 @@
 ---
 fixtures:
   repositories:
-    iptables:
-      repo: https://github.com/simp/pupmod-simp-iptables.git
-      ref: 6.2.2
-    simplib:
-      repo: https://github.com/simp/pupmod-simp-simplib.git
-      ref: 3.15.3
-    stdlib:
-      repo: https://github.com/simp/puppetlabs-stdlib.git
-      ref: 4.13.1
-    compliance_markup: https://github.com/simp/pupmod-simp-compliance_markup.git
-    disa_stig-el7-baseline:
-      repo: https://github.com/simp/inspec-profile-disa_stig-el7.git
-      branch: master
-      target: spec/fixtures/inspec_deps/inspec_profiles/profiles
+    augeas_core: https://github.com/simp/pupmod-puppetlabs-augeas_core.git
+    firewalld: https://github.com/simp/pupmod-voxpupuli-firewalld.git
+    iptables: https://github.com/simp/pupmod-simp-iptables.git
+    simp_firewalld: https://github.com/simp/pupmod-simp-simp_firewalld.git
+    simplib: https://github.com/simp/pupmod-simp-simplib.git
+    stdlib: https://github.com/simp/puppetlabs-stdlib.git

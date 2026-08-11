@@ -1,3 +1,9 @@
+* Tue Aug 11 2026 Steven Pritchard <steve@sicura.us> - 0.6.0
+- Require OpenVox 8 and update to currently supported operating systems
+- Update dependencies and issues URL in metadata.json
+- Clean up .fixtures.yml (drop version pins, compliance_markup, and the
+  DISA STIG InSpec profile)
+
 * Thu Jul 09 2026 Steven Pritchard <steve@sicura.us> - 0.5.4
 - Documented parameters, added data types, and resolved puppet-lint offenses
 

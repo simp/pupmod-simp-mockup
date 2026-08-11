@@ -1,0 +1,3 @@
+---
+simplib::assert_metadata::options:
+  fatal: true
