@@ -89,16 +89,19 @@ describe 'dummy' do
     describe 'dummy class without any parameters on Solaris/Nexenta' do
       let(:facts) do
         {
-          osfamily: 'Solaris',
-          operatingsystem: 'Nexenta',
           os: {
             family: 'Solaris',
             name: 'Nexenta',
+            release: {
+              full: '1.0',
+              major: '1',
+            },
           },
         }
       end
+      let(:hieradata) { 'assert_metadata_failure' }
 
-      it { expect { is_expected.to contain_package('dummy') }.to raise_error(Puppet::Error, %r{'Nexenta' is not supported}) }
+      it { expect { is_expected.to contain_package('dummy') }.to raise_error(Puppet::Error, %r{'Nexenta 1\.0' is not supported}) }
     end
   end
 end

@@ -42,6 +42,8 @@ The following parameters are available in the `dummy` class:
 
 * [`service_name`](#-dummy--service_name)
 * [`package_name`](#-dummy--package_name)
+* [`package_ensure`](#-dummy--package_ensure)
+* [`tcp_listen_port`](#-dummy--tcp_listen_port)
 * [`trusted_nets`](#-dummy--trusted_nets)
 * [`auditing`](#-dummy--auditing)
 * [`firewall`](#-dummy--firewall)
@@ -50,8 +52,6 @@ The following parameters are available in the `dummy` class:
 * [`selinux`](#-dummy--selinux)
 * [`tcpwrappers`](#-dummy--tcpwrappers)
 * [`foo`](#-dummy--foo)
-* [`package_ensure`](#-dummy--package_ensure)
-* [`tcp_listen_port`](#-dummy--tcp_listen_port)
 * [`bar`](#-dummy--bar)
 
 ##### <a name="-dummy--service_name"></a>`service_name`
@@ -70,13 +70,29 @@ The name of the dummy package
 
 Default value: `'dummy'`
 
+##### <a name="-dummy--package_ensure"></a>`package_ensure`
+
+Data type: `String[1]`
+
+The ensure status of the dummy package
+
+Default value: `simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })`
+
+##### <a name="-dummy--tcp_listen_port"></a>`tcp_listen_port`
+
+Data type: `Simplib::Port`
+
+The TCP port on which the dummy service listens
+
+Default value: `9999`
+
 ##### <a name="-dummy--trusted_nets"></a>`trusted_nets`
 
 Data type: `Simplib::Netlist`
 
 A whitelist of subnets (in CIDR notation) permitted access
 
-Default value: `simplib::lookup('simp_options::trusted_nets', {'default_value' => ['127.0.0.1/32'] })`
+Default value: `simplib::lookup('simp_options::trusted_nets', { 'default_value' => ['127.0.0.1/32'] })`
 
 ##### <a name="-dummy--auditing"></a>`auditing`
 
@@ -134,27 +150,11 @@ A new API thingamie
 
 Default value: `true`
 
-##### <a name="-dummy--package_ensure"></a>`package_ensure`
-
-Data type: `String[1]`
-
-
-
-Default value: `simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })`
-
-##### <a name="-dummy--tcp_listen_port"></a>`tcp_listen_port`
-
-Data type: `Simplib::Port`
-
-
-
-Default value: `9999`
-
 ##### <a name="-dummy--bar"></a>`bar`
 
 Data type: `Boolean`
 
-
+Another new API thingamie
 
 Default value: `true`
 
