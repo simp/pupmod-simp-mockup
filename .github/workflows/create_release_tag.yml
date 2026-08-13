@@ -26,7 +26,7 @@ on:
 
 jobs:
   create-release-tag:
-    uses: simp/gha-workflows/.github/workflows/puppet_create_release_tag.yml@ac00f2ff0498d2e8234b5338e898505e33e939de  # v1.0.0 candidate
+    uses: simp/gha-workflows/.github/workflows/puppet_create_release_tag.yml@v1.0.0
     with:
       dry_run: ${{ inputs.dry_run }}
     secrets: inherit
