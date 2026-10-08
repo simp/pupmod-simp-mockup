@@ -157,4 +157,3 @@ Data type: `Boolean`
 Another new API thingamie
 
 Default value: `true`
-
